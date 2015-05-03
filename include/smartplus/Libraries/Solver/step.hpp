@@ -1,0 +1,67 @@
+/* This file is part of SMART+.
+ 
+ SMART+ is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ SMART+ is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with SMART+.  If not, see <http://www.gnu.org/licenses/>.
+ 
+ */
+
+///@file step.hpp
+///@brief object that defines an step
+///@version 1.0
+
+#pragma once
+
+#include <iostream>
+#include <armadillo>
+#include "output.hpp"
+
+using namespace std;
+using namespace arma;
+
+namespace smart{
+
+//======================================
+class step
+//======================================
+{
+private:
+    
+protected:
+    
+	public :
+    int number;
+    int ninc;
+    int mode;
+    
+    double Time;
+    vec times;
+    double BC_Time;
+    
+    string file; //  It is used for input/output values of the loading path
+    
+    step(); 	//default constructor
+    step(int, int, int);	//Constructor with parameters
+    step(const step &);	//Copy constructor
+    ~step();
+   
+    virtual void generate(const double &, const vec &, const vec &, const double &);
+    
+    virtual step& operator = (const step&);
+
+    //This function serves to output
+    virtual void output(ostream&, const solver_output &, const int &, const int &, const int&, const vec&);
+    
+    friend  ostream& operator << (ostream&, const step&);
+};
+
+} //namespace smart

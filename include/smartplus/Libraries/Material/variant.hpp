@@ -1,0 +1,59 @@
+/* This file is part of SMART+.
+ 
+ SMART+ is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ SMART+ is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with SMART+.  If not, see <http://www.gnu.org/licenses/>.
+ 
+ */
+
+///@file variant.hpp
+///@brief Class that defines characteristics of a variant of martensite
+///@version 1.0
+
+#pragma once
+
+#include <iostream>
+#include <armadillo>
+
+using namespace std;
+using namespace arma;
+
+namespace smart{
+
+//======================================
+class variant
+//======================================
+{
+	private:
+
+	protected:
+
+	public :
+		
+		vec n;
+		vec m;
+		mat R;
+		double g;
+		vec ETn;	//Strain associated to each variant
+		
+		variant(); 	//default constructor
+		variant(vec, vec, double); //Constructor with parameters
+		variant(const variant &);	//Copy constructor
+		~variant();
+		
+		void build(const double &);
+		virtual variant& operator = (const variant&);
+		
+		friend ostream& operator << (ostream&, const variant&);
+};
+
+} //namespace smart
