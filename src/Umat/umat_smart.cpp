@@ -181,8 +181,8 @@ void select_umat_T(const string &umat_name, const vec &Etot, const vec &DEtot, v
 {
     string buffer;
     int c_umat = 0;
-    int n_umat;
-    int n_meta;
+    int n_umat = 0;
+    int n_meta = 0;
     
     ifstream listumat;
     listumat.open("data/list_umat_T.dat", ios::in);
@@ -217,18 +217,18 @@ void select_umat(const string &umat_name, const vec &Etot, const vec &DEtot, vec
 {
 	string buffer;
     int c_umat = 0;
-	int n_umat;
-	int n_meta;
+	int n_umat = 0;
+	int n_meta = 0;
 	
 	ifstream listumat;
 	listumat.open("data/list_umat.dat", ios::in);
 	if(listumat) {
 		listumat >> buffer >> n_umat >> buffer >> n_meta;
-	}
+    }
 	else {
 		cout << "Error: cannot open list_umat.dat file \n";
 	}
-	
+
     std::map<string, int> list_umat;
     for (int i = 0; i < (n_umat + n_meta); i++){
 		listumat >> buffer >> buffer >> c_umat;

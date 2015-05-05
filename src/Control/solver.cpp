@@ -50,14 +50,11 @@ int main() {
 	///Usefull UMAT variables
 	int ndi = 3;
 	int nshr = 3;
-    int nblock = 0;
-    int type = 0;
     
     mat dSdE = zeros(6,6);
     mat dSdT = zeros(1,6);
     mat dQdE = zeros(6,1);
     mat dQdT = zeros(1,1);
-    double pnewdt = 1.;
     
     double lambda = 10000.;
     
@@ -107,7 +104,6 @@ int main() {
     vec residual;
     vec Delta;
     int nK = 0; // The size of the problem to solve
-    int kT = 0; // cursor that increments the current position in mixed fluxes/state problems
     mat K;
     mat invK;
     int compteur = 0.;
