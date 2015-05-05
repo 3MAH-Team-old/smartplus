@@ -49,12 +49,8 @@ endif()
 message(STATUS "Build type ${CMAKE_BUILD_TYPE}")
 
 # Set the CFLAGS and CXXFLAGS depending on the options the user specified.
-# Only GCC-like compilers support -Wextra, and other compilers give tons of
-# output for -Wall, so only -Wall and -Wextra on GCC.
-if(CMAKE_COMPILER_IS_GNUCC OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-endif(CMAKE_COMPILER_IS_GNUCC OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 
 # Debugging CFLAGS.  Turn optimizations off; turn debugging symbols on.
 if(DEBUG)
