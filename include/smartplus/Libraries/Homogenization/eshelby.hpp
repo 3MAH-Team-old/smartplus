@@ -26,38 +26,35 @@
 #include <armadillo>
 #include "../../parameter.hpp"
 
-using namespace std;
-using namespace arma;
-
 namespace smart{
 
 //Eshelby tensor for a sphere
-mat Eshelby_sphere(const double &);
+arma::mat Eshelby_sphere(const double &);
 
 //	Eshelby tensor determination. The cylinder is oriented in such a way that the axis direction is the 1 direction. a2=a3 here
-mat Eshelby_cylinder(const double &);
+arma::mat Eshelby_cylinder(const double &);
 
 //	Eshelby tensor determination. The prolate shape is oriented in such a way that the axis direction is the 1 direction. a1>a2=a3 here
-mat Eshelby_prolate(const double &, const double &);
+arma::mat Eshelby_prolate(const double &, const double &);
 
 //	Eshelby tensor determination. The oblate shape is oriented in such a way that the axis direction is the 1 direction. a1<a2=a3 here
-mat Eshelby_oblate(const double &, const double &);
+arma::mat Eshelby_oblate(const double &, const double &);
 
 //This methods is using the Voigt notations for the tensors.
-void calG(const double &, const double &, const double &, const double &, const double &, const Mat<int> &, const mat &, mat &);
+void calG(const double &, const double &, const double &, const double &, const double &, const arma::Mat<int> &, const arma::mat &, arma::mat &);
 
 //Weighted Gauss integration over a sphere to represent the integration over the ellipsoid
-void Gauss(Mat<int> &, const mat &, mat &, const double &, const double &, const double &, const vec &, const vec &, const vec &, const vec &, const int &, const int &);
+void Gauss(arma::Mat<int> &, const arma::mat &, arma::mat &, const double &, const double &, const double &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const int &, const int &);
 
 //Numerical Eshelby tensor determination
-mat Eshelby(const mat &, const double &, const double &, const double &, const vec &, const vec &, const vec &, const vec &, const int &mp, const int &np);
+arma::mat Eshelby(const arma::mat &, const double &, const double &, const double &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const int &mp, const int &np);
 
-//mat T_II_sphere(const double &, const double &); {
+//arma::mat T_II_sphere(const double &, const double &); {
 
 //Numerical Hill Interaction tensor determination
-mat T_II(const mat &Lt, const double &, const double &, const double &, const vec &, const vec &, const vec &, const vec &, const int &, const int &);
+arma::mat T_II(const arma::mat &Lt, const double &, const double &, const double &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const int &, const int &);
 
 //This function computes the integration points and weights
-void points(vec &x, vec &wx, vec &y, vec &wy, const int &mp, const int &np);
+void points(arma::vec &x, arma::vec &wx, arma::vec &y, arma::vec &wy, const int &mp, const int &np);
 
 } //namespace smart

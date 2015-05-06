@@ -24,9 +24,6 @@
 #include <iostream>
 #include <armadillo>
 
-using namespace std;
-using namespace arma;
-
 namespace smart{
 
 //======================================
@@ -39,14 +36,14 @@ class state_variables
 
 	public :
 		
-		vec Etot;
-		vec DEtot;
-		vec sigma;
-		mat L;
-		mat Lt;
+		arma::vec Etot;
+		arma::vec DEtot;
+		arma::vec sigma;
+		arma::mat L;
+		arma::mat Lt;
 		
 		state_variables(); 	//default constructor
-		state_variables(vec, vec, vec, mat, mat, mat); //Constructor with parameters
+		state_variables(arma::vec, arma::vec, arma::vec, arma::mat, arma::mat, arma::mat); //Constructor with parameters
 		state_variables(const state_variables &);	//Copy constructor
 		~state_variables();
 		
@@ -55,7 +52,7 @@ class state_variables
         virtual state_variables& rotate_l2g(const state_variables&, const double&, const double&, const double&);
         virtual state_variables& rotate_g2l(const state_variables&, const double&, const double&, const double&);
     
-		friend ostream& operator << (ostream&, const state_variables&);
+        friend std::ostream& operator << (std::ostream&, const state_variables&);
 };
 
 } //namespace smart

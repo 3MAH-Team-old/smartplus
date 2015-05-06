@@ -24,9 +24,6 @@
 #include <iostream>
 #include <armadillo>
 
-using namespace std;
-using namespace arma;
-
 namespace smart{
 
 //======================================
@@ -39,21 +36,21 @@ class variant
 
 	public :
 		
-		vec n;
-		vec m;
-		mat R;
+		arma::vec n;
+		arma::vec m;
+		arma::mat R;
 		double g;
-		vec ETn;	//Strain associated to each variant
+		arma::vec ETn;	//Strain associated to each variant
 		
 		variant(); 	//default constructor
-		variant(vec, vec, double); //Constructor with parameters
+		variant(arma::vec, arma::vec, double); //Constructor with parameters
 		variant(const variant &);	//Copy constructor
 		~variant();
 		
 		void build(const double &);
 		virtual variant& operator = (const variant&);
 		
-		friend ostream& operator << (ostream&, const variant&);
+        friend std::ostream& operator << (std::ostream&, const variant&);
 };
 
 } //namespace smart

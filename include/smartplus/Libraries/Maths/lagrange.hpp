@@ -21,11 +21,6 @@
 
 #pragma once
 
-#include <math.h>
-#include <armadillo>
-
-using namespace arma;
-
 namespace smart{
 
 //This function is used to determine an exponential Lagrange Multiplier (like contact in Abaqus)

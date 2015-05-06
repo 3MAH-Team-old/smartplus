@@ -22,16 +22,8 @@
 #pragma once
 
 #include <iostream>
-#include <sstream>
-#include <fstream>
-#include <assert.h>
-#include <math.h>
-
 #include <armadillo>
 #include "step.hpp"
-
-using namespace std;
-using namespace arma;
 
 namespace smart{
 
@@ -45,31 +37,31 @@ protected:
     
 	public :
 
-    Col<int> cBC_meca; //True is for stress (flux), false if for strain (state)
-    vec BC_meca;
-    mat mecas;
+    arma::Col<int> cBC_meca; //True is for stress (flux), false if for strain (state)
+    arma::vec BC_meca;
+    arma::mat mecas;
     double BC_T;
     int cBC_T;         //True (1) is for a heat flux entering in a material point, 0 is for fixed temperature
-    vec Ts;
+    arma::vec Ts;
     
-    vec Etot;
-    vec DEtot;
-    vec sigma;
+    arma::vec Etot;
+    arma::vec DEtot;
+    arma::vec sigma;
     double T;
     double Q;
     
     step_thermomeca(); 	//default constructor
-    step_thermomeca(int, int, int, const Col<int>&, const vec&, const mat&, const double&, const int&, const vec&, const vec&, const vec&, const vec&, const double&, const double&); //Constructor with parameters
+    step_thermomeca(int, int, int, const arma::Col<int>&, const arma::vec&, const arma::mat&, const double&, const int&, const arma::vec&, const arma::vec&, const arma::vec&, const arma::vec&, const double&, const double&); //Constructor with parameters
     step_thermomeca(const step_thermomeca&);	//Copy constructor
     ~step_thermomeca();
     
-    virtual void generate(const double&, const vec&, const vec&, const double&);
+    virtual void generate(const double&, const arma::vec&, const arma::vec&, const double&);
     
     virtual step_thermomeca& operator = (const step_thermomeca&);
     
-    virtual void output(ostream&, const solver_output&, const int&, const int&, const int&, const vec&);
+    virtual void output(std::ostream&, const solver_output&, const int&, const int&, const int&, const arma::vec&);
     
-    friend  ostream& operator << (ostream&, const step_thermomeca&);
+    friend  std::ostream& operator << (std::ostream&, const step_thermomeca&);
 };
 
 } //namespace smart

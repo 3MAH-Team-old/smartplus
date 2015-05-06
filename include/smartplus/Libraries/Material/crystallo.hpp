@@ -24,21 +24,18 @@
 #include <iostream>
 #include <armadillo>
 
-using namespace std;
-using namespace arma;
-
 namespace smart{
 
 //This function returns the Shmidt tensor (3x3 matrix)
-mat Schmid(const vec &n, const vec &m);
+arma::mat Schmid(const arma::vec &n, const arma::vec &m);
 
 //This function returns the Shmidt tensor (6 vector), with the convention of strain
-vec Schmid_v(const vec &n, const vec &m);
+arma::vec Schmid_v(const arma::vec &n, const arma::vec &m);
 
 //This function returns a matrix utilized for the Hill interfacial operator
-mat F_nm(const vec &N);
+arma::mat F_nm(const arma::vec &N);
 
 //This function returns the Hill interfacial operator for an isotropic material
-mat Q_nm(const vec &N, const double &mu, const double &lambda);
+arma::mat Q_nm(const arma::vec &N, const double &mu, const double &lambda);
 
 } //namespace smart

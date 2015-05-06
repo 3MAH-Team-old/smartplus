@@ -26,9 +26,6 @@
 #include <armadillo>
 #include "phase_characteristics.hpp"
 
-using namespace std;
-using namespace arma;
-
 namespace smart{
 
 //======================================
@@ -46,13 +43,13 @@ protected:
 
     general_characteristics(); 	//default constructor
     general_characteristics(int, int, bool=true, double=0.);	//constructor - allocates memory for statev
-    general_characteristics(int, int, int, string, double, double, double, double, int, const vec&, int, const vec&, const state_variables&, const state_variables&, const mat&, const mat&); //Constructor with parameters
+    general_characteristics(int, int, int, std::string, double, double, double, double, int, const arma::vec&, int, const arma::vec&, const state_variables&, const state_variables&, const arma::mat&, const arma::mat&); //Constructor with parameters
     general_characteristics(const general_characteristics&);	//Copy constructor
     ~general_characteristics();
     
 	virtual general_characteristics& operator = (const general_characteristics&);
     
-    friend ostream& operator << (ostream&, const general_characteristics&);
+    friend std::ostream& operator << (std::ostream&, const general_characteristics&);
     
 };
 

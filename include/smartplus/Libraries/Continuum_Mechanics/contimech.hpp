@@ -22,60 +22,57 @@
 #pragma once
 #include <armadillo>
 
-using namespace std;
-using namespace arma;
-
 namespace smart{
 
 //This function returns the trace of the tensor v
-double tr(const vec &);
+double tr(const arma::vec &);
 
 //This function returns the deviatoric part of v
-vec dev(const vec &);
+arma::vec dev(const arma::vec &);
 
 //This function determines the Mises equivalent of a stress tensor, according to the Voigt convention for stress 
-double Mises_stress(const vec &);
+double Mises_stress(const arma::vec &);
 
 //This function determines the strain flow (direction) from a stress tensor, according to the Voigt convention for strains
-vec eta_stress(const vec &);
+arma::vec eta_stress(const arma::vec &);
 
 //This function determines the Mises equivalent of a strain tensor, according to the Voigt convention for strains 
-double Mises_strain(const vec &);
+double Mises_strain(const arma::vec &);
 
 //This function determines the strain flow (direction) from a strain tensor, according to the Voigt convention for strains
-vec eta_strain(const vec &);
+arma::vec eta_strain(const arma::vec &);
 
 //This function transforms the strain Voigt vector into a 3*3 strain matrix
-mat v2t_strain(const vec &v);
+arma::mat v2t_strain(const arma::vec &v);
 
 //This function transforms a 3*3 strain matrix into a strain Voigt vector
-vec t2v_strain (const mat &);
+arma::vec t2v_strain (const arma::mat &);
 
 //This function transforms the stress Voigt vector into a 3*3 stress matrix
-mat v2t_stress(const vec &);
+arma::mat v2t_stress(const arma::vec &);
 
 //This function transforms a 3*3 stress matrix into a stress Voigt vector
-vec t2v_stress (const mat &);
+arma::vec t2v_stress (const arma::mat &);
 
 //Returns the second invariant of the deviatoric part of a second order stress tensor written as a Voigt vector
-double J2_stress(const vec &);
+double J2_stress(const arma::vec &);
 
 //Returns the second invariant of the deviatoric part of a second order strain tensor written as a Voigt vector
-double J2_strain(const vec &);
+double J2_strain(const arma::vec &);
 
 //Returns the third invariant of the deviatoric part of a second order stress tensor written as a Voigt vector
-double J3_stress(const vec &);
+double J3_stress(const arma::vec &);
 
 //Returns the third invariant of the deviatoric part of a second order stress tensor written as a Voigt vector
-double J3_strain(const vec &);
+double J3_strain(const arma::vec &);
 
 //Returns the normalized vector normal to an ellipsoid with semi-principal axes of length a1, a2, a3. The direction of the normalized vector is set by angles u
-vec normal_ellipsoid(const double &, const double &, const double &, const double &, const double &);
+arma::vec normal_ellipsoid(const double &, const double &, const double &, const double &, const double &);
 
 //Returns the normal and tangent components of the stress vector in the normal direction n to an ellipsoid with axes a1, a2, a3. The direction of the normalized vector is set by angles u
-vec sigma_int(const vec &, const double &, const double &, const double &, const double &, const double &);
+arma::vec sigma_int(const arma::vec &, const double &, const double &, const double &, const double &, const double &);
 
 ///This computes the Hill interfacial operator according to a normal a (see papers of Siredey and Entemeyer phD dissertation)
-mat p_ikjl(const vec &);
+arma::mat p_ikjl(const arma::vec &);
 
 } //namespace smart

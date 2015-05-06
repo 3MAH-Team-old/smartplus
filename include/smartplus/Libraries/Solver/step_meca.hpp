@@ -25,9 +25,6 @@
 #include <armadillo>
 #include "step.hpp"
 
-using namespace std;
-using namespace arma;
-
 namespace smart{
 
 //======================================
@@ -40,30 +37,30 @@ protected:
     
 	public :
 
-    Col<int> cBC_meca; //True is for stress (flux), false if for strain (state)
-    vec BC_meca;
-    mat mecas;
+    arma::Col<int> cBC_meca; //True is for stress (flux), false if for strain (state)
+    arma::vec BC_meca;
+    arma::mat mecas;
     double BC_T;
     int cBC_T;
-    vec Ts;
+    arma::vec Ts;
     
-    vec Etot;
-    vec DEtot;
-    vec sigma;
+    arma::vec Etot;
+    arma::vec DEtot;
+    arma::vec sigma;
     double T;
  
     step_meca(); 	//default constructor
-    step_meca(int, int, int, const Col<int>&, const vec&, const mat&, const double&, const int&, const vec&, const vec&, const vec&, const vec&, const double&); //Constructor with parameters
+    step_meca(int, int, int, const arma::Col<int>&, const arma::vec&, const arma::mat&, const double&, const int&, const arma::vec&, const arma::vec&, const arma::vec&, const arma::vec&, const double&); //Constructor with parameters
     step_meca(const step_meca&);	//Copy constructor
     ~step_meca();
     
-    virtual void generate(const double&, const vec&, const vec&, const double&);
+    virtual void generate(const double&, const arma::vec&, const arma::vec&, const double&);
     
     virtual step_meca& operator = (const step_meca&);
     
-    virtual void output(ostream&, const solver_output&, const int&, const int&, const int&, const vec&);
+    virtual void output(std::ostream&, const solver_output&, const int&, const int&, const int&, const arma::vec&);
     
-    friend  ostream& operator << (ostream&, const step_meca&);
+    friend  std::ostream& operator << (std::ostream&, const step_meca&);
 };
 
 } //namespace smart

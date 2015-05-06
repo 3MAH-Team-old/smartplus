@@ -29,9 +29,6 @@
 #include <armadillo>
 #include "state_variables.hpp"
 
-using namespace std;
-using namespace arma;
-
 namespace smart{
 
 //======================================
@@ -45,26 +42,26 @@ class phase_characteristics
 	public :
 
 		int number;
-		string umat_name;
+        std::string umat_name;
 		double concentration;
         double psi_mat;
         double theta_mat;
         double phi_mat;
     
 		int nprops;
-		vec props;
+		arma::vec props;
 		int nstatev;
-		vec statev;
+		arma::vec statev;
 		
 		state_variables local;
 		state_variables global;
 		
-		mat A;	//Concentration tensor (strain)
-		mat B;	//Concentration tensor (stress)	
+		arma::mat A;	//Concentration tensor (strain)
+		arma::mat B;	//Concentration tensor (stress)
 		
 		phase_characteristics(); 	//default constructor
 		phase_characteristics(int, int, bool=true, double=0.);	//constructor - allocates memory for statev
-		phase_characteristics(int, string, double, double, double, double, int, const vec&, int, const vec&, const state_variables&, const state_variables&, const mat&, const mat&); //Constructor with parameters
+        phase_characteristics(int, std::string, double, double, double, double, int, const arma::vec&, int, const arma::vec&, const state_variables&, const state_variables&, const arma::mat&, const arma::mat&); //Constructor with parameters
 		phase_characteristics(const phase_characteristics&);	//Copy constructor
         ~phase_characteristics();
 		
@@ -77,7 +74,7 @@ class phase_characteristics
     
 		virtual phase_characteristics& operator = (const phase_characteristics&);
 		
-		friend ostream& operator << (ostream&, const phase_characteristics&);
+        friend std::ostream& operator << (std::ostream&, const phase_characteristics&);
 };
 
 } //namespace smart

@@ -25,15 +25,12 @@
 #include <string.h>
 #include <armadillo>
 
-using namespace std;
-using namespace arma;
-
 namespace smart{
 
 //This function computes the ODF of the selected angle, according to different methods (Lorentzian, Pearson...)
-double ODF(const double&, const int&, const vec&, const bool&, const double& = 0.*pi);
+double ODF(const double&, const int&, const arma::vec&, const bool&, const double& = 0.*pi);
 
 //Writes the Nphases.dat file for multiphase modeling, according to specific ODFs
-void ODF2Nphases(const Col<int> &, const Col<int> &, const Col<int> &, const vector<string> &, const mat &, const bool& = false, const double& = 0.*pi);
+    void ODF2Nphases(const arma::Col<int> &, const arma::Col<int> &, const arma::Col<int> &, const std::vector<std::string> &, const arma::mat &, const bool& = false, const double& = 0.*pi);
 
 } //namespace smart

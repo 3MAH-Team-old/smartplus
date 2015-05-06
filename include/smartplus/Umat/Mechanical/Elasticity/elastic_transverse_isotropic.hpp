@@ -21,12 +21,7 @@
 
 #pragma once
 
-#include <iostream>
-#include <fstream>
 #include <armadillo>
-
-using namespace std;
-using namespace arma;
 
 namespace smart{
     
@@ -37,6 +32,6 @@ namespace smart{
     
     ///@brief No statev is required for thermoelastic constitutive law
     
-    void umat_elasticity_trans_iso(const vec &, const vec &, vec &, mat &, const mat &, const int &, const vec &, const int &, vec &, const double &, const double &,const double &,const double &, double &, double &, const int &, const int &, const bool &);
+    void umat_elasticity_trans_iso(const arma::vec &, const arma::vec &, arma::vec &, arma::mat &, const arma::mat &, const int &, const arma::vec &, const int &, arma::vec &, const double &, const double &,const double &,const double &, double &, double &, const int &, const int &, const bool &);
     
 } //namespace smart

@@ -35,16 +35,16 @@ namespace smart{
 ///@param kinc increment number
 
 
-void abaqus2smart(double *, double *, const double *, const double *, const double *, const double &, const double &, const double &, const int &,const double *, const int &, double *, const double &, const int &, const int &, const double *, vec &, mat &, vec &, vec &, double &, double &, double &, double &, vec &, vec &, double &, mat &, bool &);
+void abaqus2smart(double *, double *, const double *, const double *, const double *, const double &, const double &, const double &, const int &,const double *, const int &, double *, const double &, const int &, const int &, const double *, arma::vec &, arma::mat &, arma::vec &, arma::vec &, double &, double &, double &, double &, arma::vec &, arma::vec &, double &, arma::mat &, bool &);
 
-void select_umat_T(const string &, const vec &, const vec &, vec &, double &, mat &, mat &, mat &, mat &, const mat &, const int &, const vec &, const int &, vec &, const double &, const double &,const double &,const double &, double &, double &, const int &, const int &, bool &, double &);
+void select_umat_T(const std::string &, const arma::vec &, const arma::vec &, arma::vec &, double &, arma::mat &, arma::mat &, arma::mat &, arma::mat &, const arma::mat &, const int &, const arma::vec &, const int &, arma::vec &, const double &, const double &,const double &,const double &, double &, double &, const int &, const int &, bool &, double &);
     
-void select_umat(const string &, const vec &, const vec &, vec &, mat &, const mat &, const int &, const vec &, const int &, vec &, const double &, const double &,const double &,const double &, double &, double &, const int &, const int &, const bool &, double &);
+void select_umat(const std::string &, const arma::vec &, const arma::vec &, arma::vec &, arma::mat &, const arma::mat &, const int &, const arma::vec &, const int &, arma::vec &, const double &, const double &,const double &,const double &, double &, double &, const int &, const int &, const bool &, double &);
 
-void run_umat_T(const string &, const vec &, const vec &, vec &, double &, mat &, mat &, mat &, mat &, const mat &, const int &, const vec &, const int &, vec &, const double &, const double &,const double &,const double &, double &, double &, const int &, const int &, bool &, double &);
+void run_umat_T(const std::string &, const arma::vec &, const arma::vec &, arma::vec &, double &, arma::mat &, arma::mat &, arma::mat &, arma::mat &, const arma::mat &, const int &, const arma::vec &, const int &, arma::vec &, const double &, const double &,const double &,const double &, double &, double &, const int &, const int &, bool &, double &);
 
-void run_umat(const string &, const vec &, const vec &, vec &, mat &, const mat &, const int &, const vec &, const int &, vec &, const double &, const double &,const double &,const double &, double &, double &, const int &, const int &, bool &, double &);
+    void run_umat(const std::string &, const arma::vec &, const arma::vec &, arma::vec &, arma::mat &, const arma::mat &, const int &, const arma::vec &, const int &, arma::vec &, const double &, const double &,const double &,const double &, double &, double &, const int &, const int &, bool &, double &);
 
-void smart2abaqus(double *, double *, double *, const int &, const int &, const vec &, const mat &, const vec &, double &, const double &);
+void smart2abaqus(double *, double *, double *, const int &, const int &, const arma::vec &, const arma::mat &, const arma::vec &, double &, const double &);
     
 } //namespace smart

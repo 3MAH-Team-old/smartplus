@@ -23,44 +23,41 @@
 
 #include <armadillo>
 
-using namespace std;
-using namespace arma;
-
 namespace smart{
 
-void Rot_strain(vec &, const mat &);
+void Rot_strain(arma::vec &, const arma::mat &);
 
-void Rot_stress(vec &, const mat &);
+void Rot_stress(arma::vec &, const arma::mat &);
 
-mat fillQS(const double &, const int &);
+arma::mat fillQS(const double &, const int &);
 
-mat fillQE(const double &, const int &);
+arma::mat fillQE(const double &, const int &);
 
 //To rotate a stiffness matrix (6,6)
-mat rotateL(const mat &, const double &, const int &);
+arma::mat rotateL(const arma::mat &, const double &, const int &);
 
 //To rotate a compliance matrix (6,6)
-mat rotateM(const mat &, const double &, const int &);
+arma::mat rotateM(const arma::mat &, const double &, const int &);
 
 //To rotate a interaction matrix (6,6)
-mat rotateA(const mat &, const double &, const int &);
+arma::mat rotateA(const arma::mat &, const double &, const int &);
 
 //To rotate a stress vector (6)
-vec rotate_stress(const vec &, const double &, const int &);
+arma::vec rotate_stress(const arma::vec &, const double &, const int &);
 
 //To rotate a strain vector (6)
-vec rotate_strain(const vec &, const double &, const int &);
+arma::vec rotate_strain(const arma::vec &, const double &, const int &);
 
 //To rotate from local to global a stiffness matrix (6,6)
-mat rotate_l2g_L(const mat &, const double &, const double &, const double &);
+arma::mat rotate_l2g_L(const arma::mat &, const double &, const double &, const double &);
 
 //To rotate from global to local a stiffness matrix (6,6)
-mat rotate_g2l_L(const mat &, const double &, const double &, const double &);
+arma::mat rotate_g2l_L(const arma::mat &, const double &, const double &, const double &);
 
 //To rotate from local to global a localisation matrix (6,6)
-mat rotate_l2g_A(const mat &, const double &, const double &, const double &);
+arma::mat rotate_l2g_A(const arma::mat &, const double &, const double &, const double &);
 
 //To rotate from global to local a localisation matrix (6,6)
-mat rotate_g2l_A(const mat &, const double &, const double &, const double &);
+arma::mat rotate_g2l_A(const arma::mat &, const double &, const double &, const double &);
 
 } //namespace smart

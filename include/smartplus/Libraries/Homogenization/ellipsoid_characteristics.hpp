@@ -26,9 +26,6 @@
 #include <armadillo>
 #include "phase_characteristics.hpp"
 
-using namespace std;
-using namespace arma;
-
 namespace smart{
 
 //======================================
@@ -52,21 +49,21 @@ protected:
     double theta_geom;
     double phi_geom;
     
-    mat S;
-    mat T;
+    arma::mat S;
+    arma::mat T;
     
     ellipsoid_characteristics(); 	//default constructor
     ellipsoid_characteristics(int, int, bool=true, double=0.);	//constructor - allocates memory for statev
-    ellipsoid_characteristics(int, int, int, string, double, double, double, double, double, double, double, double, double, double, int, const vec&, int, const vec&, const state_variables&, const state_variables&, const mat&, const mat&, const mat&, const mat&); //Constructor with parameters
+    ellipsoid_characteristics(int, int, int, std::string, double, double, double, double, double, double, double, double, double, double, int, const arma::vec&, int, const arma::vec&, const state_variables&, const state_variables&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&); //Constructor with parameters
     ellipsoid_characteristics(const ellipsoid_characteristics&);	//Copy constructor
     ~ellipsoid_characteristics();
     
-    void fillS(const mat&, const vec&, const vec&, const vec&, const vec&, const int&, const int&); //need the L_global of the matrix
-    void fillT(const mat&, const vec&, const vec&, const vec&, const vec&, const int&, const int&); //need the L_global of the matrix
+    void fillS(const arma::mat&, const arma::vec&, const arma::vec&, const arma::vec&, const arma::vec&, const int&, const int&); //need the L_global of the matrix
+    void fillT(const arma::mat&, const arma::vec&, const arma::vec&, const arma::vec&, const arma::vec&, const int&, const int&); //need the L_global of the matrix
     
 	virtual ellipsoid_characteristics& operator = (const ellipsoid_characteristics&);
     
-    friend ostream& operator << (ostream&, const ellipsoid_characteristics&);
+    friend std::ostream& operator << (std::ostream&, const ellipsoid_characteristics&);
     
 };
 

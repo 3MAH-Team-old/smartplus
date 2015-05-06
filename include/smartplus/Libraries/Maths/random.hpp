@@ -21,11 +21,6 @@
 
 #pragma once
 
-#include <armadillo>
-
-using namespace std;
-using namespace arma;
-
 namespace smart{
 
 //This function returns a random in number between 0 and a

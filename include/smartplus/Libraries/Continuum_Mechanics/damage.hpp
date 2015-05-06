@@ -23,16 +23,13 @@
 #include <iostream>
 #include <armadillo>
 
-using namespace std;
-using namespace arma;
-
 namespace smart{
 
 //This function returns damage evolution (/dt) considering a Weibull damage law
-double damage_weibull(const vec &, const double &, const double &, const double &, const double &, const string& = "vonmises");
+double damage_weibull(const arma::vec &, const double &, const double &, const double &, const double &, const std::string& = "vonmises");
 
 //This function returns damage evolution (/dt) considering Kachanov's creep damage law
-double damage_kachanov(const vec &, const vec &, const double &, const double &, const double &, const string &);
+double damage_kachanov(const arma::vec &, const arma::vec &, const double &, const double &, const double &, const std::string &);
 
 //This function returns the constant damage evolution (/dN) considering Woehler- Miner's damage law
 double damage_miner(const double &, const double &, const double &, const double &, const double &, const double &, const double & =0.);

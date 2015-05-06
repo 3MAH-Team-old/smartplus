@@ -24,9 +24,6 @@
 #include <iostream>
 #include <armadillo>
 
-using namespace std;
-using namespace arma;
-
 namespace smart{
 
 //======================================
@@ -41,16 +38,16 @@ public :
 
     //output values
     int o_nb_meca;
-    Col<int> o_meca;
+    arma::Col<int> o_meca;
     int o_nb_T;
     
 	int o_nw_statev;
-	Col<int> o_wanted_statev;
-	Col<int> o_range_statev;
+	arma::Col<int> o_wanted_statev;
+	arma::Col<int> o_range_statev;
     
-    Col<int> o_type;
-    Col<int> o_nfreq;
-    vec o_tfreq;
+    arma::Col<int> o_type;
+    arma::Col<int> o_nfreq;
+    arma::vec o_tfreq;
     
     solver_output(); 	//default constructor
     solver_output(const int&);	//Constructor with parameters
@@ -59,7 +56,7 @@ public :
     
     virtual solver_output& operator = (const solver_output&);
     
-    friend  ostream& operator << (ostream&, const solver_output&);
+    friend  std::ostream& operator << (std::ostream&, const solver_output&);
 };
 
 } //namespace smart

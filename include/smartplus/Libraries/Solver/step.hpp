@@ -25,9 +25,6 @@
 #include <armadillo>
 #include "output.hpp"
 
-using namespace std;
-using namespace arma;
-
 namespace smart{
 
 //======================================
@@ -44,24 +41,24 @@ protected:
     int mode;
     
     double Time;
-    vec times;
+    arma::vec times;
     double BC_Time;
     
-    string file; //  It is used for input/output values of the loading path
+    std::string file; //  It is used for input/output values of the loading path
     
     step(); 	//default constructor
     step(int, int, int);	//Constructor with parameters
     step(const step &);	//Copy constructor
     ~step();
    
-    virtual void generate(const double &, const vec &, const vec &, const double &);
+    virtual void generate(const double &, const arma::vec &, const arma::vec &, const double &);
     
     virtual step& operator = (const step&);
 
     //This function serves to output
-    virtual void output(ostream&, const solver_output &, const int &, const int &, const int&, const vec&);
+    virtual void output(std::ostream&, const solver_output &, const int &, const int &, const int&, const arma::vec&);
     
-    friend  ostream& operator << (ostream&, const step&);
+    friend  std::ostream& operator << (std::ostream&, const step&);
 };
 
 } //namespace smart

@@ -26,9 +26,6 @@
 #include <armadillo>
 #include "phase_characteristics.hpp"
 
-using namespace std;
-using namespace arma;
-
 namespace smart{
 
 //======================================
@@ -41,15 +38,15 @@ class layer_characteristics : public phase_characteristics
     
 	public :
 
-        layer_characteristics(); 	//default constructor
-        layer_characteristics(int, int, bool=true, double=0.);	//constructor - allocates memory for statev
-        layer_characteristics(int, string, double, double, double, double, int, const vec&, int, const vec&, const state_variables&, const state_variables&, const mat&, const mat&); //Constructor with parameters
-        layer_characteristics(const layer_characteristics&);	//Copy constructor
+    layer_characteristics(); 	//default constructor
+    layer_characteristics(int, int, bool=true, double=0.);	//constructor - allocates memory for statev
+    layer_characteristics(int, std::string, double, double, double, double, int, const arma::vec&, int, const arma::vec&, const state_variables&, const state_variables&, const arma::mat&, const arma::mat&); //Constructor with parameters
+    layer_characteristics(const layer_characteristics&);	//Copy constructor
         ~layer_characteristics();
     
-    	virtual layer_characteristics& operator = (const layer_characteristics&);
+    virtual layer_characteristics& operator = (const layer_characteristics&);
     
-        friend ostream& operator << (ostream&, const layer_characteristics&);
+    friend std::ostream& operator << (std::ostream&, const layer_characteristics&);
     
 };
 

@@ -21,12 +21,8 @@
 
 #pragma once
 #include <iostream>
-#include <armadillo>
 #include "step.hpp"
 #include <memory>
-
-using namespace std;
-using namespace arma;
 
 namespace smart{
 
@@ -44,11 +40,11 @@ class block
         int ncycle;
         int type;
     
-        vector<shared_ptr<step> > steps;
+        std::vector<std::shared_ptr<step> > steps;
     
         block(); 	//default constructor
 		block(int, int, int, int);	//constructor - allocates memory for the step vector
-        block(int, int, int, int, const std::vector<shared_ptr<step> > &); //Constructor with parameters
+        block(int, int, int, int, const std::vector<std::shared_ptr<step> > &); //Constructor with parameters
 		block(const block&);	//Copy constructor
 		~block();
 		
@@ -57,7 +53,7 @@ class block
     
 		virtual block& operator = (const block&);
 		
-        friend ostream& operator << (ostream&, const block&);
+        friend std::ostream& operator << (std::ostream&, const block&);
 };
 
 } //namespace smart

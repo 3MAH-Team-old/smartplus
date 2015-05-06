@@ -23,9 +23,6 @@
 
 #include <armadillo>
 
-using namespace std;
-using namespace arma;
-
 namespace smart{
 
 ///Approximation of a normal distribution
@@ -44,24 +41,24 @@ double ODF_hard(const double &, const double &, const double &, const double &);
 double Gaussian(const double &, const double &, const double &, const double & = 1.);
 
 ///30. Several Gaussian
-double Mult_Gaussian(const double &, const int &, const vec &, const vec &, const vec &);
+double Mult_Gaussian(const double &, const int &, const arma::vec &, const arma::vec &, const arma::vec &);
 
 ///4. Lorentzian
 double Lorentzian(const double &, const double &, const double &, const double & = 1.);
 
 ///40. Several Lorentzian
-double Mult_Lorentzian(const double &, const int &, const vec &, const vec &, const vec &);
+double Mult_Lorentzian(const double &, const int &, const arma::vec &, const arma::vec &, const arma::vec &);
 
 ///5. Pseudo-Voigt
 double PseudoVoigt(const double &, const double &, const double &, const double &, const double &, const double & = 1.);
 
 ///50. Several Pseudo-Voigt
-double Mult_PseudoVoigt(const double &, const int &, const vec &, const vec &, const vec &, const vec &, const vec &);
+double Mult_PseudoVoigt(const double &, const int &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &);
 
 ///6. Pearson VII
 double Pearson7(const double &, const double &, const double &, const double &, const double & = 1.);
 
 ///60. Several Pearson VII
-double Mult_Pearson7(const double &, const int &, const vec &, const vec &, const vec &, const vec &);
+double Mult_Pearson7(const double &, const int &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &);
 
 } //namespace smart
