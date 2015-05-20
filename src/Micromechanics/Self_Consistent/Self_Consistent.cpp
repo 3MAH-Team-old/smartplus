@@ -188,7 +188,7 @@ void umat_SC_N(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat
         }
         
 		//Compute the Eshelby tensor and the interaction tensor for each phase
-        #pragma omp parallel
+        #pragma omp parallel for
 		for(int i=0; i<nphases; i++) {
 			//Compute the local matrix tensor
             rvesvs[i].fillT(Lt, x, wx, y, wy, mp, np);
@@ -196,7 +196,7 @@ void umat_SC_N(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat
 
 		#pragma omp parallel for       
 		for(int i=0; i<nphases; i++) {
-		//Compute the Mori-Tanaka tensor for each phase
+		//Compute the Self-COnsistent tensor for each phase
 		
 			rvesvs[i].A = rvesvs[i].T;
 			rvesvs[i].global.DEtot = rvesvs[i].A*DEtot;

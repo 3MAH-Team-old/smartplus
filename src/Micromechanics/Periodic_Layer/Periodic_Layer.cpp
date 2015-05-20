@@ -207,7 +207,8 @@ void umat_PL_N(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat
 		}		
 		
 		m = inv(sumDnn)*sumcDsig;
-		
+
+		#pragma omp parallel for        
 		for(int i=0; i<nlayers; i++) {
 
 			dzdx1[i] = inv(Dnn[i])*(m-sigma_hat[i]);

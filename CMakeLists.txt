@@ -37,7 +37,7 @@ include_directories(${ARMADILLO_INCLUDE_DIRS})
 
 # OpenMP
 include(FindOpenMP)
-#find_package(OpenMP)
+find_package(OpenMP)
 
 # Build type
 if(NOT CMAKE_BUILD_TYPE)  # Debug by default

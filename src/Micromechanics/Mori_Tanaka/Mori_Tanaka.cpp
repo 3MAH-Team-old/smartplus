@@ -187,7 +187,7 @@ void umat_MT_N(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat
 		sumT.zeros();
 		
 		//Compute the Eshelby tensor and the interaction tensor for each phase
-		#pragma omp parallel
+		#pragma omp parallel for
 		for(int i=0; i<nphases; i++) {
 			//Compute the local matrix tensor
             rvesvs[i].fillT(rvesvs[0].global.Lt, x, wx, y, wy, mp, np);
@@ -199,7 +199,8 @@ void umat_MT_N(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat
 		}
 
 		invsumT = inv(sumT);
-		
+        
+		#pragma omp parallel for
 		for(int i=0; i<nphases; i++) {
 		//Compute the Mori-Tanaka tensor for each phase
 		
