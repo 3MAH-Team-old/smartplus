@@ -81,10 +81,10 @@ list(REMOVE_ITEM source_files "Control/solver.cpp")
 #Add the files to the lib
 add_library(smartplus SHARED ${source_files})
 #link against armadillo
-target_link_libraries(smartplus ${ARMADILLO_LIBRARIES})
+#target_link_libraries(smartplus ${ARMADILLO_LIBRARIES})
 
 #Add the solver executable
-add_executable(solver src/Control/solver.cpp ${source_files})
+add_executable(solver src/Control/solver.cpp)
 
 #Link the solver executable with armadillo
-target_link_libraries(solver ${ARMADILLO_LIBRARIES})
+target_link_libraries(solver smartplus ${ARMADILLO_LIBRARIES})
