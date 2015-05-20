@@ -390,7 +390,7 @@ void smart2abaqus(double *stress, double *ddsdde, double *statev, const int &ndi
 	}
 	
     ///@brief : Pass the material properties and the variables
-    for (int i=0; i<statev_smart.n_elem; i++) {
+    for (unsigned int i=0; i<statev_smart.n_elem; i++) {
         statev[i] = statev_smart(i);
     }
     

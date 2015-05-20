@@ -127,7 +127,7 @@ ostream& operator << (ostream& s, const solver_output& so)
     s << "range statev\n" << so.o_range_statev << "\n";
     
     s << "block\t type\t every\n";
-    for (int i=0; i<so.o_type.n_elem; i++) {
+    for (unsigned int i=0; i<so.o_type.n_elem; i++) {
         s << i+1 << "\t" << so.o_type(i) << "\t";
         if (so.o_type(i) == 1)
             s << so.o_nfreq(i);

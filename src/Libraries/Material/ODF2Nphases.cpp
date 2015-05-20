@@ -275,14 +275,14 @@ void ODF2Nphases(const Col<int> &Nphases, const Col<int> &Angle, const Col<int> 
 	cout << "Coupling with ODF and orientation families...\n\n";
 	stringstream path;
 	mat full_ODF;
-	int limiteinf;
+	int limiteinf = 0;
 	int limitesup;
 	int compteur;
 	double corr;
-	bool flag;
+	bool flag = false;
 	char answer;
 	int conver;
-	int ndata;
+	int ndata = 0;
 
 	for(int i = 0; i < phases_init; i++) {
         normODF = 0.;

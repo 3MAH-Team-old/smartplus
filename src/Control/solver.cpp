@@ -275,7 +275,7 @@ int main() {
                 invK = zeros(7, 7);
                 
                 vec sigma_start = sigma;
-                double Q_start = Q;
+                // double Q_start = Q;
                 dSdE = zeros(6,6);
                 dSdT = zeros(1,6);
                 dQdE = zeros(6,1);
@@ -437,7 +437,7 @@ int main() {
                             Time += DTime;
                             
                             sigma_start = sigma;
-                            Q_start = Q;
+                            // Q_start = Q;
                             statev_start = statev;
                             dSdE_start = dSdE;
                             dSdT_start = dSdT;

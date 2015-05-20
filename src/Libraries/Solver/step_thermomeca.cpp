@@ -322,7 +322,7 @@ void step_thermomeca::output(ostream& output, const solver_output &so, const int
     output << "\t";
     if(so.o_nw_statev != 0){
         if (so.o_wanted_statev(0) < 0) {
-            for(int k = 0 ; k < statev.n_elem ; k++)
+            for(unsigned int k = 0 ; k < statev.n_elem ; k++)
                 output << statev(k) << "\t";
         }
         else{
