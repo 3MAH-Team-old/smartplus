@@ -1,24 +1,35 @@
 # smartplus
 
-How to install the SMART+ :
+How to install SMART+ :
 
-copy and paste the content of the library where you want to install SMART+
-create a folder /build. So in Linux/Unix systems you can type
-Use Cmake to generate source in the folder /build
+You should have downloaded a zip file called smartplus-master.zip
 
-mkdir build
-cd build
-ccmake ../Hello 
+1 - Unzip the file in the location where you want to use SMART+ and rename it "smartplus"
 
-Open a terminal
-Navigate to the folder /build
+2 - Go to the folder "smartplus"
+        ** cd 'pathtothefile'/smartplus
 
-type the command:
-make
+3 - create a build folder 
+        ** mkdir build
 
-After all the compilation of the files, go to /build/bin/Release and copy-paste the solver exec to a folder where you want to run the solver executable file
-You have to copy the content of the folder "data" in the same folder.
+4 - Use Cmake to configure and generate the Makefile
+        ** cmake ..
 
-Copy the content of build/lib/Release to a folder /lib of your project (Or you can manually paste it with appropriate right to /usr/lib you you want to use it from anywhere)
+5 - Build the libraries and the executable files
+        ** make
+
+6 - After the compilation and linking is done, go to /build/bin/Release
+
+    Copy-paste the solver exec to a folder where you want to run the solver executable file
+    for example in a folder exec
+    Copy the content of the folder "data" in the same folder.
+
+7 - If you want to build projects with the smartplus lib, you can copy paste the library in the build/lib/Release to the folder /usr/lib, or to the folder /lib of your project 
+    In the last case you may need to specify the path of the smartplus dynamic library (with the -I option)
+
+8 - To link smartplus with your application compile it with using -lsmartplus
+    To use the solver you can go to the 'exec' folder and use the command ./solver in a terminal (Linux and MacOS)
+
+9 - Go to http://www.lem3.fr/chemisky/smartplus/ . Click on the  the menu 'examples' to find examples on how to use SMART+
 
 Have fun :)
