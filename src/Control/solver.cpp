@@ -27,6 +27,7 @@
 #include <string.h>
 #include <armadillo>
 #include <smartplus/parameter.hpp>
+
 #include <smartplus/Umat/umat_smart.hpp>
 
 #include <smartplus/Libraries/Solver/read.hpp>
@@ -296,7 +297,8 @@ int main() {
                 
                 dQdE = -drpldE.t();
                 dQdT = lambda;
-                
+
+                statev_start = statev;                
                 start = false;
                 mat dSdE_start = dSdE;
                 mat dSdT_start = dSdT;
@@ -426,6 +428,7 @@ int main() {
                                     
                                     error = sqrt(norm(residual, 2.));
                                     compteur++;
+                                                                        
                                 }
                                 
                             }
