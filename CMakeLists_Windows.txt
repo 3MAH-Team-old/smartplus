@@ -1,5 +1,7 @@
 # CMakeLists.txt
 
+# Visit http://www.lem3.fr/chemisky/smartplus/ to find the full manual for Windows users.
+
 cmake_minimum_required(VERSION 2.6)
 project(smartplus)
 
