@@ -75,7 +75,7 @@ void umat_elasticity_iso_T(const vec &Etot, const vec &DEtot, vec &sigma, double
     
     if(DTime < 1.E-12) {
         rpl = 0.;
-        dSdT = -1.*Lth;
+        dSdT = Lth;
         drpldE = zeros(6);
         drpldT = 0.;
     }
