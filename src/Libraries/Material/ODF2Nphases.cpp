@@ -77,7 +77,7 @@ double ODF(const double& theta, const int& method, const vec& param, const bool&
 				Mean = param(0)*pi/180.;
 				SD = param(1)*pi/180.;
 			}
-			if (fabs(Ampl) < precision) {
+			if (fabs(Ampl) < limit) {
 				Ampl = 1.;
 			}
 			return Gaussian(Theta, Mean, SD, Ampl) + Gaussian(Theta - pi, Mean, SD, Ampl) + Gaussian(Theta + pi, Mean, SD, Ampl);
@@ -94,7 +94,7 @@ double ODF(const double& theta, const int& method, const vec& param, const bool&
 				Mean = param(0)*pi/180.;
 				Width = param(1)*pi/180.;
 			}
-			if (fabs(Ampl) < precision) {
+			if (fabs(Ampl) < limit) {
 				Ampl = 1.;
 			}
 			return Lorentzian(Theta, Mean, Width, Ampl) + Lorentzian(Theta - pi, Mean, Width, Ampl) + Lorentzian(Theta + pi, Mean, Width, Ampl);
@@ -114,7 +114,7 @@ double ODF(const double& theta, const int& method, const vec& param, const bool&
 				Width = param(2)*pi/180.;
 				SD = param(3)*pi/180.;
 			}
-			if (fabs(Ampl) < precision) {
+			if (fabs(Ampl) < limit) {
 				Ampl = 1.;
 			}
 			return PseudoVoigt(Theta, param(0), Mean, Width, SD, Ampl) + PseudoVoigt(Theta - pi, param(0), Mean, Width, SD, Ampl) + PseudoVoigt(Theta + pi, param(0), Mean, Width, SD, Ampl);
@@ -131,7 +131,7 @@ double ODF(const double& theta, const int& method, const vec& param, const bool&
 				Mean = param(0)*pi/180.;
 				Inv_Width = param(1)*180./pi;
 			}
-			if (fabs(Max) < precision) {
+			if (fabs(Max) < limit) {
 				Max = 1.;
 			}
 			return Pearson7(Theta, Mean, Inv_Width, param(2), Max) + Pearson7(Theta - pi, Mean, Inv_Width, param(2), Max) + Pearson7(Theta + pi, Mean, Inv_Width, param(2), Max);
@@ -456,7 +456,7 @@ void ODF2Nphases(const Col<int> &Nphases, const Col<int> &Angle, const Col<int> 
                 ///Cas d'une ODF tabulé
                 if (method(i) == 0) {
 					if (flag) {
-						if (fabs((full_ODF(j,0) - alpha)) > precision) {
+						if (fabs((full_ODF(j,0) - alpha)) > limit) {
 							cout << "ERROR: At line " << j+1 << ", the file angle " << full_ODF(j,0)*180./pi << " does not match its orientation family, centered in " << alpha*180./pi << ".\n";
 						}
 						rvesvs[i][j].concentration = full_ODF(j,1);
@@ -465,12 +465,12 @@ void ODF2Nphases(const Col<int> &Nphases, const Col<int> &Angle, const Col<int> 
 						if (j==0) {
 							///Détermination de la borne inférieure de la première famille d'orientation (toujours supérieure ou égale à la borne théorique)
 							compteur = 0;
-							if (full_ODF(ndata-1,0) + precision < (pi - dalpha/2.)) {
+							if (full_ODF(ndata-1,0) + limit < (pi - dalpha/2.)) {
 								///Cas particulier où le fichier ne contient aucune donnée pour des angles approchant 180° par la limite inférieure, pour la première famille d'orientation
 								limiteinf = 0;
 							}
 							else {							
-								while (full_ODF(compteur,0) + precision < (pi - dalpha/2.)) {
+								while (full_ODF(compteur,0) + limit < (pi - dalpha/2.)) {
 										compteur++;
 								}
 							}
@@ -478,7 +478,7 @@ void ODF2Nphases(const Col<int> &Nphases, const Col<int> &Angle, const Col<int> 
 							
 							///Détermination de la borne supérieure de la première famille d'orientation  (toujours supérieure ou égale à la borne théorique)
 							compteur = 0;
-							while (full_ODF(compteur,0) + precision < dalpha/2.) {
+							while (full_ODF(compteur,0) + limit < dalpha/2.) {
 									compteur++;
 							}
 							limitesup = compteur;			
@@ -501,7 +501,7 @@ void ODF2Nphases(const Col<int> &Nphases, const Col<int> &Angle, const Col<int> 
 							///Correction for intervals between 2 orientations family
 							///Correction regarding lower bound, always something to be add
 							if (limiteinf > 0) {
-								if (fabs(full_ODF(limiteinf,0) - (pi - dalpha/2.)) > precision) {
+								if (fabs(full_ODF(limiteinf,0) - (pi - dalpha/2.)) > limit) {
 									corr = (full_ODF(limiteinf,0) - (pi - dalpha/2.))/(full_ODF(limiteinf,0) - full_ODF(limiteinf-1,0));
 									rvesvs[i][j].concentration += (full_ODF(limiteinf,0)-full_ODF(limiteinf-1,0)) * corr * (full_ODF(limiteinf,1)*(2.-corr)+full_ODF(limiteinf-1,1)*corr) / 2.;
 					//cout << " Corr Inf: " << corr << "\t+ " << ((full_ODF(limiteinf,0)-full_ODF(limiteinf-1,0)) * corr * 180./pi * (full_ODF(limiteinf,1)*(2.-corr)+full_ODF(limiteinf-1,1)*corr) / 2.) << "\t\t" << rvesvs[i][j].concentration *180./pi<< "\n";	
@@ -513,7 +513,7 @@ void ODF2Nphases(const Col<int> &Nphases, const Col<int> &Angle, const Col<int> 
 					//cout << "***SPECIAL MISS_0*** Corr Inf: " << corr << "\t+ " << ((full_ODF(0,0)+pi-full_ODF(ndata-1,0)) * 180./pi * corr * (full_ODF(0,1)*(2.-corr)+full_ODF(ndata-1,1)*corr) / 2.) << "\t\t" << rvesvs[i][j].concentration *180./pi<< "\n";	
 							}
 							///Correction regarding higher bound, always something to be soustracted
-							if (fabs(full_ODF(limitesup,0) - (dalpha/2.)) > precision) {
+							if (fabs(full_ODF(limitesup,0) - (dalpha/2.)) > limit) {
 								if (limitesup == 0) {
 									///Cas particulier où le fichier ne contient aucune donnée pour des angles approchant 0° par la limite supérieure, pour la première famille d'orientation
 									corr = (full_ODF(0,0) - dalpha/2.)/(full_ODF(0,0)+pi - full_ODF(ndata-1,0));
@@ -533,23 +533,23 @@ void ODF2Nphases(const Col<int> &Nphases, const Col<int> &Angle, const Col<int> 
 						else {			
 							///Détermination de la borne inférieure de la i+1 ème famille d'orientation	(toujours supérieure ou égale à la borne théorique)
 							compteur = limiteinf;
-							if (full_ODF(ndata-1,0) + precision < (alpha - dalpha/2.)) {
+							if (full_ODF(ndata-1,0) + limit < (alpha - dalpha/2.)) {
 								///Cas particulier où le fichier ne contient aucune donnée pour des angles supérieurs à la borne inférieure de la i+1 ème famille d'orientation
 								limiteinf = 0;
 							}
 							else {
-								while (full_ODF(compteur,0) + precision < (alpha - dalpha/2.)) {
+								while (full_ODF(compteur,0) + limit < (alpha - dalpha/2.)) {
 										compteur++;
 								}
 								limiteinf = compteur;
 							}
 							///Détermination de la borne supérieure de la i+1 ème famille d'orientation (toujours supérieure ou égale à la borne théorique)
-							if (full_ODF(ndata-1,0) + precision < (alpha + dalpha/2.)) {
+							if (full_ODF(ndata-1,0) + limit < (alpha + dalpha/2.)) {
 								///Cas particulier où le fichier ne contient aucune donnée pour des angles supérieurs à la borne supérieure de la i+1 ème famille d'orientation
 								limitesup = 0;
 							}
 							else {
-								while (full_ODF(compteur,0) + precision < (alpha + dalpha/2.)) {
+								while (full_ODF(compteur,0) + limit < (alpha + dalpha/2.)) {
 										compteur++;
 								}
 								limitesup = compteur;
@@ -577,7 +577,7 @@ void ODF2Nphases(const Col<int> &Nphases, const Col<int> &Angle, const Col<int> 
 							
 							///Correction for intervals between 2 orientations family
 							///Correction regarding lower bound, always something to be add
-							if (fabs(full_ODF(limiteinf,0) - (alpha - dalpha/2.)) > precision) {
+							if (fabs(full_ODF(limiteinf,0) - (alpha - dalpha/2.)) > limit) {
 								if (limiteinf == 0) {
 									///Cas particulier où la borne inférieure de la i+1 ème famille d'orientation est le premier point
 									corr = (full_ODF(0,0)+pi - (alpha - dalpha/2.))/(full_ODF(0,0)+pi - full_ODF(ndata-1,0));
@@ -606,7 +606,7 @@ void ODF2Nphases(const Col<int> &Nphases, const Col<int> &Angle, const Col<int> 
 					//cout << "***SPECIAL MISS*** Corr Sup: " << corr << "\t- " << ((full_ODF(0,0)+pi-full_ODF(ndata-1,0)) * corr * 180./pi * (full_ODF(0,1)*(2.-corr)+full_ODF(ndata-1,1)*corr) / 2.) << "\t\t" << rvesvs[i][j].concentration *180./pi<< "\n";
 							}
 							else {
-								if (fabs(full_ODF(limitesup,0) - (alpha + dalpha/2.)) > precision) {
+								if (fabs(full_ODF(limitesup,0) - (alpha + dalpha/2.)) > limit) {
 									corr = (full_ODF(limitesup,0) - (alpha + dalpha/2.))/(full_ODF(limitesup,0) - full_ODF(limitesup-1,0));
 									rvesvs[i][j].concentration -= (full_ODF(limitesup,0)-full_ODF(limitesup-1,0)) * corr * (full_ODF(limitesup,1)*(2.-corr)+full_ODF(limitesup-1,1)*corr) / 2.;
 					//cout << " Corr Sup: " << corr << "\t- " << ((full_ODF(limitesup,0)-full_ODF(limitesup-1,0)) * corr  * 180./pi* (full_ODF(limitesup,1)*(2.-corr)+full_ODF(limitesup-1,1)*corr) / 2.) << "\t\t" << rvesvs[i][j].concentration *180./pi<< "\n";
