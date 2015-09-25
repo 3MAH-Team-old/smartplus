@@ -181,7 +181,7 @@ void umat_MT_N(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat
 	vec wy(np);
 	points(x, wx, y, wy, mp, np);
     
-	while ((error > iotaMicro)&&(nbiter <= maxiterMicro)) {
+	while ((error > precision_micro)&&(nbiter <= maxiter_micro)) {
 	  
 		DEtot_0n = DEtot_0;	  
 		sumT.zeros();
