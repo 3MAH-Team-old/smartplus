@@ -1,11 +1,13 @@
 #Umat_number
-3
+5
 #Meta_Umat
 3
 
 #1__isotropic_elasticity		ELISO	1
 #2__transverse_isotropic_elasticity	ELIST	2
-#3__elasto-plasticity_ccp		EPCCP	3
+#3__orthotropic_elasticity		ELORT	3
+#4__elasto-plasticity_ccp		EPICP	4
+#5__elasto-plasticity_kin_ccp		EPKCP	5
 
 #Meta_1__Mori-Tanaka_Nphase		MIMTN	100
 #Meta_4__Self-consistent_Nphase		MISCN	101
