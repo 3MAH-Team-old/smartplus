@@ -226,7 +226,7 @@ void read_output(solver_output &so, const int &nblock, const int &nstatev) {
 }
 
 
-void read_path(std::vector<block> &blocks, double &T) {
+void read_path(std::vector<block> &blocks, double &T, const string &pathfile) {
     
 	/// Reading the loading path file, Path.txt
     string buffer;
@@ -236,7 +236,7 @@ void read_path(std::vector<block> &blocks, double &T) {
     Col<int> Equiv = subdiag2vec();
     
 	ifstream path;
-	path.open("path.txt", ios::in);
+	path.open(pathfile, ios::in);
 	if(!path)
 	{
 		cout << "Error: cannot open the file path.txt \n";
@@ -269,7 +269,7 @@ void read_path(std::vector<block> &blocks, double &T) {
                         
                         shared_ptr<step_meca> sptr_meca = std::dynamic_pointer_cast<step_meca>(blocks[i].steps[j]);
                         
-                        path >> buffer >> sptr_meca->ninc >> buffer >> sptr_meca->BC_Time >> buffer;
+                        path >> buffer >> sptr_meca->Dn_init >> buffer >> sptr_meca->Dn_mini >> buffer >> sptr_meca->Dn_maxi >> buffer >> sptr_meca->BC_Time >> buffer;
                         for(int k = 0 ; k < 6 ; k++) {
                             path >> bufferchar;
                             conver = bufferchar;
