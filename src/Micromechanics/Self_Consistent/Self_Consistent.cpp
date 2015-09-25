@@ -181,7 +181,7 @@ void umat_SC_N(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat
 	points(x, wx, y, wy, mp, np);
     mat Lt_local = zeros(6,6);
     
-	while ((error > iotaMicro)&&(nbiter <= maxiterMicro)) {
+	while ((error > precision_micro)&&(nbiter <= maxiter_micro)) {
         
 		for(int i=0; i<nphases; i++) {
             DEtot_N[i] = rvesvs[i].global.DEtot;
