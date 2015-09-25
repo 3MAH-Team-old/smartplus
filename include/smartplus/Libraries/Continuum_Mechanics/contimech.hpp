@@ -66,6 +66,12 @@ double J3_stress(const arma::vec &);
 //Returns the third invariant of the deviatoric part of a second order stress tensor written as a Voigt vector
 double J3_strain(const arma::vec &);
 
+//This function returns the value if it's positive, zero if it's negative (Macaulay brackets <>+)
+double Macaulay_p(const double &);
+
+//This function returns the value if it's negative, zero if it's positive (Macaulay brackets <>-)
+double Macaulay_n(const double &);
+    
 //Returns the normalized vector normal to an ellipsoid with semi-principal axes of length a1, a2, a3. The direction of the normalized vector is set by angles u
 arma::vec normal_ellipsoid(const double &, const double &, const double &, const double &, const double &);
 
