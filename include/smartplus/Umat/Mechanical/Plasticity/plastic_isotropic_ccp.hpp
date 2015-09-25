@@ -22,7 +22,6 @@
 ///@version 1.0
 
 #pragma once
-
 #include <armadillo>
 
 namespace smart {
