@@ -221,6 +221,24 @@ double J3_strain(const vec &v) {
     
     return (1./3.)*accu(mat1%(mat1*mat1));
 }
+    
+//This function returns the value if it's positive, zero if it's negative (Macaulay brackets <>+)
+double Macaulay_p(const double &d) {
+
+    if (d >= 0)
+        return d;
+    else
+        return 0.;
+}
+    
+//This function returns the value if it's negative, zero if it's positive (Macaulay brackets <>-)
+double Macaulay_n(const double &d) {
+
+    if (d <= 0)
+        return d;
+    else
+        return 0.;
+}
 
 //Returns the normalized vector normal to an ellipsoid with semi-principal axes of length a1, a2, a3. The direction of the normalized vector is set by angles u
 vec normal_ellipsoid(const double &u, const double &v, const double &a1, const double &a2, const double &a3) {
