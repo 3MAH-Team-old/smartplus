@@ -25,6 +25,7 @@
 #include <assert.h>
 #include <math.h>
 #include <armadillo>
+#include <smartplus/parameter.hpp>
 #include <smartplus/Libraries/Solver/step.hpp>
 #include <smartplus/Libraries/Solver/output.hpp>
 
@@ -43,6 +44,9 @@ step::step()
 //-------------------------------------------------------------
 {
 	number=0;
+    Dn_init = 0.;
+    Dn_mini = 0.;
+    Dn_maxi = 0.;
 	ninc=0;
 	mode=0;
     
@@ -50,7 +54,6 @@ step::step()
     BC_Time = 0.;
     
     file = "";
-    
 }
 
 /*!
@@ -61,15 +64,21 @@ step::step()
  */
 
 //-------------------------------------------------------------
-step::step(int mnumber, int mninc, int mmode)
+step::step(int mnumber, int mDn_init, int mDn_mini, int mDn_maxi, int mmode)
 //-------------------------------------------------------------
 {
-	assert(mnumber>=0);
-	assert(mninc>0);
-	assert(mmode>0);
+    
+    assert(mnumber>=0);
+	assert(mDn_maxi<=1.);
+	assert(mDn_init<=mDn_maxi);
+	assert(mDn_mini<=mDn_init);
+    assert(fmod(1.,mDn_maxi)==0.);
     
 	number = mnumber;
-	ninc = mninc;
+    Dn_init = mDn_init;
+    Dn_mini = mDn_mini;
+    Dn_maxi = mDn_maxi;
+    ninc = std::round(1./mDn_maxi);
 	mode = mmode;
     
     Time = 0.;
@@ -89,6 +98,9 @@ step::step(const step& st)
 //------------------------------------------------------
 {    
 	number = st.number;
+    Dn_init = st.Dn_init;
+    Dn_mini = st.Dn_mini;
+    Dn_maxi = st.Dn_maxi;
 	ninc = st.ninc;
 	mode = st.mode;
     
@@ -111,12 +123,53 @@ void step::generate(const double &mTime, const vec &msigma, const vec &mEtot, co
 //-------------------------------------------------------------
 {
 	assert(number>=0);
-	assert(ninc>0);
+    assert(Dn_maxi<=1.);
+    assert(Dn_init<=Dn_maxi);
+    assert(Dn_mini<=Dn_init);
+    assert(fmod(1.,Dn_maxi)==0.);
 	assert(mode>0);
 
+    ninc = std::round(1./Dn_maxi);
+    
     times = zeros(ninc);
 }
 
+//----------------------------------------------------------------------
+void step::compute_inc(double &tnew_dt, const int &inc, double &tinc, double &Dtinc, double &Dtinc_cur) {
+//----------------------------------------------------------------------
+    
+    if((inc == 0)&&(Dtinc == 0.)){
+        Dtinc_cur = Dn_init;
+    }
+    else {
+        Dtinc_cur = Dtinc_cur*tnew_dt;
+    }
+    
+    if (Dtinc_cur < Dn_mini) {
+        if (inforce_solver == 1) {
+            cout << "Warning : The solver has been forced to continue with the minial increment at step:" << number << " inc: " << inc << " and fraction:" << tinc << "\n";
+            //tnew_dt = 1.;
+            Dtinc_cur = Dn_mini;
+        }
+        else {
+            cout << "\nThe increment size is less than the minimum specified\n";
+            exit(0);
+        }
+        
+    }
+    
+    if (Dtinc_cur >= Dn_maxi) {
+        Dtinc_cur = Dn_maxi;
+    }
+    
+    Dtinc = Dtinc_cur;
+        
+    if(tinc + Dtinc > 1.) {
+        Dtinc = 1.-tinc;
+    }
+    
+}
+    
 /*!
  \brief Standard operator = for block
  */
