@@ -50,11 +50,12 @@ protected:
     double T;
  
     step_meca(); 	//default constructor
-    step_meca(int, int, int, const arma::Col<int>&, const arma::vec&, const arma::mat&, const double&, const int&, const arma::vec&, const arma::vec&, const arma::vec&, const arma::vec&, const double&); //Constructor with parameters
+    step_meca(int, int, int, int, int, const arma::Col<int>&, const arma::vec&, const arma::mat&, const double&, const int&, const arma::vec&, const arma::vec&, const arma::vec&, const arma::vec&, const double&); //Constructor with parameters
     step_meca(const step_meca&);	//Copy constructor
     ~step_meca();
     
     virtual void generate(const double&, const arma::vec&, const arma::vec&, const double&);
+    virtual void assess_inc(const double &, double &, const double &, arma::vec &, const arma::vec &, double &, const double &, double &, const double &, arma::vec &, arma::vec &, arma::vec &, arma::vec&, arma::mat &, arma::mat &);
     
     virtual step_meca& operator = (const step_meca&);
     

@@ -51,11 +51,12 @@ protected:
     double Q;
     
     step_thermomeca(); 	//default constructor
-    step_thermomeca(int, int, int, const arma::Col<int>&, const arma::vec&, const arma::mat&, const double&, const int&, const arma::vec&, const arma::vec&, const arma::vec&, const arma::vec&, const double&, const double&); //Constructor with parameters
+    step_thermomeca(int, int, int, int, int, const arma::Col<int>&, const arma::vec&, const arma::mat&, const double&, const int&, const arma::vec&, const arma::vec&, const arma::vec&, const arma::vec&, const double&, const double&); //Constructor with parameters
     step_thermomeca(const step_thermomeca&);	//Copy constructor
     ~step_thermomeca();
     
     virtual void generate(const double&, const arma::vec&, const arma::vec&, const double&);
+    virtual void assess_inc(const double &, double &, const double &, arma::vec &, const arma::vec &, double &, const double &, double &, const double &, arma::vec &, arma::vec &, arma::vec &, arma::vec&, arma::mat &, arma::mat &);
     
     virtual step_thermomeca& operator = (const step_thermomeca&);
     

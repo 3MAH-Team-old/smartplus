@@ -42,6 +42,6 @@ void read_matprops(std::string &, int &, arma::vec &, int &, arma::vec &, double
 void read_output(solver_output &, const int &, const int &);
 
 /// Function that reads the loading path
-void read_path(std::vector<block> &, double &);
+void read_path(std::vector<block> &, double &, const string & = "path.txt");
 
 } //namespace smart
