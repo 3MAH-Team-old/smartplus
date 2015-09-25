@@ -67,7 +67,7 @@ step_thermomeca::step_thermomeca() : step()
  */
 
 //-------------------------------------------------------------
-step_thermomeca::step_thermomeca(int mnumber, int mninc, int mmode, const Col<int> &mcBC_meca, const vec &mBC_meca, const mat &mmecas, const double &mBC_T, const int &mcBC_T, const vec &mTs, const vec &mEtot, const vec &mDEtot, const vec &msigma, const double &mT, const double &mQ) : step(mnumber, mninc, mmode)
+step_thermomeca::step_thermomeca(int mnumber, int mDn_init, int mDn_mini, int mDn_maxi, int mmode, const Col<int> &mcBC_meca, const vec &mBC_meca, const mat &mmecas, const double &mBC_T, const int &mcBC_T, const vec &mTs, const vec &mEtot, const vec &mDEtot, const vec &msigma, const double &mT, const double &mQ) : step(mnumber, mDn_init, mDn_mini, mDn_maxi, mmode)
 //-------------------------------------------------------------
 {
     cBC_meca = mcBC_meca;
@@ -266,6 +266,28 @@ void step_thermomeca::generate(const double &mTime, const vec &msigma, const vec
     
 }
 
+//----------------------------------------------------------------------
+void step_thermomeca::assess_inc(const double &tnew_dt, double &tinc, const double &Dtinc, vec &Etot, const vec &DEtot, double &T, const double &DT, double &Time, const double &DTime, vec &sigma, vec &sigma_start, vec &statev, vec&statev_start, mat &Lt, mat &Lt_start) {
+    //----------------------------------------------------------------------
+    
+    if(tnew_dt < 1.){
+        sigma = sigma_start;
+        statev = statev_start;
+        Lt = Lt_start;
+        
+    }
+    else {
+        tinc += Dtinc;
+        Etot += DEtot;
+        T += DT;
+        Time += DTime;
+        sigma_start = sigma;
+        statev_start = statev;
+        Lt_start = Lt;
+    }
+    
+}
+    
 /*!
  \brief Standard operator = for block
  */
