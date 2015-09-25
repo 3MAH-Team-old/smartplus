@@ -267,9 +267,9 @@ mat L_ortho(const double &C11, const double &C12, const double &C13, const doubl
 	    L(2,0) = C13;
 	    L(2,1) = C23;
 	    L(2,2) = C33;
-	    L(3,3) = C66;
+	    L(3,3) = C44;
 	    L(4,4) = C55;
-	    L(5,5) = C44;
+	    L(5,5) = C66;
 		
 	}
 	else if (conv == "EnuG") {
@@ -277,18 +277,18 @@ mat L_ortho(const double &C11, const double &C12, const double &C13, const doubl
         double Ey = C12;
         double Ez = C13;
         double nuxy = C22;
-        double nuyz = C23;
-        double nuxz = C33;
+        double nuxz = C23;
+        double nuyz = C33;
         double Gxy = C44;
-        double Gyz = C55;
-        double Gxz = C66;
+        double Gxz = C55;
+        double Gyz = C66;
         
         double nuyx=nuxy*(Ey/Ex);
         double nuzy=nuyz*(Ez/Ey);
         double nuzx=nuxz*(Ez/Ex);
         double delta =(1-nuxy*nuyx-nuyz*nuzy-nuzx*nuxz-2*nuxy*nuyz*nuzx)/(Ex*Ey*Ez);
         
-        L(0,0) = (1-nuyz*nuzy)/Ey*Ez*delta;
+        L(0,0) = (1-nuyz*nuzy)/(Ey*Ez*delta);
         L(0,1) = (nuyx+nuzx*nuyz)/(Ey*Ez*delta);
         L(0,2) = (nuzx+nuyx*nuzy)/(Ey*Ez*delta);
         L(1,0) = (nuyx+nuzx*nuyz)/(Ey*Ez*delta);
@@ -297,9 +297,9 @@ mat L_ortho(const double &C11, const double &C12, const double &C13, const doubl
         L(2,0) = (nuzx+nuyx*nuzy)/(Ey*Ez*delta);
         L(2,1) = (nuzy+nuzx*nuxy)/(Ez*Ex*delta);
         L(2,2) = (1-nuxy*nuyx)/(Ex*Ex*delta);
-        L(3,3) = Gxz;
-        L(4,4) = Gyz;
-        L(5,5) = Gxy;
+        L(3,3) = Gxy;
+        L(4,4) = Gxz;
+        L(5,5) = Gyz;
         
     }
 	else {
@@ -314,21 +314,23 @@ mat L_ortho(const double &C11, const double &C12, const double &C13, const doubl
 mat M_ortho(const double &C11, const double &C12, const double &C13, const double &C22, const double &C23, const double &C33, const double &C44, const double &C55, const double &C66, string conv ){
 	
     mat M = zeros(6,6);
+    mat L = zeros(6,6);
     
     if (conv == "Cii") {
-	    M(0,0) = C11;
-	    M(0,1) = C12;
-	    M(0,2) = C13;
-	    M(1,0) = C12;
-	    M(1,1) = C22;
-	    M(1,2) = C23;
-	    M(2,0) = C13;
-	    M(2,1) = C23;
-	    M(2,2) = C33;
-	    M(3,3) = C66;
-	    M(4,4) = C55;
-	    M(5,5) = C44;
+	    L(0,0) = C11;
+	    L(0,1) = C12;
+	    L(0,2) = C13;
+	    L(1,0) = C12;
+	    L(1,1) = C22;
+	    L(1,2) = C23;
+	    L(2,0) = C13;
+	    L(2,1) = C23;
+	    L(2,2) = C33;
+	    L(3,3) = C66;
+	    L(4,4) = C55;
+	    L(5,5) = C44;
 		
+        M = inv(L);
 	}
     
     else if (conv == "EnuG") {
@@ -336,11 +338,11 @@ mat M_ortho(const double &C11, const double &C12, const double &C13, const doubl
 		double Ey = C12;
 		double Ez = C13;
 		double nuxy = C22;
-		double nuyz = C23;
-		double nuxz = C33;
+		double nuxz = C23;
+		double nuyz = C33;
 		double Gxy = C44;
-		double Gyz = C55;
-		double Gxz = C66;
+		double Gxz = C55;
+		double Gyz = C66;
         
 		M(0,0) = 1/Ex;
 		M(0,1) = -nuxy/Ex;
@@ -351,9 +353,9 @@ mat M_ortho(const double &C11, const double &C12, const double &C13, const doubl
 		M(2,0) = -nuxz/Ex;
 		M(2,1) = -nuyz/Ey;
 		M(2,2) = 1/Ez;
-		M(3,3) = 1/Gxz;
-		M(4,4) = 1/Gyz;
-		M(5,5) = 1/Gxy;
+		M(3,3) = 1/Gxy;
+		M(4,4) = 1/Gxz;
+		M(5,5) = 1/Gyz;
 	}
 	
 	else {
