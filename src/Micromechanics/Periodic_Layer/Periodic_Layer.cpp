@@ -175,7 +175,7 @@ void umat_PL_N(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat
 	// ********** Convergence Loop ******************/
 	//################################################
 
-	while ((error > iotaMicro)&&(nbiter <= maxiterMicro)) {
+	while ((error > precision_micro)&&(nbiter <= maxiter_micro)) {
 
 		for(int i=0; i<nlayers; i++) {
 
