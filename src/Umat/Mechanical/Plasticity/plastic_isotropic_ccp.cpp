@@ -49,9 +49,9 @@ namespace smart {
 ///@brief statev[2] : Plastic strain 11: EP(0,0)
 ///@brief statev[3] : Plastic strain 22: EP(1,1)
 ///@brief statev[4] : Plastic strain 33: EP(2,2)
-///@brief statev[5] : Plastic strain 12: EP(0,1)
-///@brief statev[6] : Plastic strain 13: EP(0,2)
-///@brief statev[7] : Plastic strain 23: EP(1,2)
+///@brief statev[5] : Plastic strain 12: EP(0,1) (*2)
+///@brief statev[6] : Plastic strain 13: EP(0,2) (*2)
+///@brief statev[7] : Plastic strain 23: EP(1,2) (*2)
 
 void umat_plasticity_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT,const double &Time,const double &DTime, double &sse, double &spd, const int &ndi, const int &nshr, const bool &start)
 {
@@ -149,8 +149,8 @@ void umat_plasticity_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, mat 
 	vec diff = zeros(6);
 	int compteur = 0;
     
-    if(Phi > precision) {
-		for(compteur = 0 ; (compteur < maxitNewton) && (fabs(Phi)/sigmaY > precision) ; compteur++) {
+    if(fabs(Phi)/sigmaY > precision_umat) {
+		for(compteur = 0 ; (compteur < maxiter_umat) && (fabs(Phi)/sigmaY > precision_umat) ; compteur++) {
 	        
 	        Lambdap = eta_stress(sigma);
 	        dPhidsigma = eta_stress(sigma);
