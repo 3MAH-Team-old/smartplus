@@ -28,7 +28,7 @@ using namespace std;
 using namespace arma;
 
 namespace smart{
-
+    
 ///Approximation of a normal distribution
 double normal_distrib(const double &x, const double &mean, const double &dev){
 	
