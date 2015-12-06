@@ -71,6 +71,9 @@ double Macaulay_p(const double &);
 
 //This function returns the value if it's negative, zero if it's positive (Macaulay brackets <>-)
 double Macaulay_n(const double &);
+
+//This function returns the value if it's negative, zero if it's positive (Macaulay brackets <>-)
+double sign(const double &);
     
 //Returns the normalized vector normal to an ellipsoid with semi-principal axes of length a1, a2, a3. The direction of the normalized vector is set by angles u
 arma::vec normal_ellipsoid(const double &, const double &, const double &, const double &, const double &);

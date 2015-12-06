@@ -239,6 +239,17 @@ double Macaulay_n(const double &d) {
     else
         return 0.;
 }
+    
+//This function returns the value if it's negative, zero if it's positive (Macaulay brackets <>-)
+double sign(const double &d) {
+    
+    if (d < iota)
+        return -1.;
+    else if(d > iota)
+        return 1.;
+    else
+        return 0.;
+}    
 
 //Returns the normalized vector normal to an ellipsoid with semi-principal axes of length a1, a2, a3. The direction of the normalized vector is set by angles u
 vec normal_ellipsoid(const double &u, const double &v, const double &a1, const double &a2, const double &a3) {
