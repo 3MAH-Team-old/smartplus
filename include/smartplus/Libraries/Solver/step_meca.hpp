@@ -54,6 +54,7 @@ protected:
     step_meca(const step_meca&);	//Copy constructor
     ~step_meca();
     
+    using step::generate;
     virtual void generate(const double&, const arma::vec&, const arma::vec&, const double&);
     virtual void assess_inc(const double &, double &, const double &, arma::vec &, const arma::vec &, double &, const double &, double &, const double &, arma::vec &, arma::vec &, arma::vec &, arma::vec&, arma::mat &, arma::mat &);
     

@@ -55,8 +55,9 @@ protected:
     step_thermomeca(const step_thermomeca&);	//Copy constructor
     ~step_thermomeca();
     
+    using step::generate;
     virtual void generate(const double&, const arma::vec&, const arma::vec&, const double&);
-    virtual void assess_inc(const double &, double &, const double &, arma::vec &, const arma::vec &, double &, const double &, double &, const double &, arma::vec &, arma::vec &, arma::vec &, arma::vec&, arma::mat &, arma::mat &);
+    virtual void assess_inc(const double &, double &, const double &, arma::vec &, const arma::vec &, double &, const double &, double &, const double &, arma::vec &, arma::vec &, arma::vec &, arma::vec&, arma::mat &, arma::mat &, arma::mat &, arma::mat &, arma::mat &, arma::mat &, arma::mat &, arma::mat &);
     
     virtual step_thermomeca& operator = (const step_thermomeca&);
     

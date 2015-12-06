@@ -33,7 +33,7 @@ using namespace std;
 using namespace arma;
 
 namespace smart{
-
+    
 //=====Private methods for ellipsoid_characteristics===================================
 
 //=====Public methods for ellipsoid_characteristics============================================
@@ -65,7 +65,7 @@ step_meca::step_meca() : step()
  */
 
 //-------------------------------------------------------------
-step_meca::step_meca(int mnumber, int mDn_init, int mDn_mini, int mDn_maxi, int mmode, const Col<int> &mcBC_meca, const vec &mBC_meca, const mat &mmecas, const double &mBC_T, const int &mcBC_T, const vec &mTs, const vec &mEtot, const vec &mDEtot, const vec &msigma, const double &mT) : step(mnumber, mDn_init, mDn_mini, mDn_maxi, mmode)
+step_meca::step_meca(int mnumber, int mDn_init, int mDn_mini, int mDn_inc, int mmode, const Col<int> &mcBC_meca, const vec &mBC_meca, const mat &mmecas, const double &mBC_T, const int &mcBC_T, const vec &mTs, const vec &mEtot, const vec &mDEtot, const vec &msigma, const double &mT) : step(mnumber, mDn_init, mDn_mini, mDn_inc, mmode)
 //-------------------------------------------------------------
 {
     cBC_meca = mcBC_meca;
@@ -135,7 +135,7 @@ void step_meca::generate(const double &mTime, const vec &msigma, const vec &mEto
         pathinc.close();
     }
     
-    step::generate(mTime, msigma, mEtot, mT);
+    step::generate();
         
     Time = mTime;
     Etot = mEtot;
@@ -217,7 +217,7 @@ void step_meca::generate(const double &mTime, const vec &msigma, const vec &mEto
             times(i) = (BC_file(0) - BC_file_n(0));
             kT = 0;
             if (cBC_T == 0) {
-                Ts(i) = (BC_file(kT+1) - BC_file_n(kT+1))/ninc;
+                Ts(i) = BC_file(kT+1) - BC_file_n(kT+1);
                 kT++;
             }
             else if(cBC_T == 2) {
@@ -307,7 +307,7 @@ void step_meca::output(ostream& output, const solver_output &so, const int &kblo
     output << kcycle+1 << "\t";
     output << number+1 << "\t";
     output << kinc+1 << "\t";
-    output << times(kinc) << "\t\t";
+    output << Time << "\t\t";
     
     if (so.o_nb_T) {
         output << T  << "\t";
@@ -376,7 +376,7 @@ ostream& operator << (ostream& s, const step_meca& stm)
     else {
 
         s << "\tTime of the step " << stm.BC_Time << " s\n\t";
-        s << "\tInitial fraction: " << stm.Dn_init << "\tMinimal fraction: " << stm.Dn_mini << "\tMaximal fraction: " << stm.Dn_maxi << "\n\t";
+        s << "\tInitial fraction: " << stm.Dn_init << "\tMinimal fraction: " << stm.Dn_mini << "\tIncrement fraction: " << stm.Dn_inc << "\n\t";
         for(int k = 0 ; k < 6 ; k++) {
             s << ((stm.cBC_meca(temp(k)) == 0) ? "\tE " : "\tS ") << stm.BC_meca(temp(k)) << (((k==0)||(k==2)||(k==5)) ? "\n\t" : "\t");
         }

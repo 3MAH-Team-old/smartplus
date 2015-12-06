@@ -33,7 +33,7 @@ using namespace std;
 using namespace arma;
 
 namespace smart{
-
+    
 //=====Private methods for ellipsoid_characteristics===================================
 
 //=====Public methods for ellipsoid_characteristics============================================
@@ -67,7 +67,7 @@ step_thermomeca::step_thermomeca() : step()
  */
 
 //-------------------------------------------------------------
-step_thermomeca::step_thermomeca(int mnumber, int mDn_init, int mDn_mini, int mDn_maxi, int mmode, const Col<int> &mcBC_meca, const vec &mBC_meca, const mat &mmecas, const double &mBC_T, const int &mcBC_T, const vec &mTs, const vec &mEtot, const vec &mDEtot, const vec &msigma, const double &mT, const double &mQ) : step(mnumber, mDn_init, mDn_mini, mDn_maxi, mmode)
+step_thermomeca::step_thermomeca(int mnumber, int mDn_init, int mDn_mini, int mDn_inc, int mmode, const Col<int> &mcBC_meca, const vec &mBC_meca, const mat &mmecas, const double &mBC_T, const int &mcBC_T, const vec &mTs, const vec &mEtot, const vec &mDEtot, const vec &msigma, const double &mT, const double &mQ) : step(mnumber, mDn_init, mDn_mini, mDn_inc, mmode)
 //-------------------------------------------------------------
 {
     cBC_meca = mcBC_meca;
@@ -139,7 +139,7 @@ void step_thermomeca::generate(const double &mTime, const vec &msigma, const vec
         pathinc.close();
     }
     
-    step::generate(mTime, msigma, mEtot, mT);
+    step::generate();
     
     Time = mTime;
     Etot = mEtot;
@@ -176,7 +176,7 @@ void step_thermomeca::generate(const double &mTime, const vec &msigma, const vec
                 Ts(i) = BC_T;                   //Note that here it is the flux that is imposed
             }
             else if(cBC_T == 0) {
-                Ts(i) = (BC_T - T)/ninc;
+                Ts(i) = inc_coef(i)*(BC_T - T)/ninc;
             }
             
         }
@@ -190,7 +190,7 @@ void step_thermomeca::generate(const double &mTime, const vec &msigma, const vec
                 size_BC--;
             }
         }
-        if (cBC_T == 2 ) {
+        if (cBC_T > 2 ) {
             size_BC--;
         }
         
@@ -203,6 +203,11 @@ void step_thermomeca::generate(const double &mTime, const vec &msigma, const vec
             BC_file_n(kT+1) = T;
             kT++;
         }
+        else if (cBC_T == 1) {
+            BC_file_n(kT+1) = 0.;    //Heat flux does not depend on any previous condition
+            kT++;
+        }
+        
         for (int k=0; k<6; k++) {
             if (cBC_meca(k) == 0) {
                 BC_file_n(kT+1) = Etot(k);
@@ -267,13 +272,17 @@ void step_thermomeca::generate(const double &mTime, const vec &msigma, const vec
 }
 
 //----------------------------------------------------------------------
-void step_thermomeca::assess_inc(const double &tnew_dt, double &tinc, const double &Dtinc, vec &Etot, const vec &DEtot, double &T, const double &DT, double &Time, const double &DTime, vec &sigma, vec &sigma_start, vec &statev, vec&statev_start, mat &Lt, mat &Lt_start) {
+void step_thermomeca::assess_inc(const double &tnew_dt, double &tinc, const double &Dtinc, vec &Etot, const vec &DEtot, double &T, const double &DT, double &Time, const double &DTime, vec &sigma, vec &sigma_start, vec &statev, vec&statev_start, mat &dSdE, mat &dSdE_start, mat &dSdT, mat &dSdT_start, mat &dQdE, mat &dQdE_start, mat &dQdT, mat &dQdT_start) {
     //----------------------------------------------------------------------
     
     if(tnew_dt < 1.){
         sigma = sigma_start;
         statev = statev_start;
-        Lt = Lt_start;
+        
+        dSdE = dSdE_start;
+        dSdT = dSdT_start;
+        dQdE = dQdE_start;
+        dQdT = dQdT_start;
         
     }
     else {
@@ -283,7 +292,12 @@ void step_thermomeca::assess_inc(const double &tnew_dt, double &tinc, const doub
         Time += DTime;
         sigma_start = sigma;
         statev_start = statev;
-        Lt_start = Lt;
+
+        dSdE_start = dSdE;
+        dSdT_start = dSdT;
+        dQdE_start = dQdE;
+        dQdT_start = dQdT;
+        
     }
     
 }
@@ -326,7 +340,7 @@ void step_thermomeca::output(ostream& output, const solver_output &so, const int
     output << kcycle+1 << "\t";
     output << number+1 << "\t";
     output << kinc+1 << "\t";
-    output << times(kinc) << "\t\t";
+    output << Time << "\t\t";
     
     if (so.o_nb_T) {
         output << T  << "\t";
@@ -392,10 +406,14 @@ ostream& operator << (ostream& s, const step_thermomeca& stm)
             s << "Q\n";
         else if(stm.cBC_T == 2)
             s << 0 << "\n";
+        else if(stm.cBC_T == 3)
+            s << "convexion with Tau = " << stm.BC_T << "\n";
     }
     else {
         
-        s << "\tNumber of increments: " << stm.ninc << "\twithin " << stm.BC_Time << " s\n";
+        s << "\tTime of the step " << stm.BC_Time << " s\n\t";
+        s << "\tInitial fraction: " << stm.Dn_init << "\tMinimal fraction: " << stm.Dn_mini << "\tIncrement fraction: " << stm.Dn_inc << "\n\t";
+
         for(int k = 0 ; k < 6 ; k++) {
             s << ((stm.cBC_meca(temp(k)) == 0) ? "\tE " : "\tS ") << stm.BC_meca(temp(k)) << (((k==0)||(k==2)||(k==5)) ? "\n\t" : "\t");
         }

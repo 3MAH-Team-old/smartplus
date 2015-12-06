@@ -39,7 +39,7 @@ protected:
     int number;     //Number of the step
     double Dn_init;    //Initial fraction of the step
     double Dn_mini;    //Minimal fraction of the step
-    double Dn_maxi;    //Maximal fraction of the step
+    double Dn_inc;    //Maximal fraction of the step
     int ninc;       //Number of milestones in the step (based on Dnmaxi)
     int mode;
     
@@ -54,7 +54,7 @@ protected:
     step(const step &);	//Copy constructor
     ~step();
    
-    virtual void generate(const double &, const arma::vec &, const arma::vec &, const double &);
+    virtual void generate();
     virtual void compute_inc(double &, const int &, double &, double &, double &);
     
     virtual step& operator = (const step&);

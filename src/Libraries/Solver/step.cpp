@@ -46,7 +46,7 @@ step::step()
 	number=0;
     Dn_init = 0.;
     Dn_mini = 0.;
-    Dn_maxi = 0.;
+    Dn_inc = 0.;
 	ninc=0;
 	mode=0;
     
@@ -64,21 +64,21 @@ step::step()
  */
 
 //-------------------------------------------------------------
-step::step(int mnumber, int mDn_init, int mDn_mini, int mDn_maxi, int mmode)
+step::step(int mnumber, int mDn_init, int mDn_mini, int mDn_inc, int mmode)
 //-------------------------------------------------------------
 {
     
     assert(mnumber>=0);
-	assert(mDn_maxi<=1.);
-	assert(mDn_init<=mDn_maxi);
+	assert(mDn_inc<=1.);
+	assert(mDn_init<=mDn_inc);
 	assert(mDn_mini<=mDn_init);
-    assert(fmod(1.,mDn_maxi)==0.);
+    assert(fmod(1.,mDn_inc)==0.);
     
 	number = mnumber;
     Dn_init = mDn_init;
     Dn_mini = mDn_mini;
-    Dn_maxi = mDn_maxi;
-    ninc = std::round(1./mDn_maxi);
+    Dn_inc = mDn_inc;
+    ninc = std::round(1./mDn_inc);
 	mode = mmode;
     
     Time = 0.;
@@ -100,7 +100,7 @@ step::step(const step& st)
 	number = st.number;
     Dn_init = st.Dn_init;
     Dn_mini = st.Dn_mini;
-    Dn_maxi = st.Dn_maxi;
+    Dn_inc = st.Dn_inc;
 	ninc = st.ninc;
 	mode = st.mode;
     
@@ -119,18 +119,20 @@ step::step(const step& st)
 step::~step() {}
 
 //-------------------------------------------------------------
-void step::generate(const double &mTime, const vec &msigma, const vec &mEtot, const double &mT)
+void step::generate()
 //-------------------------------------------------------------
 {
 	assert(number>=0);
-    assert(Dn_maxi<=1.);
-    assert(Dn_init<=Dn_maxi);
-    assert(Dn_mini<=Dn_init);
-    assert(fmod(1.,Dn_maxi)==0.);
+    assert(Dn_inc<=1.);
 	assert(mode>0);
-
-    ninc = std::round(1./Dn_maxi);
     
+    if(mode == 3) {
+        Dn_inc = 1./ninc;
+    }
+    else {
+        ninc = std::round(1./Dn_inc);
+        assert(ninc*Dn_inc==1.);
+    }
     times = zeros(ninc);
 }
 
@@ -147,19 +149,19 @@ void step::compute_inc(double &tnew_dt, const int &inc, double &tinc, double &Dt
     
     if (Dtinc_cur < Dn_mini) {
         if (inforce_solver == 1) {
-            cout << "Warning : The solver has been forced to continue with the minial increment at step:" << number << " inc: " << inc << " and fraction:" << tinc << "\n";
+//            cout << "Warning : The solver has been forced to continue with the minial increment at step:" << number << " inc: " << inc << " and fraction:" << tinc << "\n";
             //tnew_dt = 1.;
             Dtinc_cur = Dn_mini;
         }
         else {
-            cout << "\nThe increment size is less than the minimum specified\n";
+//            cout << "\nThe increment size is less than the minimum specified\n";
             exit(0);
         }
         
     }
     
-    if (Dtinc_cur >= Dn_maxi) {
-        Dtinc_cur = Dn_maxi;
+    if (Dtinc_cur >= 1.) {
+        Dtinc_cur = 1.;
     }
     
     Dtinc = Dtinc_cur;
