@@ -113,4 +113,18 @@ double dlagrange_pow_1(const double &x, const double &c, const double &p0, const
 	}
 }
 
-} //namespace smart
+//This function is used to determine the SECOND derivative of a power-law Lagrange Multiplier for problem such x <= 1
+double d2lagrange_pow_1(const double &x, const double &c, const double &p0, const double &n, const double &alpha)
+{
+	double h = 1.-c;
+	
+	if(x <= h)
+	{
+		return (p0 + 1.) * n * pow(1. - x, -n - 1.) + n * (n + 1.) * x * pow(1. - x, -n - 2.);
+	}
+	else
+	{
+		return 2. * alpha;
+	}			
+} 
+}//namespace smart
