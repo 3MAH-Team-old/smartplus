@@ -22,6 +22,7 @@
 #include <iostream>
 #include <fstream>
 #include <armadillo>
+#include <smartplus/parameter.hpp>
 #include <smartplus/Libraries/Continuum_Mechanics/constitutive.hpp>
 
 using namespace std;
@@ -36,9 +37,20 @@ namespace smart{
 
 ///@brief No statev is required for thermoelastic constitutive law
 
-void umat_elasticity_iso(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT,const double &Time,const double &DTime, double &sse, double &spd, const int &ndi, const int &nshr, const bool &start)
+void umat_elasticity_iso(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT,const double &Time,const double &DTime, double &sse, double &spd, const int &ndi, const int &nshr, const bool &start, double &tnew_dt)
 {  	
 
+    UNUSED(Etot);
+    UNUSED(DR);
+    UNUSED(nprops);
+    UNUSED(nstatev);
+    UNUSED(statev);
+    UNUSED(T);
+    UNUSED(Time);
+    UNUSED(DTime);
+    UNUSED(nshr);
+    UNUSED(tnew_dt);
+    
 	//From the props to the material properties
 	double E = props(0);
 	double nu = props(1);
@@ -50,24 +62,31 @@ void umat_elasticity_iso(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt,
 	
 	if(start) { //Initialization
 		sigma = zeros(6);
-	}	
-	
+	}
 	vec sigma_start = sigma;
 	
 	//Compute the elastic strain and the related stress	
-	vec DEtot2 = DEtot - alpha*Ith()*DT;
+	vec DEel = DEtot - alpha*Ith()*DT;
 
 	if (ndi == 1) {
-        sigma(0) = sigma_start(0) + E*(DEtot2(0));
+        sigma(0) = sigma_start(0) + E*(DEel(0));
     }
 	else if (ndi == 2) {
-        sigma(0) = sigma_start(0) + E/(1. - (nu*nu))*(DEtot2(0)) + nu*(DEtot2(1));
-        sigma(1) = sigma_start(1) + E/(1. - (nu*nu))*(DEtot2(1)) + nu*(DEtot2(0));
-        sigma(3) = sigma_start(3) + E/(1.+nu)*0.5*DEtot2(3);
+        sigma(0) = sigma_start(0) + E/(1. - (nu*nu))*(DEel(0)) + nu*(DEel(1));
+        sigma(1) = sigma_start(1) + E/(1. - (nu*nu))*(DEel(1)) + nu*(DEel(0));
+        sigma(3) = sigma_start(3) + E/(1.+nu)*0.5*DEel(3);
     }
     else
-        sigma = sigma_start + (Lt*DEtot2);
-        
+        sigma = sigma_start + (Lt*DEel);
+    
+    //Returning the energy
+    vec Dsigma = sigma - sigma_start;
+    
+    double Dtde = 0.5*sum((sigma_start+sigma)%DEtot);
+    double Dsse = sum(sigma_start%DEel) + 0.5*sum(Dsigma%DEel);
+    
+    sse += Dsse;
+    spd += Dtde - Dsse;
 }
 
 } //namespace smart

@@ -22,6 +22,7 @@
 #include <iostream>
 #include <fstream>
 #include <armadillo>
+#include <smartplus/parameter.hpp>
 #include <smartplus/Libraries/Continuum_Mechanics/constitutive.hpp>
 
 using namespace std;
@@ -36,9 +37,20 @@ namespace smart {
 
 ///@brief No statev is required for thermoelastic constitutive law
 
-void umat_elasticity_trans_iso(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT,const double &Time,const double &DTime, double &sse, double &spd, const int &ndi, const int &nshr, const bool &start)
+void umat_elasticity_trans_iso(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT,const double &Time,const double &DTime, double &sse, double &spd, const int &ndi, const int &nshr, const bool &start, double &tnew_dt)
 {  	
 
+    UNUSED(Etot);
+    UNUSED(DR);
+    UNUSED(nprops);
+    UNUSED(nstatev);
+    UNUSED(statev);
+    UNUSED(T);
+    UNUSED(Time);
+    UNUSED(DTime);
+    UNUSED(nshr);
+    UNUSED(tnew_dt);    
+    
 	//From the props to the material properties
 	double axis = props(0);
 	double EL = props(1);
@@ -67,10 +79,10 @@ void umat_elasticity_trans_iso(const vec &Etot, const vec &DEtot, vec &sigma, ma
 	///Elastic prediction - Accounting for the thermal prediction
 
 	//Compute the elastic strain and the related stress	
-	vec DEtot2 = DEtot - alpha*DT;
+	vec DEel = DEtot - alpha*DT;
 
 	if (ndi == 1) {
-        sigma(0) = sigma_start(0) + Lt(0,0)*(DEtot2(0));
+        sigma(0) = sigma_start(0) + Lt(0,0)*(DEel(0));
     }
 	else if (ndi == 2) {
 		
@@ -84,12 +96,21 @@ void umat_elasticity_trans_iso(const vec &Etot, const vec &DEtot, vec &sigma, ma
 		double Q42 = Lt(3,1)-Lt(3,2)*Lt(2,1)/Lt(2,2);
 		double Q44 = Lt(3,3)-Lt(3,2)*Lt(2,3)/Lt(2,2);		
 		
-        sigma(0) = sigma_start(0) + Q11*DEtot2(0) + Q12*DEtot2(1) + Q14*DEtot2(3);
-        sigma(1) = sigma_start(1) + Q21*DEtot2(0) + Q22*DEtot2(1) + Q24*DEtot2(3);
-        sigma(3) = sigma_start(3) + Q41*DEtot2(0) + Q42*DEtot2(1) + Q44*DEtot2(3);
+        sigma(0) = sigma_start(0) + Q11*DEel(0) + Q12*DEel(1) + Q14*DEel(3);
+        sigma(1) = sigma_start(1) + Q21*DEel(0) + Q22*DEel(1) + Q24*DEel(3);
+        sigma(3) = sigma_start(3) + Q41*DEel(0) + Q42*DEel(1) + Q44*DEel(3);
     }
     else
-        sigma = sigma_start + (Lt*DEtot2);
+        sigma = sigma_start + (Lt*DEel);
+    
+    //Returning the energy
+    vec Dsigma = sigma - sigma_start;
+    
+    double Dtde = 0.5*sum((sigma_start+sigma)%DEtot);
+    double Dsse = sum(sigma_start%DEel) + 0.5*sum(Dsigma%DEel);
+    
+    sse += Dsse;
+    spd += Dtde - Dsse;
         
 }
     
