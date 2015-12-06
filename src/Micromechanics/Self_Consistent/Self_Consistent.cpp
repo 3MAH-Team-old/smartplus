@@ -42,11 +42,13 @@ namespace smart{
 
 ///@brief The table phases.dat will store the necessary informations about the geometry of the phases and the material properties
 
-void umat_SC_N(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT,const double &Time,const double &DTime, double &sse, double &spd, const int &ndi, const int &nshr, const bool &start)
+void umat_SC_N(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT,const double &Time,const double &DTime, double &sse, double &spd, const int &ndi, const int &nshr, const bool &start, double &tnew_dt)
 {	
 	//This will create the N phase object, that stores the props, stran, Dstran, stress and stetev for each phase:
 	
-    double tnew_dt = 1.;
+    UNUSED(Etot);
+    UNUSED(nprops);
+    UNUSED(nstatev);
     
 	//This will create the N phase object, that stores the props, stran, Dstran, stress and stetev for each phase:
 	int nphases = props(0); // Number of phases

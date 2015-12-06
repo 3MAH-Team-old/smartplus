@@ -32,6 +32,6 @@ namespace smart{
 ///@brief props[2] : Number of integration points in the 1 direction
 ///@brief props[3] : Number of integration points in the 2 direction
 
-void umat_MT_N(const arma::vec &, const arma::vec &, arma::vec &, arma::mat &, const arma::mat &, const int &, const arma::vec &, const int &, arma::vec &, const double &, const double &,const double &,const double &, double &, double &, const int &, const int &, const bool &);
+void umat_MT_N(const arma::vec &, const arma::vec &, arma::vec &, arma::mat &, const arma::mat &, const int &, const arma::vec &, const int &, arma::vec &, const double &, const double &,const double &,const double &, double &, double &, const int &, const int &, const bool &, double &);
 
 } //namespace smart
