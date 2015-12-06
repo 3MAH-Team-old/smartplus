@@ -23,13 +23,12 @@
 #include <math.h>
 #include <armadillo>
 #include <smartplus/Libraries/Homogenization/eshelby.hpp>
-#include <smartplus/parameter.hpp>
 
 using namespace std;
 using namespace arma;
 
 namespace smart{
-
+    
 //Eshelby tensor for a sphere
 mat Eshelby_sphere(const double &nu) {
 
