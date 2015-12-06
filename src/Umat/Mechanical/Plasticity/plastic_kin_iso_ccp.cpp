@@ -61,40 +61,15 @@ namespace smart {
 ///@brief statev[8] : Backstress 11: X(1,2)
     
 
-void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT,const double &Time,const double &DTime, double &sse, double &spd, const int &ndi, const int &nshr, const bool &start)
+void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT,const double &Time,const double &DTime, double &sse, double &spd, const int &ndi, const int &nshr, const bool &start, double &tnew_dt)
 {
-	vec sigma_start = sigma;
-
-	///@brief Temperature initialization
-	double Tinit = statev(0);
-
-	//From the statev to the internal variables
-	double p = statev(1);
-	double p_temp = p;
-	double p_start = p;
-        
-	vec EP = zeros(6);
-	EP(0) = statev(2);
-	EP(1) = statev(3);
-	EP(2) = statev(4);
-	EP(3) = statev(5);
-	EP(4) = statev(6);
-	EP(5) = statev(7);
-
-    ///@brief X is the backstress associated with reorientation
-    vec X = zeros(6);
-    X(0) = statev(8);
-    X(1) = statev(9);
-    X(2) = statev(10);
-    X(3) = statev(11);
-    X(4) = statev(12);
-    X(5) = statev(13);
     
-	double h = 0.;
-
-	//Rotation of internal variables (tensors)
-	Rot_strain(EP, DR);
-	Rot_stress(X, DR);
+    UNUSED(nprops);
+    UNUSED(nstatev);
+    UNUSED(Time);
+    UNUSED(DTime);
+    UNUSED(nshr);
+    UNUSED(tnew_dt);    
 
 	//From the props to the material properties
 	double E = props(0);
@@ -110,36 +85,62 @@ void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, 
 	mat L = L_iso(E, nu, "Enu");
 	mat M = M_iso(E, nu, "Enu");
     
+    ///@brief Temperature initialization
+    double Tinit = statev(0);
+    //From the statev to the internal variables
+    double p = statev(1);
+    
+    vec EP = zeros(6);
+    EP(0) = statev(2);
+    EP(1) = statev(3);
+    EP(2) = statev(4);
+    EP(3) = statev(5);
+    EP(4) = statev(6);
+    EP(5) = statev(7);
+    
+    ///@brief X is the backstress associated with reorientation
+    vec X = zeros(6);
+    X(0) = statev(8);
+    X(1) = statev(9);
+    X(2) = statev(10);
+    X(3) = statev(11);
+    X(4) = statev(12);
+    X(5) = statev(13);
+    
+    //Rotation of internal variables (tensors)
+    Rot_strain(EP, DR);
+    Rot_stress(X, DR);
+    
+    
 	///@brief Initialization
 	if(start)
 	{
 		Tinit = T;
 		vec vide = zeros(6);
 		sigma = vide;
-		sigma_start = vide;
         X = vide;
 		EP = vide;
 		p = 0.;
-		p_temp = 0.;
-		p_start = 0.;
-		h = 0.;
 	}
+    vec sigma_start = sigma;
+    double p_temp = p;
+    double p_start = p;
 	
 	///Elastic prediction - Accounting for the thermal prediction	
 	
-	vec Eelstart = Etot - (alpha*Ith()*T -  alpha*Ith()*Tinit) - EP;
-	vec DEtot2 = DEtot - alpha*Ith()*DT;
+	vec Eel_start = Etot - (alpha*Ith()*T -  alpha*Ith()*Tinit) - EP;
+	vec DEel_start = DEtot - alpha*Ith()*DT;
 
 	if (ndi == 1) {
-        sigma(0) = sigma_start(0) + E*(DEtot2(0));
+        sigma(0) = sigma_start(0) + E*(DEel_start(0));
     }
 	else if (ndi == 2) {
-        sigma(0) = sigma_start(0) + E/(1. - (nu*nu))*(DEtot2(0)) + nu*(DEtot2(1));
-        sigma(1) = sigma_start(1) + E/(1. - (nu*nu))*(DEtot2(1)) + nu*(DEtot2(0));
-        sigma(3) = sigma_start(3) + E/(1.+nu)*0.5*DEtot2(3);
+        sigma(0) = sigma_start(0) + E/(1. - (nu*nu))*(DEel_start(0)) + nu*(DEel_start(1));
+        sigma(1) = sigma_start(1) + E/(1. - (nu*nu))*(DEel_start(1)) + nu*(DEel_start(0));
+        sigma(3) = sigma_start(3) + E/(1.+nu)*0.5*DEel_start(3);
     }
     else
-        sigma = sigma_start + (L*DEtot2);
+        sigma = sigma_start + (L*DEel_start);
         
     //Compute the explicit flow direction
 	vec Lambdap = eta_stress(sigma - X);
@@ -168,7 +169,7 @@ void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, 
     
     //Initialization of the function that defines the elastic domain
 	Phi = Mises_stress(sigma - X) - Hp - sigmaY;
-	vec diff = zeros(6);
+	vec Eel = zeros(6);
 	int compteur = 0;
     
     if(fabs(Phi)/sigmaY > precision_umat) {
@@ -212,21 +213,21 @@ void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, 
             X = X + (p - p_temp)*lambdaX;
             
 			//the stress is now computed using the relationship sigma = L(E-Ep)
-			diff = Etot + DEtot - alpha*Ith()*(T + DT - Tinit) - EP;
+			Eel = Etot + DEtot - alpha*Ith()*(T + DT - Tinit) - EP;
 			
 			if(ndi == 1) {						// 1D
 				double Eeff = 1./M(0,0);
-	            sigma(0) = Eeff*(diff(0));
+	            sigma(0) = Eeff*(Eel(0));
 	        }
 	        else if(ndi == 2){					// 2D Plane Stress
 				double Eeff = 1./M(0,0);
 	            double nueff = -M(0,1)/M(0,0);
-	            sigma(0) = Eeff/(1. - nueff*nueff)*(diff(0)) + nueff*(diff(1));
-	            sigma(1) = Eeff/(1. - nueff*nueff)*(diff(1)) + nueff*(diff(0));
-	            sigma(3) = Eeff/(1. - nueff*nueff)*(1. - nueff)*0.5*diff(3);
+	            sigma(0) = Eeff/(1. - nueff*nueff)*(Eel(0)) + nueff*(Eel(1));
+	            sigma(1) = Eeff/(1. - nueff*nueff)*(Eel(1)) + nueff*(Eel(0));
+	            sigma(3) = Eeff/(1. - nueff*nueff)*(1. - nueff)*0.5*Eel(3);
 	        }
 	        else
-				sigma = (L*diff); // 2D Generalized Plane Strain (Plane Strain, Axisymetric) && 3D			
+				sigma = (L*Eel); // 2D Generalized Plane Strain (Plane Strain, Axisymetric) && 3D
 			
 		}
 			
@@ -253,21 +254,21 @@ void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, 
         Lt = L + (B1*trans(B2))/At2;
 	}
 	else {
-		diff = Etot + DEtot - alpha*Ith()*(T + DT - Tinit) - EP;
+		Eel = Etot + DEtot - alpha*Ith()*(T + DT - Tinit) - EP;
 		
 		if(ndi == 1){						// 1D
 			double Eeff = 1./M(0,0);
-			sigma(0) = Eeff*(diff(0));
+			sigma(0) = Eeff*(Eel(0));
 		}
 		else if(ndi == 2){					// 2D Plane Stress
 			double Eeff = 1./M(0,0);
 			double nueff = -M(0,1)/M(0,0);
-			sigma(0) = Eeff/(1. - nueff*nueff)*(diff(0)) + nueff*(diff(1));
-			sigma(1) = Eeff/(1. - nueff*nueff)*(diff(1)) + nueff*(diff(0));
-			sigma(3) = Eeff/(1. - nueff*nueff)*(1. - nueff)*0.5*diff(3);
+			sigma(0) = Eeff/(1. - nueff*nueff)*(Eel(0)) + nueff*(Eel(1));
+			sigma(1) = Eeff/(1. - nueff*nueff)*(Eel(1)) + nueff*(Eel(0));
+			sigma(3) = Eeff/(1. - nueff*nueff)*(1. - nueff)*0.5*Eel(3);
 		}
 		else
-			sigma = (L*diff); // 2D Generalized Plane Strain (Plane Strain, Axisymetric) && 3D
+			sigma = (L*Eel); // 2D Generalized Plane Strain (Plane Strain, Axisymetric) && 3D
 		
 		Lt = L;
 	}
@@ -292,9 +293,8 @@ void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, 
     statev(13) = X(5);
     
 	//Returning the energy
-	vec Eel = Etot + DEtot - (alpha*Ith()*(T + DT) -  alpha*Ith()*Tinit) - EP;
-	vec DEel = Eel - Eelstart;
-	vec Dsigma = sigma - sigma_start;
+    vec DEel = Eel - Eel_start;
+    vec Dsigma = sigma - sigma_start;
     
 	double Dtde = 0.5*sum((sigma_start+sigma)%DEtot);
 	double Dsse = sum(sigma_start%DEel) + 0.5*sum(Dsigma%DEel);
