@@ -24,7 +24,7 @@
 #include <smartplus/Umat/Thermomechanical/Elasticity/elastic_isotropic.hpp>
 
 #include <smartplus/Micromechanics/Mori_Tanaka/Mori_Tanaka.hpp>
-#include <smartplus/Micromechanics/Periodic_Layer/Periodic_Layer.hpp>
+#include <smartplus/Micromechanics/Periodic_Layer/Periodic_layer.hpp>
 #include <smartplus/Micromechanics/Self_Consistent/Self_Consistent.hpp>
 
 using namespace std;
@@ -203,7 +203,7 @@ void select_umat_T(const string &umat_name, const vec &Etot, const vec &DEtot, v
     
     switch (list_umat[umat_name]) {
         case 1: {
-            umat_elasticity_iso_T(Etot, DEtot, sigma, rpl, dSdE, dSdT, drpldE, drpldT, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start);
+            umat_elasticity_iso_T(Etot, DEtot, sigma, rpl, dSdE, dSdT, drpldE, drpldT, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
             break;
         }
             
@@ -216,7 +216,7 @@ void select_umat_T(const string &umat_name, const vec &Etot, const vec &DEtot, v
     
 void select_umat(const string &umat_name, const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT,const double &Time,const double &DTime, double &sse, double &spd, const int &ndi, const int &nshr, const bool &start, double &tnew_dt)
 {
-	string buffer;
+    string buffer;
     int c_umat = 0;
 	int n_umat = 0;
 	int n_meta = 0;
@@ -225,11 +225,11 @@ void select_umat(const string &umat_name, const vec &Etot, const vec &DEtot, vec
 	listumat.open("data/list_umat.dat", ios::in);
 	if(listumat) {
 		listumat >> buffer >> n_umat >> buffer >> n_meta;
-    }
+	}
 	else {
 		cout << "Error: cannot open list_umat.dat file \n";
 	}
-
+	
     std::map<string, int> list_umat;
     for (int i = 0; i < (n_umat + n_meta); i++){
 		listumat >> buffer >> buffer >> c_umat;
@@ -239,35 +239,31 @@ void select_umat(const string &umat_name, const vec &Etot, const vec &DEtot, vec
     
 	switch (list_umat[umat_name]) {
 		case 1: {
-			umat_elasticity_iso(Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start);
+			umat_elasticity_iso(Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
 			break;
 		}
 		case 2: {
-			umat_elasticity_trans_iso(Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start);
+			umat_elasticity_trans_iso(Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
 			break;
 		}
-        case 3: {
-            umat_elasticity_ortho(Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start);
-            break;
-        }
-		case 4: {
-			umat_plasticity_iso_CCP(Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start);
+		case 3: {
+			umat_plasticity_iso_CCP(Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
 			break;
 		}
-        case 5: {
-            umat_plasticity_kin_iso_CCP(Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start);
+        case 4: {
+            umat_plasticity_kin_iso_CCP(Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
             break;
         }
 		case 100: {
-			umat_MT_N(Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start);
+			umat_MT_N(Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
 			break;
 		}
 		case 101: {
-			umat_SC_N(Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start);
+			umat_SC_N(Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
 			break;
 		}
 		case 102: {
-			umat_PL_N(Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start);
+			umat_PL_N(Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
 			break;
 		}
 						
@@ -275,7 +271,6 @@ void select_umat(const string &umat_name, const vec &Etot, const vec &DEtot, vec
 			cout << "Error: The choice of Umat could not be found in the umat library :" << umat_name << "\n"; 
 		}
 	}
-    
 }
 
 void run_umat_T(const string &umat_name, const vec &Etot, const vec &DEtot, vec &sigma, double &rpl, mat &dSdE, mat &dSdT, mat &drpldE, mat &drpldT, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT,const double &Time,const double &DTime, double &sse, double &spd, const int &ndi, const int &nshr, bool &start, double &tnew_dt)
@@ -285,7 +280,7 @@ void run_umat_T(const string &umat_name, const vec &Etot, const vec &DEtot, vec 
     
     select_umat_T(umat_name, Etot, DEtot, sigma, rpl, dSdE, dSdT, drpldE, drpldT, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
     
-    if (Time + DTime > precision) {
+    if (Time + DTime > limit) {
         start = false;
     }
 }
@@ -297,7 +292,7 @@ void run_umat(const string &umat_name, const vec &Etot, const vec &DEtot, vec &s
     
     select_umat(umat_name, Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
     
-    if (Time + DTime > precision) {
+    if (Time + DTime > limit) {
         start = false;
     }
 }	
