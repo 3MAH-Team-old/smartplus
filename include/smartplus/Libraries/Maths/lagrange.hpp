@@ -40,6 +40,9 @@ double lagrange_pow_1(const double &, const double &, const double &, const doub
 
 //This function is used to determine the first derivative of a power-law Lagrange Multiplier for problem such x <= 1
 double dlagrange_pow_1(const double &, const double &, const double &, const double &, const double &);
+
+//This function is used to determine the SECOND derivative of a power-law Lagrange Multiplier for problem such x <= 1
+double d2lagrange_pow_1(const double &, const double &, const double &, const double &, const double &);
     
 } //namespace smart
 
