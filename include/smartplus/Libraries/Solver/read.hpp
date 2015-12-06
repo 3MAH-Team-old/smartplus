@@ -37,10 +37,13 @@ void Lth_2_K(const arma::mat &, arma::mat &, arma::mat &, arma::mat &, arma::mat
 
 /// Function that reads the material properties
 void read_matprops(std::string &, int &, arma::vec &, int &, arma::vec &, double &, double &);
-
-/// Function that reads the material properties
+    
+/// Function that reads the output parameters
 void read_output(solver_output &, const int &, const int &);
 
+/// Function that checks the coherency between the path and the step increments provided
+void check_path_output(const std::vector<block> &, const solver_output &);
+    
 /// Function that reads the loading path
 void read_path(std::vector<block> &, double &, const string & = "path.txt");
 

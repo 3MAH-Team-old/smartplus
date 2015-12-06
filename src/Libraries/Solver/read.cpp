@@ -225,7 +225,83 @@ void read_output(solver_output &so, const int &nblock, const int &nstatev) {
     
 }
 
+void check_path_output(const std::vector<block> &blocks, const solver_output &so) {
 
+    /// Reading blocks
+    for(unsigned int i = 0 ; i < blocks.size() ; i++) {
+        
+        switch(blocks[i].type) {
+            case 1: {
+                
+                for(int j = 0; j < blocks[i].nstep; j++){
+                    
+                    shared_ptr<step_meca> sptr_meca = std::dynamic_pointer_cast<step_meca>(blocks[i].steps[j]);
+                    
+                    if (sptr_meca->mode == 3) {
+                        if((so.o_type(i) == 2)||(sptr_meca->ninc%so.o_nfreq(i))) {
+                            cout << "The output nfreq is not compatible with the number of increments of the step)";
+                            break;
+                        }
+                    }
+                    else {
+                        
+                        if(so.o_type(i) == 1) {
+                            if(sptr_meca->ninc%so.o_nfreq(i) > 0) {
+                                cout << "The output nfreq is not compatible with the number of increments of the step)";
+                                break;
+                            }
+                        }
+                        else if(so.o_type(i) == 2) {
+                            if((fmod(1, so.o_tfreq(i)) > limit)||(fmod(so.o_tfreq(i), sptr_meca->Dn_inc) > 0.)) {
+                                cout << "The output tfreq is not compatible with the time of increments of the step)";
+                                break;
+                            }
+                        }
+                        
+                    }
+                    
+                }
+                break;
+            }
+            case 2: {
+                
+                for(int j = 0; j < blocks[i].nstep; j++){
+                    
+                    shared_ptr<step_thermomeca> sptr_thermomeca = std::dynamic_pointer_cast<step_thermomeca>(blocks[i].steps[j]);
+                    
+                    if (sptr_thermomeca->mode == 3) {
+                        if((so.o_type(i) == 2)||(sptr_thermomeca->ninc%so.o_nfreq(i))) {
+                            cout << "The output nfreq is not compatible with the number of increments of the step)";
+                            break;
+                        }
+                    }
+                    else {
+                        if(so.o_type(i) == 1) {
+                            if(sptr_thermomeca->ninc%so.o_nfreq(i) > 0) {
+                                cout << "The output nfreq is not compatible with the number of increments of the step)";
+                                break;
+                            }
+                        }
+                        else if(so.o_type(i) == 2) {
+                            if((fmod(1, so.o_tfreq(i)) > limit)||(fmod(so.o_tfreq(i), sptr_thermomeca->Dn_inc) > 0.)) {
+                                cout << "The output tfreq is not compatible with the time of increments of the step)";
+                                break;
+                            }
+                        }
+                    }
+                }
+                break;
+            }
+            default: {
+                cout << "The block type is incorrect. Please enter a valid block type (1) : Mechanical (2) Thermomechanical";
+                break;
+            }
+        }
+        
+    }
+    
+}
+    
 void read_path(std::vector<block> &blocks, double &T, const string &pathfile) {
     
 	/// Reading the loading path file, Path.txt
@@ -269,7 +345,7 @@ void read_path(std::vector<block> &blocks, double &T, const string &pathfile) {
                         
                         shared_ptr<step_meca> sptr_meca = std::dynamic_pointer_cast<step_meca>(blocks[i].steps[j]);
                         
-                        path >> buffer >> sptr_meca->Dn_init >> buffer >> sptr_meca->Dn_mini >> buffer >> sptr_meca->Dn_maxi >> buffer >> sptr_meca->BC_Time >> buffer;
+                        path >> buffer >> sptr_meca->Dn_init >> buffer >> sptr_meca->Dn_mini >> buffer >> sptr_meca->Dn_inc >> buffer >> sptr_meca->BC_Time >> buffer;
                         for(int k = 0 ; k < 6 ; k++) {
                             path >> bufferchar;
                             conver = bufferchar;
@@ -295,7 +371,7 @@ void read_path(std::vector<block> &blocks, double &T, const string &pathfile) {
                         
                         shared_ptr<step_meca> sptr_meca = std::dynamic_pointer_cast<step_meca>(blocks[i].steps[j]);                        
                         
-                        path >> buffer >> sptr_meca->file >> buffer;
+                        path >> buffer >> sptr_meca->file >> buffer >> sptr_meca->Dn_init >> buffer >> sptr_meca->Dn_mini >> buffer;
                         
                         for(int k = 0 ; k < 6 ; k++) {
                             path >> bufferchar;
@@ -337,7 +413,8 @@ void read_path(std::vector<block> &blocks, double &T, const string &pathfile) {
                         
                         shared_ptr<step_thermomeca> sptr_thermomeca = std::dynamic_pointer_cast<step_thermomeca>(blocks[i].steps[j]);
                         
-                        path >> buffer >> sptr_thermomeca->ninc >> buffer >> sptr_thermomeca->BC_Time >> buffer;
+                        path >> buffer >> sptr_thermomeca->Dn_init >> buffer >> sptr_thermomeca->Dn_mini >> buffer >> sptr_thermomeca->Dn_inc >> buffer >> sptr_thermomeca->BC_Time >> buffer;
+                    
                         for(int k = 0 ; k < 6 ; k++) {
                             path >> bufferchar;
                             conver = bufferchar;
@@ -360,13 +437,17 @@ void read_path(std::vector<block> &blocks, double &T, const string &pathfile) {
                             sptr_thermomeca->cBC_T = 0;
                             path >> sptr_thermomeca->BC_T;
                         }
+                        else if (conver == 67) {
+                            sptr_thermomeca->cBC_T = 3;
+                            path >> sptr_thermomeca->BC_T;
+                        }
                         
                     }
                     else if (blocks[i].steps[j]->mode == 3) {
                         
                         shared_ptr<step_thermomeca> sptr_thermomeca = std::dynamic_pointer_cast<step_thermomeca>(blocks[i].steps[j]);
                         
-                        path >> buffer >> sptr_thermomeca->file >> buffer;
+                        path >> buffer >> sptr_thermomeca->file >> buffer >> sptr_thermomeca->Dn_init >> buffer >> sptr_thermomeca->Dn_mini >> buffer;
                         
                         for(int k = 0 ; k < 6 ; k++) {
                             path >> bufferchar;
@@ -393,6 +474,11 @@ void read_path(std::vector<block> &blocks, double &T, const string &pathfile) {
                         else if (conver == 48) {                        //This is a special case where the temperature is constant
                             sptr_thermomeca->cBC_T = 2;
                         }
+                        else if (conver == 67) {                        //This is a special case where the convexion is assumed
+                            sptr_thermomeca->cBC_T = 3;
+                            path >> sptr_thermomeca->BC_T;                              //Get the tau
+                        }
+                        
                         
                     }
                     else {
