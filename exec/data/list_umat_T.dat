@@ -1,10 +1,10 @@
 #Umat_number
-1
+2
 #Meta_Umat
 0
 
 #1__isotropic_elasticity		ELISO	1
-
+#2__Sma_Fischer-Burmeister		SMAFB	2
 
 
 
