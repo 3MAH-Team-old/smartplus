@@ -59,7 +59,7 @@ state_variables::state_variables() : Etot(6), DEtot(6), sigma(6), L(6,6), Lt(6,6
 */
 
 //-------------------------------------------------------------
-state_variables::state_variables(vec mEtot, vec mDEtot, vec msigma, mat mL, mat mLt, mat mTi) : Etot(6), DEtot(6), sigma(6), L(6,6), Lt(6,6)
+state_variables::state_variables(vec mEtot, vec mDEtot, vec msigma, mat mL, mat mLt) : Etot(6), DEtot(6), sigma(6), L(6,6), Lt(6,6)
 //-------------------------------------------------------------
 {	
 	assert (mEtot.size() == 6);
