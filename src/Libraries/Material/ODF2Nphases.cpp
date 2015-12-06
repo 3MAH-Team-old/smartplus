@@ -36,7 +36,7 @@ using namespace std;
 using namespace arma;
 
 namespace smart{
-
+    
 double ODF(const double& theta, const int& method, const vec& param, const bool& radian, const double& dec){
 	
 	double Theta = theta + dec;
