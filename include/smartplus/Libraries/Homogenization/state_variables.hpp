@@ -43,7 +43,7 @@ class state_variables
 		arma::mat Lt;
 		
 		state_variables(); 	//default constructor
-		state_variables(arma::vec, arma::vec, arma::vec, arma::mat, arma::mat, arma::mat); //Constructor with parameters
+		state_variables(arma::vec, arma::vec, arma::vec, arma::mat, arma::mat); //Constructor with parameters
 		state_variables(const state_variables &);	//Copy constructor
 		~state_variables();
 		
