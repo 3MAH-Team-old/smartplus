@@ -286,21 +286,21 @@ mat L_ortho(const double &C11, const double &C12, const double &C13, const doubl
         double nuyx=nuxy*(Ey/Ex);
         double nuzy=nuyz*(Ez/Ey);
         double nuzx=nuxz*(Ez/Ex);
-        double delta =(1-nuxy*nuyx-nuyz*nuzy-nuzx*nuxz-2*nuxy*nuyz*nuzx)/(Ex*Ey*Ez);
-        
-        L(0,0) = (1-nuyz*nuzy)/(Ey*Ez*delta);
-        L(0,1) = (nuyx+nuzx*nuyz)/(Ey*Ez*delta);
-        L(0,2) = (nuzx+nuyx*nuzy)/(Ey*Ez*delta);
-        L(1,0) = (nuyx+nuzx*nuyz)/(Ey*Ez*delta);
-        L(1,1) = (1-nuzx*nuxz)/(Ez*Ex*delta);
-        L(1,2) = (nuzy+nuzx*nuxy)/(Ez*Ex*delta);
-        L(2,0) = (nuzx+nuyx*nuzy)/(Ey*Ez*delta);
-        L(2,1) = (nuzy+nuzx*nuxy)/(Ez*Ex*delta);
-        L(2,2) = (1-nuxy*nuyx)/(Ex*Ex*delta);
+
+        double delta =1./(1-nuxy*nuyx-nuyz*nuzy-nuzx*nuxz-2.*nuyx*nuzy*nuxz);
+         
+        L(0,0) = Ex*(1-nuyz*nuzy)*delta;
+        L(0,1) = Ex*(nuyx+nuzx*nuyz)*delta;
+        L(0,2) = Ex*(nuzx+nuyx*nuzy)*delta;
+        L(1,0) = L(0,1);
+        L(1,1) = Ey*(1-nuxz*nuzx)*delta;
+        L(1,2) = Ey*(nuzy+nuxy*nuzx)*delta;
+        L(2,0) = L(0,2);
+        L(2,1) = L(1,2);
+        L(2,2) = Ez*(1-nuxy*nuyx)*delta;
         L(3,3) = Gxy;
         L(4,4) = Gxz;
         L(5,5) = Gyz;
-        
     }
 	else {
         cout << "ERROR : Please use a valid set of arguments. Please refer to the documentation of Smart + for an exhaustive list of authorised argument" << endl;
