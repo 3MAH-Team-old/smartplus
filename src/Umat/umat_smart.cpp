@@ -18,6 +18,7 @@
 
 #include <smartplus/Umat/Mechanical/Elasticity/elastic_isotropic.hpp>
 #include <smartplus/Umat/Mechanical/Elasticity/elastic_transverse_isotropic.hpp>
+#include <smartplus/Umat/Mechanical/Elasticity/elastic_orthotropic.hpp>
 #include <smartplus/Umat/Mechanical/Plasticity/plastic_isotropic_ccp.hpp>
 #include <smartplus/Umat/Mechanical/Plasticity/plastic_kin_iso_ccp.hpp>
 
@@ -247,13 +248,17 @@ void select_umat(const string &umat_name, const vec &Etot, const vec &DEtot, vec
 			break;
 		}
 		case 3: {
+			umat_elasticity_ortho(Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
+			break;
+		}
+		case 4: {
 			umat_plasticity_iso_CCP(Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
 			break;
 		}
-        case 4: {
-            umat_plasticity_kin_iso_CCP(Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
-            break;
-        }
+	        case 5: {
+	            umat_plasticity_kin_iso_CCP(Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
+	            break;
+	        }
 		case 100: {
 			umat_MT_N(Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
 			break;
