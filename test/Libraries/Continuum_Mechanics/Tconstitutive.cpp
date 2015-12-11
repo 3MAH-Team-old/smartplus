@@ -19,7 +19,7 @@
 ///@brief Test for Constitutive tensors in Voigt notation
 ///@version 1.0
 
- #define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "constitutive"
 #include <boost/test/unit_test.hpp>
 
