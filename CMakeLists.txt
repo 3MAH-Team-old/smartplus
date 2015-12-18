@@ -35,12 +35,12 @@ set(LIBRARY_OUTPUT_PATH lib/${CMAKE_BUILD_TYPE})
 
 #Inclusion of Boost
 find_package(Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
-include_directories(${BOOST_INCLUDE_DIRS})
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 #Inclusion of Armadillo
 include(FindArmadillo)
 find_package(Armadillo REQUIRED)
-include_directories(${ARMADILLO_INCLUDE_DIRS})
+include_directories(SYSTEM ${ARMADILLO_INCLUDE_DIRS})
 
 # OpenMP
 include(FindOpenMP)
