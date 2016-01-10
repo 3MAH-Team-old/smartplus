@@ -57,6 +57,10 @@ namespace smart {
 #define mul_tnew_dt_umat 2
 #endif
 
+#ifndef lambda_solver
+#define lambda_solver 10000
+#endif
+    
 #ifndef miniter_solver
 #define miniter_solver 10
 #endif
