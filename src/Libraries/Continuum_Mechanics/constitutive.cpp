@@ -326,9 +326,9 @@ mat M_ortho(const double &C11, const double &C12, const double &C13, const doubl
 	    L(2,0) = C13;
 	    L(2,1) = C23;
 	    L(2,2) = C33;
-	    L(3,3) = C66;
+	    L(3,3) = C44;
 	    L(4,4) = C55;
-	    L(5,5) = C44;
+	    L(5,5) = C66;
 		
         M = inv(L);
 	}
