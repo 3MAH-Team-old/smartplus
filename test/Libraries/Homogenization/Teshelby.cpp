@@ -37,8 +37,8 @@ BOOST_AUTO_TEST_CASE( S_TII )
     double a1 = 1.;
     double a2 = 1.;
     double a3 = 1.;
-    int mp = 302;
-    int np = 302;
+    int mp = 300;
+    int np = 300;
     
     double E = 70000.;
     double nu = 0.3;
@@ -73,6 +73,8 @@ BOOST_AUTO_TEST_CASE( S_TII )
     S_anal = Eshelby_sphere(nu);
     S_num = Eshelby(Lt, a1, a2, a3, x, wx, y, wy, mp, np);
     BOOST_CHECK( norm(S_num-S_anal,2) < 1.E-9 );
+
+    cout << S_num-S_anal << "\n";
     
     T_II_num = T_II(Lt, a1, a2, a3, x, wx, y, wy, mp, np);
     BOOST_CHECK( norm(T_II_num*Lt-S_anal,2) < 1.E-9 );
@@ -81,6 +83,8 @@ BOOST_AUTO_TEST_CASE( S_TII )
     S_anal = Eshelby_cylinder(nu);
     S_num = Eshelby(Lt, a1, a2, a3, x, wx, y, wy, mp, np);
     BOOST_CHECK( norm(S_num-S_anal,2) < 1.E-4 );
+    
+    cout << S_num-S_anal << "\n";
     
     T_II_num = T_II(Lt, a1, a2, a3, x, wx, y, wy, mp, np);
     BOOST_CHECK( norm(T_II_num*Lt-S_anal,2) < 1.E-4 );

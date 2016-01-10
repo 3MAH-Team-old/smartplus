@@ -138,3 +138,46 @@ BOOST_AUTO_TEST_CASE( L_isotrans_M_isotrans )
     BOOST_CHECK( norm(Mtest - Mtrans,2) < 1.E-9 );
     
 }
+
+BOOST_AUTO_TEST_CASE( L_ortho_M_ortho )
+{
+    double E1 = 10000.;
+    double E2 = 20000.;
+    double E3 = 30000.;
+    double nu12 = 0.3;
+    double nu13 = 0.3;
+    double nu23 = 0.3;
+    double G12 = 6000.;
+    double G13 = 7000.;
+    double G23 = 8000.;
+    
+    mat Mortho = zeros(6,6);
+    Mortho(0,0) = 1/E1;
+    Mortho(0,1) = -nu12/E1;
+    Mortho(0,2) = -nu13/E1;
+    Mortho(1,0) = -nu12/E1;
+    Mortho(1,1) = 1/E2;
+    Mortho(1,2) = -nu23/E2;
+    Mortho(2,0) = -nu13/E1;
+    Mortho(2,1) = -nu23/E2;
+    Mortho(2,2) = 1/E3;
+    Mortho(3,3) = 1/G12;
+    Mortho(4,4) = 1/G13;
+    Mortho(5,5) = 1/G23;
+    
+    //Test of L_ortho function
+    mat Ltest = L_ortho(E1, E2, E3, nu12, nu13, nu23, G12, G13, G23, "EnuG");
+    BOOST_CHECK( norm(Ltest - inv(Mortho),2) < 1.E-9 );
+    //Test of M_ortho function
+    mat Mtest = M_ortho(E1, E2, E3, nu12, nu13, nu23, G12, G13, G23, "EnuG");
+    BOOST_CHECK( norm(Mtest - Mortho,2) < 1.E-9 );
+    
+    //Test of L_ortho function
+    mat Ltest2 = L_ortho(Ltest(0,0), Ltest(0,1), Ltest(0,2), Ltest(1,1), Ltest(1,2), Ltest(2,2), Ltest(3,3), Ltest(4,4), Ltest(5,5), "Cii");
+    BOOST_CHECK( norm(Ltest2 - inv(Mortho),2) < 1.E-9 );
+    //Test of M_ortho function
+    mat Mtest2 = M_ortho(Ltest(0,0), Ltest(0,1), Ltest(0,2), Ltest(1,1), Ltest(1,2), Ltest(2,2), Ltest(3,3), Ltest(4,4), Ltest(5,5), "Cii");
+    BOOST_CHECK( norm(Mtest2 - Mortho,2) < 1.E-9 );
+
+    
+}

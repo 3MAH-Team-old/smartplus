@@ -190,6 +190,51 @@ BOOST_AUTO_TEST_CASE( J2_J3 )
 
 }
 
+BOOST_AUTO_TEST_CASE( Macaulay )
+{
+    BOOST_CHECK( Macaulay_p(-4.) == 0 );
+    BOOST_CHECK( Macaulay_p(4.) - 4. == 0 );
+    BOOST_CHECK( Macaulay_p(0.) == 0 );
+
+    BOOST_CHECK( Macaulay_n(-4.) + 4 == 0 );
+    BOOST_CHECK( Macaulay_n(4.) == 0 );
+    BOOST_CHECK( Macaulay_n(0.) == 0 );
+
+    BOOST_CHECK( sign(-4.) == -1. );
+    BOOST_CHECK( sign(4.) == 1. );
+    cout << "sign(0.)" << sign(0.) << "\n";
+    BOOST_CHECK( sign(0.) == 0. );
+}
+
+BOOST_AUTO_TEST_CASE( ellipsoid )
+{
+    double a1 = 1.;
+    double a2 = 10.;
+    double a3 = 100.;
+
+    double u = 0.;
+    double v = 0.;
+    vec test = { 0, 0, 1 };
+    vec sigma_in = {4., 5., 6., 2., 1., 1.5};
+    vec test_sig_int = {5.,2.5};
+    vec normal = normal_ellipsoid(u,v,a1,a2,a3);
+    BOOST_CHECK( norm(normal-test,2) < iota );
+    
+    u = 0.;
+    v = pi/2.;
+    test = { 1, 0, 0 };
+    normal = normal_ellipsoid(u,v,a1,a2,a3);
+    BOOST_CHECK( norm(normal-test,2) < iota );
+    
+    u = pi/2.;
+    v = pi/2.;
+    test = { 0, 1, 0 };
+    normal = normal_ellipsoid(u,v,a1,a2,a3);
+    BOOST_CHECK( norm(normal-test,2) < iota );
+    vec sig_int = sigma_int(sigma_in,a1,a2,a3,u,v);
+    BOOST_CHECK( norm(sig_int-test_sig_int,2) < iota );
+}
+
 BOOST_AUTO_TEST_CASE( P_ijkl )
 {
 
