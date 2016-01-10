@@ -12,7 +12,6 @@
  
  You should have received a copy of the GNU General Public License
  along with SMART+.  If not, see <http://www.gnu.org/licenses/>.
- 
  */
 
 ///@file contimech.cpp
@@ -243,7 +242,7 @@ double Macaulay_n(const double &d) {
 //This function returns the value if it's negative, zero if it's positive (Macaulay brackets <>-)
 double sign(const double &d) {
     
-    if (d < iota)
+    if ((d < iota)&&(fabs(d) > iota))
         return -1.;
     else if(d > iota)
         return 1.;
