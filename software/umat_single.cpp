@@ -96,6 +96,6 @@ extern "C" void umat_(double *stress, double *statev, double *ddsdde, double &ss
 	string umat_name(cmname);
 	    
 	abaqus2smart(stress, ddsdde, stran, dstran, time, dtime, temperature, Dtemperature, nprops, props, nstatev, statev, pnewdt, ndi, nshr, drot, sigma, Lt, Etot, DEtot, T, dT, Time, DTime, props_smart, statev_smart, tnew_dt, DR, start);
-    umat_elasticity_iso(Etot, DEtot, sigma, Lt, DR, nprops, props_smart, nstatev, statev_smart, T, dT, Time, DTime, sse, spd, ndi, nshr, start);
+    umat_elasticity_iso(Etot, DEtot, sigma, Lt, DR, nprops, props_smart, nstatev, statev_smart, T, dT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
 	smart2abaqus(stress, ddsdde, statev, ndi, nshr, sigma, Lt, statev_smart, pnewdt, tnew_dt);
 }
