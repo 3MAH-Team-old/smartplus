@@ -179,6 +179,20 @@ void abaqus2smart(double *stress, double *ddsdde, const double *stran, const dou
 	
 }
 
+void abaqus2smartT(double *stress, double *ddsdde, double *ddsddt, double *drplde, double &drpldt, const double *stran, const double *dstran, const double *time, const double &dtime, const double &temperature, const double &Dtemperature, const int &nprops,const double *props, const int &nstatev, double *statev, const double &pnewdt, const int &ndi, const int &nshr, const double *drot, vec &sigma, mat &dSdE, mat &dSdT, mat &drpldE, mat &drpldT, vec &Etot, vec &DEtot, double &T, double &DT, double &Time, double &DTime, vec &props_smart, vec &statev_smart, double &tnew_dt, mat &DR, bool &start) {
+    
+    abaqus2smart(stress, ddsdde, stran, dstran, time, dtime, temperature, Dtemperature, nprops, props, nstatev, statev, pnewdt, ndi, nshr, drot, sigma, dSdE, Etot, DEtot, T, DT, Time, DTime, props_smart, statev_smart, tnew_dt, DR, start);
+    
+    for(int i=0 ; i<6 ; i++)
+    {
+        dSdT(0,i) = ddsddt[i];
+        drpldE(i,0) = drplde[i];
+    }
+    
+    drpldT(0,0) = drpldt;
+    
+}
+    
 void select_umat_T(const string &umat_name, const vec &Etot, const vec &DEtot, vec &sigma, double &rpl, mat &dSdE, mat &dSdT, mat &drpldE, mat &drpldT, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT,const double &Time,const double &DTime, double &sse, double &spd, const int &ndi, const int &nshr, bool &start, double &tnew_dt)
 {
     string buffer;
@@ -403,6 +417,20 @@ void smart2abaqus(double *stress, double *ddsdde, double *statev, const int &ndi
         statev[i] = statev_smart(i);
     }
     
+    
+}
+    
+void smart2abaqusT(double *stress, double *ddsdde, double *ddsddt, double *drplde, double &drpldt, double *statev, const int &ndi, const int &nshr, const vec &sigma, const mat &dSdE, const mat &dSdT, const mat &drpldE, const mat &drpldT, const vec &statev_smart, double &pnewdt, const double &tnew_dt) {
+    
+	smart2abaqus(stress, ddsdde, statev, ndi, nshr, sigma, dSdE, statev_smart, pnewdt, tnew_dt);
+    
+    for(int i=0 ; i<6 ; i++)
+    {
+        ddsddt[i] = dSdT(0,i);
+        drplde[i] = drpldE(i,0);
+    }
+        
+    drpldt = drpldT(0,0);
     
 }
 	
