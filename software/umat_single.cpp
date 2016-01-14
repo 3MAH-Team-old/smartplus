@@ -73,6 +73,9 @@ using namespace smart;
 ///@param kstep step number
 ///@param kinc increment number
 
+using namespace std;
+using namespace arma;
+using namespace smart;
 
 extern "C" void umat_(double *stress, double *statev, double *ddsdde, double &sse, double &spd, double &scd, double &rpl, double *ddsddt, double *drplde, double &drpldt, const double *stran, const double *dstran, const double *time, const double &dtime, const double &temperature, const double &Dtemperature, const double &predef, const double &dpred, char *cmname, const int &ndi, const int &nshr, const int &ntens, const int &nstatev, const double *props, const int &nprops, const double &coords, const double *drot, double &pnewdt, const double &celent, const double *dfgrd0, const double *dfgrd1, const int &noel, const int &npt, const double &layer, const int &kspt, const int &kstep, const int &kinc)
 {
@@ -81,7 +84,7 @@ extern "C" void umat_(double *stress, double *statev, double *ddsdde, double &ss
 	double Time = 0.;
 	double DTime = 0.;
 	double T = 0.;
-	double dT = 0.;
+	double DT = 0.;
     double tnew_dt = 0.;
 	
     vec props_smart = zeros(nprops);
@@ -95,7 +98,7 @@ extern "C" void umat_(double *stress, double *statev, double *ddsdde, double &ss
 	
 	string umat_name(cmname);
 	    
-	abaqus2smart(stress, ddsdde, stran, dstran, time, dtime, temperature, Dtemperature, nprops, props, nstatev, statev, pnewdt, ndi, nshr, drot, sigma, Lt, Etot, DEtot, T, dT, Time, DTime, props_smart, statev_smart, tnew_dt, DR, start);
-    umat_elasticity_iso(Etot, DEtot, sigma, Lt, DR, nprops, props_smart, nstatev, statev_smart, T, dT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
+	abaqus2smart(stress, ddsdde, stran, dstran, time, dtime, temperature, Dtemperature, nprops, props, nstatev, statev, pnewdt, ndi, nshr, drot, sigma, Lt, Etot, DEtot, T, DT, Time, DTime, props_smart, statev_smart, tnew_dt, DR, start);
+    umat_elasticity_iso(Etot, DEtot, sigma, Lt, DR, nprops, props_smart, nstatev, statev_smart, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
 	smart2abaqus(stress, ddsdde, statev, ndi, nshr, sigma, Lt, statev_smart, pnewdt, tnew_dt);
 }
