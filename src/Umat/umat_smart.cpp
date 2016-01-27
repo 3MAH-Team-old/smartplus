@@ -195,26 +195,8 @@ void abaqus2smartT(double *stress, double *ddsdde, double *ddsddt, double *drpld
     
 void select_umat_T(const string &umat_name, const vec &Etot, const vec &DEtot, vec &sigma, double &rpl, mat &dSdE, mat &dSdT, mat &drpldE, mat &drpldT, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT,const double &Time,const double &DTime, double &sse, double &spd, const int &ndi, const int &nshr, bool &start, double &tnew_dt)
 {
-    string buffer;
-    int c_umat = 0;
-    int n_umat = 0;
-    int n_meta = 0;
-    
-    ifstream listumat;
-    listumat.open("data/list_umat_T.dat", ios::in);
-    if(listumat) {
-        listumat >> buffer >> n_umat >> buffer >> n_meta;
-    }
-    else {
-        cout << "Error: cannot open list_umat_T.dat file \n";
-    }
-    
     std::map<string, int> list_umat;
-    for (int i = 0; i < (n_umat + n_meta); i++){
-        listumat >> buffer >> buffer >> c_umat;
-        list_umat.insert ( std::pair<string,int>(buffer,c_umat) );
-    }
-    listumat.close();
+    list_umat = {{"ELISO",1}};
     
     switch (list_umat[umat_name]) {
         case 1: {
@@ -231,26 +213,8 @@ void select_umat_T(const string &umat_name, const vec &Etot, const vec &DEtot, v
     
 void select_umat(const string &umat_name, const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT,const double &Time,const double &DTime, double &sse, double &spd, const int &ndi, const int &nshr, const bool &start, double &tnew_dt)
 {
-    string buffer;
-    int c_umat = 0;
-	int n_umat = 0;
-	int n_meta = 0;
-	
-	ifstream listumat;
-	listumat.open("data/list_umat.dat", ios::in);
-	if(listumat) {
-		listumat >> buffer >> n_umat >> buffer >> n_meta;
-	}
-	else {
-		cout << "Error: cannot open list_umat.dat file \n";
-	}
-	
-    std::map<string, int> list_umat;
-    for (int i = 0; i < (n_umat + n_meta); i++){
-		listumat >> buffer >> buffer >> c_umat;
-        list_umat.insert ( std::pair<string,int>(buffer,c_umat) );
-    }
-	listumat.close();
+	std::map<string, int> list_umat;
+	list_umat = {{"ELISO",1},{"ELIST",2},{"ELORT",3},{"EPICP",4},{"EPKCP",5},{"MIMTN",101},{"MISCN",102}};
     
 	switch (list_umat[umat_name]) {
 		case 1: {
