@@ -28,8 +28,31 @@
 #include <string.h>
 #include <armadillo>
 
-#include <smartplus/Umat/umat_smart.hpp>
-#include <smartplus/Umat/Mechanical/Elasticity/elastic_isotropic.hpp>
+#include "../src/Umat/umat_smart.cpp"
+
+#include "../src/Umat/Mechanical/Elasticity/elastic_isotropic.cpp"
+#include "../src/Umat/Mechanical/Elasticity/elastic_transverse_isotropic.cpp"
+#include "../src/Umat/Mechanical/Elasticity/elastic_orthotropic.cpp"
+#include "../src/Umat/Mechanical/Plasticity/plastic_isotropic_ccp.cpp"
+#include "../src/Umat/Mechanical/Plasticity/plastic_kin_iso_ccp.cpp"
+
+#include "../src/Micromechanics/Mori_Tanaka/Mori_Tanaka.cpp"
+#include "../src/Micromechanics/Periodic_Layer/Periodic_Layer.cpp"
+#include "../src/Micromechanics/Self_Consistent/Self_Consistent.cpp"
+
+#include "../src/Libraries/Continuum_Mechanics/contimech.cpp"
+#include "../src/Libraries/Continuum_Mechanics/constitutive.cpp"
+#include "../src/Libraries/Maths/rotation.cpp"
+#include "../src/Libraries/Maths/lagrange.cpp"
+
+#include "../src/Libraries/Homogenization/eshelby.cpp"
+#include "../src/Libraries/Homogenization/state_variables.cpp"
+#include "../src/Libraries/Homogenization/phase_characteristics.cpp"
+#include "../src/Libraries/Homogenization/general_characteristics.cpp"
+#include "../src/Libraries/Homogenization/ellipsoid_characteristics.cpp"
+#include "../src/Libraries/Homogenization/layer_characteristics.cpp"
+
+
 
 using namespace std;
 using namespace arma;
@@ -80,6 +103,25 @@ using namespace smart;
 extern "C" void umat_(double *stress, double *statev, double *ddsdde, double &sse, double &spd, double &scd, double &rpl, double *ddsddt, double *drplde, double &drpldt, const double *stran, const double *dstran, const double *time, const double &dtime, const double &temperature, const double &Dtemperature, const double &predef, const double &dpred, char *cmname, const int &ndi, const int &nshr, const int &ntens, const int &nstatev, const double *props, const int &nprops, const double &coords, const double *drot, double &pnewdt, const double &celent, const double *dfgrd0, const double *dfgrd1, const int &noel, const int &npt, const double &layer, const int &kspt, const int &kstep, const int &kinc)
 {
 	
+	UNUSED(scd);
+	UNUSED(rpl);
+	UNUSED(ddsddt);
+	UNUSED(drplde);
+	UNUSED(drpldt);
+	UNUSED(predef);
+	UNUSED(dpred);
+	UNUSED(ntens);
+	UNUSED(coords);
+	UNUSED(celent);
+	UNUSED(dfgrd0);
+	UNUSED(dfgrd1);
+	UNUSED(noel);
+	UNUSED(npt);
+	UNUSED(layer);
+	UNUSED(kspt);
+	UNUSED(kstep);
+	UNUSED(kinc);
+	
 	bool start = false;
 	double Time = 0.;
 	double DTime = 0.;
@@ -97,8 +139,9 @@ extern "C" void umat_(double *stress, double *statev, double *ddsdde, double &ss
 	mat DR = zeros(3,3);
 	
 	string umat_name(cmname);
+	umat_name = umat_name.substr(0, 5);
 	    
 	abaqus2smart(stress, ddsdde, stran, dstran, time, dtime, temperature, Dtemperature, nprops, props, nstatev, statev, pnewdt, ndi, nshr, drot, sigma, Lt, Etot, DEtot, T, DT, Time, DTime, props_smart, statev_smart, tnew_dt, DR, start);
-    umat_elasticity_iso(Etot, DEtot, sigma, Lt, DR, nprops, props_smart, nstatev, statev_smart, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
+	select_umat(umat_name, Etot, DEtot, sigma, Lt, DR, nprops, props_smart, nstatev, statev_smart, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
 	smart2abaqus(stress, ddsdde, statev, ndi, nshr, sigma, Lt, statev_smart, pnewdt, tnew_dt);
 }
