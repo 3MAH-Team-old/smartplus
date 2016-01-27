@@ -134,3 +134,9 @@ foreach(testSrc ${TEST_SRCS})
                  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/testBin/${testName} )
 endforeach(testSrc)
 
+
+add_library(umat OBJECT software/umat_single.cpp)
+set_property(TARGET umat PROPERTY COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -c -openm -larmadillo -std=c++11 -DARMA_DONT_USE_WRAPPER -I ${CMAKE_CURRENT_SOURCE_DIR}")
+
+add_library(umatT OBJECT software/umat_singleT.cpp)
+set_property(TARGET umatT PROPERTY COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -c -openm -larmadillo -std=c++11 -DARMA_DONT_USE_WRAPPER")
