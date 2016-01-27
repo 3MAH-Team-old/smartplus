@@ -52,12 +52,6 @@
 #include "../src/Libraries/Homogenization/ellipsoid_characteristics.cpp"
 #include "../src/Libraries/Homogenization/layer_characteristics.cpp"
 
-
-
-using namespace std;
-using namespace arma;
-using namespace smart;
-
 ///@param stress array containing the components of the stress tensor (dimension ntens)
 ///@param statev array containing the evolution variables (dimension nstatev)
 ///@param ddsdde array containing the mechanical tangent operator (dimension ntens*ntens)
@@ -127,10 +121,10 @@ extern "C" void umat_(double *stress, double *statev, double *ddsdde, double &ss
 	double DTime = 0.;
 	double T = 0.;
 	double DT = 0.;
-    double tnew_dt = 0.;
+	double tnew_dt = 0.;
 	
-    vec props_smart = zeros(nprops);
-    vec statev_smart = zeros(nstatev);
+	vec props_smart = zeros(nprops);
+	vec statev_smart = zeros(nstatev);
     
 	vec sigma = zeros(6);
 	vec Etot = zeros(6);
