@@ -29,15 +29,13 @@ echo "---------------------------"
 
 if [ -d "CMakeFiles/umat.dir" ]
 then 
-	cp ${current_dir}/build/CMakeFiles/umat.dir/software/umat_single.cpp.o ${current_dir}/build/bin
-	mv ${current_dir}/build/bin/umat_single.cpp.o ${current_dir}/build/bin/umat_single.o
+	cp ${current_dir}/build/CMakeFiles/umat.dir/software/umat_single.cpp.o ${current_dir}/build/bin/umat_single.o
 	echo "umat_single.o copied in ${current_dir}/build/bin"
 fi
 
 if [ -d "CMakeFiles/umatT.dir" ]
 then 
-	cp ${current_dir}/build/CMakeFiles/umatT.dir/software/umat_singleT.cpp.o ${current_dir}/build/bin
-	mv ${current_dir}/build/bin/umat_singleT.cpp.o ${current_dir}/build/bin/umat_singleT.o
+	cp ${current_dir}/build/CMakeFiles/umatT.dir/software/umat_singleT.cpp.o ${current_dir}/build/bin/umat_singleT.o
 	echo "umat_singleT.o copied in ${current_dir}/build/bin"
 fi
 
