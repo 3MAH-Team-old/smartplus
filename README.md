@@ -2,7 +2,7 @@
 
 How to install SMART+ :
 
-You should have downloaded a zip file called smartplus-master.zip
+You should have downloaded a zip file called smartplus-master.zip.
 
 1 - Unzip the file in the location where you want to use SMART+ and rename it "smartplus" (or as you wish).
 
@@ -20,8 +20,8 @@ Many possibilities to use it are available :
 
 a - Use the SMART+ solver.
 
-In a work folder, copy all necessary files from the folder "exec". 
-Edit configuration files to define your simulation ("path.txt", "material.dat", ... ).
+Copy all necessary files from the folder "exec" to your a work folder. 
+Edit configuration files to define your simulation ("path.txt", "material.dat" and others if necessary ).
 Solve the problem executing "./solver" in a terminal (Linux and MacOS).
 
 b - Use SMART+ Umat for Abaqus. 
@@ -32,7 +32,7 @@ Copy-paste "umat_single.o" or "umat_singleT.o" from 'pathtothefile'/smartplus/bu
 
 c - Build your own projects using the smartplus lib called "libsmartplus.so".
 
-For this, you need to specify the path of the smartplus dynamic library (with the -I option) and to link smartplus with your application
+For this, you need to specify the path of the smartplus dynamic library (with the -I option) and to link smartplus with your application.
     
 	Example : gcc myproject.cpp -I/'pathtothefile'/smartplus/lib -lsmartplus
 
