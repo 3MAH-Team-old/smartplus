@@ -18,9 +18,9 @@ Many uses are available :
 
 a - Use the SMART+ solver.
 
-In a work folder, copy all necessary files from the folder 'exec'. 
-Edit configurations file to define your simulation (path.txt, material.dat...)
-Solve the problem executing "./solver" in a terminal (Linux and MacOS)
+In a work folder, copy all necessary files from the folder "exec". 
+Edit configuration files to define your simulation ("path.txt", "material.dat", ... ).
+Solve the problem executing "./solver" in a terminal (Linux and MacOS).
 
 b - Use SMART+ Umat for Abaqus. 
 
