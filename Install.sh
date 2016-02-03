@@ -27,13 +27,13 @@ make
 
 echo "---------------------------"
 
-if [ -f "CMakeFiles/umat.dir/umat_single.cpp.o" ]
+if [ -f ${current_dir}/build/CMakeFiles/umat.dir/software/umat_single.cpp.o ]
 then 
 	cp ${current_dir}/build/CMakeFiles/umat.dir/software/umat_single.cpp.o ${current_dir}/build/bin/umat_single.o
 	echo "umat_single.o copied in ${current_dir}/build/bin"
 fi
 
-if [ -f "CMakeFiles/umatT.dir/umat_singleT.cpp.o" ]
+if [ -f ${current_dir}/build/CMakeFiles/umatT.dir/software/umat_singleT.cpp.o ]
 then 
 	cp ${current_dir}/build/CMakeFiles/umatT.dir/software/umat_singleT.cpp.o ${current_dir}/build/bin/umat_singleT.o
 	echo "umat_singleT.o copied in ${current_dir}/build/bin"
