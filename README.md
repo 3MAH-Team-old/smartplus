@@ -30,9 +30,9 @@ Copy-paste "umat_single.o" or "umat_singleT.o" from 'pathtothefile'/smartplus/bu
     
 	Example : abaqus job=mymodel.inp user=umat_single.o
 
-C ) Build your own projects using the smartplus lib called "libsmartplus.so".
+C ) Build your own projects using the SMART+ library called "libsmartplus.so".
 
-For this, you need to specify the path of the smartplus dynamic library (with the -I option) and to link smartplus with your application.
+For this, you need to specify the path of the SMART+ dynamic library (with the -I option) and to link SMART+ with your application.
     
 	Example : gcc myproject.cpp -I/'pathtothefile'/smartplus/lib -lsmartplus
 
