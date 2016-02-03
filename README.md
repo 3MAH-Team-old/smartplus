@@ -23,7 +23,7 @@ Many uses are available :
 
 	b - Use SMART+ Umat for Abaqus. 
 	Copy-past "umat_single.o" or "umat_singleT.o" from 'pathtothefile'/smartplus/build/bin to your abaqus work directory and use it like a classical Umat.
-              Example : abaqus job=mymodel.inp user=umat_single.o
+		Example : abaqus job=mymodel.inp user=umat_single.o
 
 	c - Build your own projects using the smartplus lib so called "libsmartplus.so".
 	For this, you need to specify the path of the smartplus dynamic library (with the -I option) and to link smartplus with your application
