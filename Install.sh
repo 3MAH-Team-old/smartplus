@@ -23,9 +23,10 @@ fi
 
 cd ${current_dir}/build
 cmake ..
+echo ""
 make 
 
-echo "---------------------------"
+echo "\n---------------------------"
 
 if [ -f ${current_dir}/build/CMakeFiles/umat.dir/software/umat_single.cpp.o ]
 then 
