@@ -4,32 +4,31 @@ How to install SMART+ :
 
 You should have downloaded a zip file called smartplus-master.zip
 
-1 - Unzip the file in the location where you want to use SMART+ and rename it "smartplus"
+1 - Unzip the file in the location where you want to use SMART+ and rename it "smartplus" (or as you choice).
 
 2 - Go to the folder "smartplus"
         ** cd 'pathtothefile'/smartplus
 
-3 - create a build folder 
-        ** mkdir build
+3 - Execute the installation bash file :
+        ** sh Install.sh
 
-4 - Use Cmake to configure and generate the Makefile
-        ** cmake ..
+4 - After the compilation and linking is done, you can enjoy SMART+.
 
-5 - Build the libraries and the executable files
-        ** make
+Many uses are available :
 
-6 - After the compilation and linking is done, go to /build/bin/Release
+	a - Use the SMART+ solver.
+	In a work folder, copy all necessary files from the folder 'exec'. 
+	Edit configurations file to define your simulation (path.txt, material.dat...)
+	Solve the problem executing "./solver" in a terminal (Linux and MacOS)
 
-    Copy-paste the solver exec to a folder where you want to run the solver executable file
-    for example in a folder exec
-    Copy the content of the folder "data" in the same folder.
+	b - Use SMART+ Umat for Abaqus. 
+	Copy-past "umat_single.o" or "umat_singleT.o" from 'pathtothefile'/smartplus/build/bin to your abaqus work directory and use it like a classical Umat.
+              Example : abaqus job=mymodel.inp user=umat_single.o
 
-7 - If you want to build projects with the smartplus lib, you can copy paste the library in the build/lib/Release to the folder /usr/lib, or to the folder /lib of your project 
-    In the last case you may need to specify the path of the smartplus dynamic library (with the -I option)
+	c - Build your own projects using the smartplus lib so called "libsmartplus.so".
+	For this, you need to specify the path of the smartplus dynamic library (with the -I option) and to link smartplus with your application
+		Example : gcc myproject.cpp -I/'pathtothefile'/smartplus/lib -lsmartplus
 
-8 - To link smartplus with your application compile it with using -lsmartplus
-    To use the solver you can go to the 'exec' folder and use the command ./solver in a terminal (Linux and MacOS)
-
-9 - Go to http://www.lem3.fr/chemisky/smartplus/ . Click on the  the menu 'examples' to find examples on how to use SMART+
+For more explanation, go to http://www.lem3.fr/chemisky/smartplus/ and click on the  the menu 'examples' to find examples on how to use SMART+.
 
 Have fun :)
