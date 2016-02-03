@@ -7,16 +7,16 @@ current_dir=$(pwd)
 if [ ! -d "build" ]
 then
 	mkdir ${current_dir}/build
-	echo "Folder created\n"
+	echo "Folder created \n"
 else
 	echo "Build directory already exists"
 	
 	while true; do
-		read -p "Do you want to erase old comilation files ? " yn
+		read -p "Do you want to erase old compilation files ? \n y for yes or n for no (recommended)" yn
 		case $yn in
 			[YyOo]* ) rm -r ${current_dir}/build/*; break;;
 			[Nn]* ) break;;
-			* ) echo "Please answer yes or no.";;
+			* ) echo "Please answer yes (y) or no (n).";;
 		esac
 	done
 fi
@@ -45,5 +45,5 @@ cp ${current_dir}/build/bin/solver ${current_dir}/exec
 echo "Solver copied in ${current_dir}/exec"
 echo "libsmartplus.so available in ${current_dir}/lib"
 echo "---------------------------"
-echo "Compilation of SMART+ done.\n"
+echo "Compilation of SMART+ done. \n"
 
