@@ -24,7 +24,7 @@ Solve the problem executing "./solver" in a terminal (Linux and MacOS).
 
 b - Use SMART+ Umat for Abaqus. 
 
-Copy-past "umat_single.o" or "umat_singleT.o" from 'pathtothefile'/smartplus/build/bin to your abaqus work directory and use it like a classical Umat.
+Copy-past "umat_single.o" or "umat_singleT.o" from 'pathtothefile'/smartplus/build/bin to your Abaqus work directory and use it like a classical Umat.
     
 	Example : abaqus job=mymodel.inp user=umat_single.o
 
