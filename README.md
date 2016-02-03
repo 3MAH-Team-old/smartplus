@@ -18,19 +18,19 @@ You should have downloaded a zip file called smartplus-master.zip.
 
 Many possibilities to use it are available :
 
-A - Use the SMART+ solver.
+A ) Use the SMART+ solver.
 
 Copy all necessary files from the folder "exec" to your a work folder. 
 Edit configuration files to define your simulation ("path.txt", "material.dat" and others if necessary ).
 Solve the problem executing "./solver" in a terminal (Linux and MacOS).
 
-B - Use SMART+ Umat for Abaqus. 
+B ) Use SMART+ Umat for Abaqus. 
 
 Copy-paste "umat_single.o" or "umat_singleT.o" from 'pathtothefile'/smartplus/build/bin to your Abaqus work directory and use it like a classical Umat.
     
 	Example : abaqus job=mymodel.inp user=umat_single.o
 
-C - Build your own projects using the smartplus lib called "libsmartplus.so".
+C ) Build your own projects using the smartplus lib called "libsmartplus.so".
 
 For this, you need to specify the path of the smartplus dynamic library (with the -I option) and to link smartplus with your application.
     
