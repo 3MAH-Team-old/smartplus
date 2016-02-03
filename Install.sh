@@ -1,13 +1,13 @@
 #!/bin/bash
 
-echo "\nStart the compilation of SMART+\n"
+echo "\nStart of SMART+ compilation.\n"
 
 current_dir=$(pwd)
 
 if [ ! -d "build" ]
 then
 	mkdir ${current_dir}/build
-	echo "Folder created"
+	echo "Folder created\n"
 else
 	echo "Build directory already exists"
 	
@@ -21,6 +21,7 @@ else
 	done
 fi
 
+echo ""
 cd ${current_dir}/build
 cmake ..
 echo ""
