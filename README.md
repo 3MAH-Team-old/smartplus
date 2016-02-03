@@ -32,7 +32,7 @@ Copy-paste "umat_single.o" or "umat_singleT.o" from 'pathtothefile'/smartplus/bu
 
 C ) Build your own projects using the SMART+ library called "libsmartplus.so".
 
-For this, you need to specify the path of the SMART+ dynamic library (with the -I option) and to link SMART+ with your application.
+For this, you need to specify the path of the SMART+ dynamic library (with the -I option) and to link it with your application.
     
 	Example : gcc myproject.cpp -I/'pathtothefile'/smartplus/lib -lsmartplus
 
