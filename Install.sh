@@ -1,6 +1,7 @@
 #!/bin/bash
-
-echo "\nStart of SMART+ compilation.\n"
+echo "\n----------------------------"
+echo "Start of SMART+ compilation."
+echo "---------------------------\n"
 
 #Find th current directory
 current_dir=$(pwd)
@@ -50,7 +51,7 @@ then
 		echo "umat_singleT.o copied in ${current_dir}/build/bin"
 	fi
 	
-	#Copy of solver testing if debug exists (copy the older one between build/bin/solver and build/bin/debug/solver)
+	#if debug existsn, copy of solver from Debug
 	if [ -f ${current_dir}/build/bin/Debug/solver ]
 	then
 		cp ${current_dir}/build/bin/Debug/solver ${current_dir}/build/bin
@@ -60,8 +61,8 @@ then
 	echo "Solver copied in ${current_dir}/exec"
 	echo "libsmartplus.so available in ${current_dir}/lib"
 	echo "---------------------------"
-	echo "Compilation of SMART+ done.\n"
+	echo "SMART+ compilation done.\n"
 else
 	echo "\n---------------------------"
-	echo "Compilation of SMART+ failed.\n"
+	echo "SMART+ compilation failed.\n"
 fi
