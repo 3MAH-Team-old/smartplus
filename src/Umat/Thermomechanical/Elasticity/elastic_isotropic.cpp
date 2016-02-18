@@ -89,7 +89,6 @@ void umat_elasticity_iso_T(const vec &Etot, const vec &DEtot, vec &sigma, double
     sse += Dsse;
     spd += Dtde - Dsse;
     
-    
     //Computation of the Thermal coupling variables
     vec Lth = -1.*(dSdE*Ith())*alpha;
     
