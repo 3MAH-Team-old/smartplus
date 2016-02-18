@@ -82,29 +82,6 @@ void Lth_2_K(const mat &dSdE, mat &dSdT, mat &dQdE, mat &dQdT, mat &K, const Col
     }
 }
 
-/*void Lt_2_K(const mat &Lt, mat &K, const Col<int> &cBC_meca)
-{
-	int kT;
-	int lT = 0;
-	for (int j = 0; j < 6; j++){
-		if (cBC_meca(j)){
-			kT = 0;
-			for (int i = 0; i < 6; i++){
-				if (i == j){
-					K(kT,lT) = Lt(i,j);
-					kT++;
-				}
-				else if (cBC_meca(i))
-				{
-					K(kT,lT) = Lt(i,j);
-					kT++;
-				}
-			}
-			lT++;
-		}
-	}
-}*/
-
 void read_matprops(string &umat_name, int &nprops, vec &props, int &nstatev, double &rho, double &c_p) {
 
     ///Material properties reading, use "material.dat" to specify parameters values
@@ -314,7 +291,7 @@ void read_path(std::vector<block> &blocks, double &T, const string &pathfile) {
 	path.open(pathfile, ios::in);
 	if(!path)
 	{
-		cout << "Error: cannot open the file path.txt \n";
+		cout << "Error: cannot open the file " << pathfile << "\n";
 	}
 
 	///temperature is initialized
@@ -327,7 +304,7 @@ void read_path(std::vector<block> &blocks, double &T, const string &pathfile) {
         path >> buffer >> blocks[i].number >> buffer >> blocks[i].type >> buffer >> blocks[i].ncycle >> buffer >> blocks[i].nstep;
 
         if (blocks[i].number != i+1) {
-            cout << "could not find the UMAT: This is due to a polymorphism exception mode 8875 (Vérifier Numero de block...)";
+            cout << "The number of blocks could not be found. Please verify the blocks order in the path file";
         }
         
         blocks[i].generate();
@@ -396,7 +373,7 @@ void read_path(std::vector<block> &blocks, double &T, const string &pathfile) {
                         }
                     }
                     else {
-                        cout << "The SMART+ is not compatible with your OS. Please think about upgrading to Mac OS 10.9 or later, it is much better than your shitty Windows 8";
+                        cout << "Please enter a suitable block mode (1 for linear, 2 for sinusoidal, 3 for user-input)";
                     }
                 }
                 break;
@@ -481,14 +458,14 @@ void read_path(std::vector<block> &blocks, double &T, const string &pathfile) {
                         
                     }
                     else {
-                        cout << "The SMART+ is not compatible with your OS. Please think about upgrading to Mac OS 10.9 or later, it is much better than your shitty Windows 8";
+                        cout << "Please enter a suitable block mode (1 for linear, 2 for sinusoidal, 3 for user-input)";
                     }
                     
                 }
                 break;
             }
             default: {
-                cout << "Seriously?\n";
+                cout << "Please enter a valid block type (1 for mechanical, 2 for thermomechanical)\n";
                 break;
             }
             
