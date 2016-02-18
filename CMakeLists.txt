@@ -105,6 +105,12 @@ add_executable(solver software/solver.cpp)
 #Link the solver executable with armadillo
 target_link_libraries(solver smartplus ${ARMADILLO_LIBRARIES})
 
+#Add the identification executable
+add_executable(identification software/identification.cpp)
+
+#Link the identification executable with armadillo
+target_link_libraries(identification smartplus ${ARMADILLO_LIBRARIES})
+
 
 ##Testing
 #Test files are in a separate source directory called test
