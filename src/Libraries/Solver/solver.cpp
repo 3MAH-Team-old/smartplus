@@ -79,7 +79,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
     
     //read the material properties
     //Read the loading path
-    read_path(blocks, T);
+    read_path(blocks, T, pathfile);
     
     //Output
     int o_ncount = 0;
@@ -110,7 +110,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
     /// Block loop
     for(unsigned int i = 0 ; i < blocks.size() ; i++){
         
-        cout << blocks[i];
+//        cout << blocks[i];
         
         switch(blocks[i].type) {
             case 1: {
