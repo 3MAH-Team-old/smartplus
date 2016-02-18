@@ -45,6 +45,6 @@ void read_output(solver_output &, const int &, const int &);
 void check_path_output(const std::vector<block> &, const solver_output &);
     
 /// Function that reads the loading path
-void read_path(std::vector<block> &, double &, const string & = "path.txt");
+void read_path(std::vector<block> &, double &, const std::string & = "path.txt");
 
 } //namespace smart
