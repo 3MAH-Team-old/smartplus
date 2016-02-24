@@ -56,8 +56,15 @@ then
 	then
 		cp ${current_dir}/build/bin/Debug/solver ${current_dir}/build/bin
 	fi
-	
+
+    #if debug existsn, copy of solver from Debug
+    if [ -f ${current_dir}/build/bin/Debug/identification ]
+    then
+    cp ${current_dir}/build/bin/Debug/identification ${current_dir}/build/bin
+    fi
+
 	cp ${current_dir}/build/bin/solver ${current_dir}/exec
+	cp ${current_dir}/build/bin/identification ${current_dir}/exec
 	echo "Solver copied in ${current_dir}/exec"
 	echo "libsmartplus.so available in ${current_dir}/lib"
 	echo "---------------------------"
