@@ -49,12 +49,18 @@ void Gauss(arma::Mat<int> &, const arma::mat &, arma::mat &, const double &, con
 //Numerical Eshelby tensor determination
 arma::mat Eshelby(const arma::mat &, const double &, const double &, const double &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const int &mp, const int &np);
 
+//Numerical Eshelby tensor determination
+arma::mat Eshelby(const arma::mat &, const double &, const double &, const double &, const int &, const int &);
+    
 //arma::mat T_II_sphere(const double &, const double &); {
 
 //Numerical Hill Interaction tensor determination
-arma::mat T_II(const arma::mat &Lt, const double &, const double &, const double &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const int &, const int &);
+arma::mat T_II(const arma::mat &, const double &, const double &, const double &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const int &, const int &);
 
+//Numerical Hill Interaction tensor determination
+arma::mat T_II(const arma::mat &, const double &, const double &, const double &, const int &, const int &);
+    
 //This function computes the integration points and weights
-void points(arma::vec &x, arma::vec &wx, arma::vec &y, arma::vec &wy, const int &mp, const int &np);
+void points(arma::vec &, arma::vec &, arma::vec &, arma::vec &, const int &, const int &);
 
 } //namespace smart

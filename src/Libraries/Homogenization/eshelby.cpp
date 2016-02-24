@@ -201,7 +201,7 @@ void Gauss(Mat<int> &Id, const mat &Lt, mat &G, const double &a1, const double &
 		}
 	}
 }
-
+    
 mat Eshelby(const mat &Lt, const double &a1, const double &a2, const double &a3, const vec &x, const vec &wx, const vec &y, const vec &wy, const int &mp, const int &np)
 {
     mat G = zeros(6,6);
@@ -264,6 +264,16 @@ mat Eshelby(const mat &Lt, const double &a1, const double &a2, const double &a3,
     return S;
 }
 
+mat Eshelby(const mat &Lt, const double &a1, const double &a2, const double &a3, const int &mp, const int &np) {
+    
+    vec x(mp);
+    vec wx(mp);
+    vec y(np);
+    vec wy(np);
+    points(x, wx, y, wy, mp, np);
+    return Eshelby(Lt, a1, a2, a3, x, wx, y, wy, mp, np);
+}
+    
 /*mat T_II_sphere(const double &nu, const double &mu) {
 	
     //Eshelby tensor for a sphere
@@ -350,6 +360,17 @@ mat T_II(const mat &Lt, const double &a1, const double &a2, const double &a3, co
     return T_II;
 }
 
+mat T_II(const mat &Lt, const double &a1, const double &a2, const double &a3, const int &mp, const int &np) {
+    
+    vec x(mp);
+    vec wx(mp);
+    vec y(np);
+    vec wy(np);
+    points(x, wx, y, wy, mp, np);
+    return T_II(Lt, a1, a2, a3, x, wx, y, wy, mp, np);
+}
+    
+    
 void points(vec &x, vec &wx, vec &y, vec &wy, const int &mp, const int &np)
 {
     
