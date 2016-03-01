@@ -71,7 +71,7 @@ cx_vec cx_quadratic(const cx_double &cplx_a, const cx_double &cplx_b, const cx_d
     cx_double delta;
     cx_vec t = zeros<cx_vec>(2);
     delta=pow(cplx_b,2.)-4.*cplx_a*cplx_c;
-    if (a == 0.)
+    if (cplx_a == 0.)
     {
         t.resize(1);
         t(0) = -cplx_c/cplx_b;
