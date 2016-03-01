@@ -13,6 +13,6 @@ arma::vec quadratic(const double &, const double &, const double &);
 
 arma::cx_vec cx_quadratic(const double &, const double &, const double &);
 
-arma::cx_vec cx_quadratic(const cx_double &, const cx_double &, const cx_double &);
+arma::cx_vec cx_quadratic(const arma::cx_double &, const arma::cx_double &, const arma::cx_double &);
 
 } //namespace smart    
