@@ -26,9 +26,7 @@
 #include <armadillo>
 #include <algorithm>
 
-#define BOOST_NO_CXX11_SCOPED_ENUMS
 #include <boost/filesystem.hpp>
-#undef BOOST_NO_CXX11_SCOPED_ENUMS
 #include <boost/algorithm/string/replace.hpp>
 
 #include <smartplus/Libraries/Identification/parameters.hpp>
@@ -41,7 +39,7 @@
 
 using namespace std;
 using namespace arma;
-using namespace boost::filesystem;
+using namespace arma;
 
 namespace smart{
 
@@ -55,7 +53,7 @@ void copy_parameters(const vector<parameters> &params, const string &src_path, c
         for(auto ifiles : pa.input_files) {
             src_files = src_path + ifiles;
             dst_files = dst_path + ifiles;
-            copy_file(src_files,dst_files,copy_option::overwrite_if_exists);
+            boost::filesystem::copy_file(src_files,dst_files,boost::filesystem::copy_option::overwrite_if_exists);
         }
     }
 }
@@ -70,7 +68,7 @@ void copy_constants(const vector<constants> &consts, const string &src_path, con
         for(auto ifiles : co.input_files) {
             src_files = src_path + ifiles;
             dst_files = dst_path + ifiles;
-            copy_file(src_files,dst_files,copy_option::overwrite_if_exists);
+            boost::filesystem::copy_file(src_files,dst_files,boost::filesystem::copy_option::overwrite_if_exists);
         }
     }
 }
