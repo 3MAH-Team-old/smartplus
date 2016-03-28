@@ -181,7 +181,7 @@ void umat_plasticity_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, mat 
 			
 			if (p < p_start) {
 				//Phi = 0.;
-				p = p_start+1E-6;
+                p = p_start+precision_umat;
 			}		
 			
 			EP = EP + (p - p_temp)*Lambdap;
@@ -206,17 +206,21 @@ void umat_plasticity_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, mat 
 		}
 			
 		// Computation of the elastoplastic tangent moduli
-        if (p > 1E-12)
+        if (p > precision_umat)
             dHpdp = m*k*pow(p, m-1);
         else
             dHpdp =  0.;
 		
 		double mu = E/(2.*(1+nu));
 		h = 3.*mu+dHpdp;
-		
-		Lambdap = Lambdap%Ir05();
-		Lt = (4.*pow(mu, 2.)/h)*(Lambdap*trans(Lambdap));
-		Lt = L - Lt;
+
+        if (p-p_start > 1.1*precision_umat) {
+            Lambdap = Lambdap%Ir05();
+            Lt = (4.*pow(mu, 2.)/h)*(Lambdap*trans(Lambdap));
+            Lt = L - Lt;
+        }
+        else
+            Lt = L;
 	}
 	else {
 		Eel = Etot + DEtot - alpha*Ith()*(T + DT - Tinit) - EP;
@@ -258,7 +262,14 @@ void umat_plasticity_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, mat 
 	double Dsse = sum(sigma_start%DEel) + 0.5*sum(Dsigma%DEel);
     
 	sse += Dsse;
-	spd += Dtde - Dsse;	
+	spd += Dtde - Dsse;
+    
+    cout << "Lambdap = \n" << Lambdap << "\n";
+    cout << "Dp = \n" << p-p_start << "\n";
+    cout << "dp = \n" << p-p_temp << "\n";
+    cout << "Lt = \n" << Lt << "\n";
+    cout << "L = \n" << L << "\n";
+    
 }
     
 } //namespace smart
