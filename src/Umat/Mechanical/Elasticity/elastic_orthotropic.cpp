@@ -56,8 +56,8 @@ void umat_elasticity_ortho(const vec &Etot, const vec &DEtot, vec &sigma, mat &L
 	double Ey = props(1);
 	double Ez = props(2);
 	double nuxy = props(3);
-	double nuyz = props(4);
-	double nuxz = props(5);
+	double nuxz = props(4);
+    double nuyz = props(5);
 	double Gxy = props(6);
 	double Gxz = props(7);
     double Gyz = props(8);
@@ -82,7 +82,7 @@ void umat_elasticity_ortho(const vec &Etot, const vec &DEtot, vec &sigma, mat &L
 	alpha(2) = alphaz;
     
 	//Compute the elastic strain and the related stress	
-	vec DEel = DEtot - alpha*Ith()*DT;
+	vec DEel = DEtot - alpha*DT;
     
 	if (ndi == 1) {
         sigma(0) = sigma_start(0) + Lt(0,0)*(DEel(0));
