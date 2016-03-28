@@ -111,7 +111,6 @@ void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, 
     Rot_strain(EP, DR);
     Rot_stress(X, DR);
     
-    
 	///@brief Initialization
 	if(start)
 	{
@@ -206,7 +205,7 @@ void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, 
 			
 			if (p < p_start) {
 				//Phi = 0.;
-				p = p_start+1E-6;
+				p = p_start+precision_umat;
 			}		
 			
 			EP = EP + (p - p_temp)*Lambdap;
@@ -232,26 +231,36 @@ void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, 
 		}
 			
 		// Computation of the elastoplastic tangent moduli
-        if (p > 1E-12)
+        if (p > precision_umat)
             dHpdp = m*k*pow(p, m-1);
         else
             dHpdp =  0.;
 
-        dPhidp = -dHpdp;
-        dPhidX = -1.*eta_stress(sigma - X);
-        dPhi = dPhidp + sum(dPhidX%lambdaX);
-        dPhidsigma = eta_stress(sigma - X);
-        
-        //Computation of the tangent modulus !
-        vec B1(6);
-        vec B2(6);
-        double At2;
-        
-        B1 = L*Lambdap;
-        B2 = L*dPhidsigma;
-        At2 = (dPhi - sum(dPhidsigma%B1));
-        
-        Lt = L + (B1*trans(B2))/At2;
+        if (p-p_start > 1.1*precision_umat) {
+            dPhidp = -dHpdp;
+            dPhidX = -1.*eta_stress(sigma - X);
+            dPhi = dPhidp + sum(dPhidX%lambdaX);
+            dPhidsigma = eta_stress(sigma - X);
+            
+            //Computation of the tangent modulus !
+            vec B1(6);
+            vec B2(6);
+            double At2;
+            
+            B1 = L*Lambdap;
+            B2 = L*dPhidsigma;
+            At2 = (dPhi - sum(dPhidsigma%B1));
+            
+            if (fabs(At2) > precision_umat) {
+                Lt = L + (B1*trans(B2))/At2;
+            }
+            else
+                Lt = L;
+
+        }
+        else
+            Lt = L;
+            
 	}
 	else {
 		Eel = Etot + DEtot - alpha*Ith()*(T + DT - Tinit) - EP;
@@ -300,7 +309,8 @@ void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, 
 	double Dsse = sum(sigma_start%DEel) + 0.5*sum(Dsigma%DEel);
     
 	sse += Dsse;
-	spd += Dtde - Dsse;	
+	spd += Dtde - Dsse;
+    
 }
     
 } //namespace smart
