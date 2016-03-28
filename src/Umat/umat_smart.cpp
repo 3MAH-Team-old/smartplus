@@ -214,7 +214,7 @@ void select_umat_T(const string &umat_name, const vec &Etot, const vec &DEtot, v
 void select_umat(const string &umat_name, const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT,const double &Time,const double &DTime, double &sse, double &spd, const int &ndi, const int &nshr, const bool &start, double &tnew_dt)
 {
 	std::map<string, int> list_umat;
-	list_umat = {{"ELISO",1},{"ELIST",2},{"ELORT",3},{"EPICP",4},{"EPKCP",5},{"MIMTN",101},{"MISCN",102}};
+    list_umat = {{"ELISO",1},{"ELIST",2},{"ELORT",3},{"EPICP",4},{"EPKCP",5},{"MIMTN",100},{"MISCN",101},{"MIPLN",102}};
     
 	switch (list_umat[umat_name]) {
 		case 1: {
