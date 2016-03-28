@@ -141,63 +141,73 @@ void read_output(solver_output &so, const int &nblock, const int &nstatev) {
     
     ifstream cyclic_output;
 	cyclic_output.open("data/output.dat", ios::in);
-	if(!cyclic_output)
+	if(cyclic_output)
 	{
-		cout << "Error: cannot open the file data/output.dat \n";
-	}
-    
-	cyclic_output >> buffer;
-    cyclic_output >> buffer >> so.o_nb_meca;
-    so.o_meca.zeros(so.o_nb_meca);
-    for (int i=0; i<so.o_nb_meca; i++) {
-        cyclic_output >> so.o_meca(i);
-    }
-    cyclic_output >> buffer >> so.o_nb_T;
-    
-    ///Selection of the wanted umat statev, use "cyclic.dat" to specify wanted internal variables
-    cyclic_output >> buffer >> buffer;
-    if ((buffer == "all") || (buffer == "All") || (buffer == "ALL")){
-        so.o_wanted_statev.zeros(1);
-        so.o_wanted_statev(0) = -1;
-    }
-    else if(atoi(buffer.c_str()) != 0){
-        so.o_nw_statev = atoi(buffer.c_str());
-        so.o_wanted_statev.zeros(so.o_nw_statev);
-        so.o_range_statev.zeros(so.o_nw_statev);
-        for (int i = 0; i < so.o_nw_statev; i++){
-            cyclic_output >> buffer >> buffer;
-            if ((buffer == "from") || (buffer == "From") || (buffer == "FROM")){
-                cyclic_output >> so.o_wanted_statev(i) >> buffer >> so.o_range_statev(i);
-            }
-            else{
-                so.o_wanted_statev(i) = atoi(buffer.c_str());
-                so.o_range_statev(i) = so.o_wanted_statev(i);
-            }
-            
-            if(so.o_range_statev(i) > nstatev -1) {
-                cout << "Error : The range of outputed statev is greater than the actual number of statev!\n";
-                cout << "Check output.dat and/or material.dat\n\n";
+        cyclic_output >> buffer;
+        cyclic_output >> buffer >> so.o_nb_meca;
+        so.o_meca.zeros(so.o_nb_meca);
+        for (int i=0; i<so.o_nb_meca; i++) {
+            cyclic_output >> so.o_meca(i);
+        }
+        cyclic_output >> buffer >> so.o_nb_T;
+        
+        ///Selection of the wanted umat statev, use "cyclic.dat" to specify wanted internal variables
+        cyclic_output >> buffer >> buffer;
+        if ((buffer == "all") || (buffer == "All") || (buffer == "ALL")){
+            so.o_wanted_statev.zeros(1);
+            so.o_wanted_statev(0) = -1;
+        }
+        else if(atoi(buffer.c_str()) != 0){
+            so.o_nw_statev = atoi(buffer.c_str());
+            so.o_wanted_statev.zeros(so.o_nw_statev);
+            so.o_range_statev.zeros(so.o_nw_statev);
+            for (int i = 0; i < so.o_nw_statev; i++){
+                cyclic_output >> buffer >> buffer;
+                if ((buffer == "from") || (buffer == "From") || (buffer == "FROM")){
+                    cyclic_output >> so.o_wanted_statev(i) >> buffer >> so.o_range_statev(i);
+                }
+                else{
+                    so.o_wanted_statev(i) = atoi(buffer.c_str());
+                    so.o_range_statev(i) = so.o_wanted_statev(i);
+                }
                 
-                exit(0);
+                if(so.o_range_statev(i) > nstatev -1) {
+                    cout << "Error : The range of outputed statev is greater than the actual number of statev!\n";
+                    cout << "Check output.dat and/or material.dat\n\n";
+                    
+                    exit(0);
+                }
             }
         }
+        else {
+            so.o_nw_statev = 0;
+        }
+        
+        cyclic_output >> buffer >> buffer >> buffer;
+        for(int i = 0 ; i < nblock ; i++){
+            cyclic_output >> buffer >> so.o_type(i);
+            if(so.o_type(i) == 1)
+                cyclic_output >> so.o_nfreq(i);
+            else if(so.o_type(i) == 2)
+                cyclic_output >> so.o_tfreq(i);
+            else
+                cyclic_output >> buffer;
+        }
+        cyclic_output.close();
     }
     else {
+        cout << "The file data/output.dat is not present, so default output is selected\n";
+        so.o_nb_meca = 6;
+        so.o_meca.zeros(so.o_nb_meca);
+        so.o_meca = {0,1,2,3,4,5};
+        so.o_nb_T = 1;
         so.o_nw_statev = 0;
+        
+        for(int i = 0 ; i < nblock ; i++){
+            so.o_type(i) = 1;
+            so.o_nfreq(i) = 1;
+        }
     }
-    
-    cyclic_output >> buffer >> buffer >> buffer;
-    for(int i = 0 ; i < nblock ; i++){
-        cyclic_output >> buffer >> so.o_type(i);
-        if(so.o_type(i) == 1)
-            cyclic_output >> so.o_nfreq(i);
-        else if(so.o_type(i) == 2)
-            cyclic_output >> so.o_tfreq(i);
-        else
-            cyclic_output >> buffer;
-    }
-
-	cyclic_output.close();
     
 }
 
