@@ -44,7 +44,7 @@ namespace smart {
 ///@brief props[6] : exponent m
 ///@brief props[7] : linear kinematical hardening h
 
-///@brief The elastic-plastic UMAT with isotropic hardening requires 8 statev:
+///@brief The elastic-plastic UMAT with isotropic hardening requires 14 statev:
 ///@brief statev[0] : T_init : Initial temperature
 ///@brief statev[1] : Accumulative plastic parameter: p
 ///@brief statev[2] : Plastic strain 11: EP(0,0)
@@ -54,11 +54,11 @@ namespace smart {
 ///@brief statev[6] : Plastic strain 13: EP(0,2) (*2)
 ///@brief statev[7] : Plastic strain 23: EP(1,2) (*2)
 ///@brief statev[8] : Backstress 11: X(0,0)
-///@brief statev[8] : Backstress 11: X(1,1)
-///@brief statev[8] : Backstress 11: X(2,2)
-///@brief statev[8] : Backstress 11: X(0,1)
-///@brief statev[8] : Backstress 11: X(0,2)
-///@brief statev[8] : Backstress 11: X(1,2)
+///@brief statev[9] : Backstress 22: X(1,1)
+///@brief statev[10] : Backstress 33: X(2,2)
+///@brief statev[11] : Backstress 12: X(0,1)
+///@brief statev[12] : Backstress 13: X(0,2)
+///@brief statev[13] : Backstress 23: X(1,2)
     
 
 void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT,const double &Time,const double &DTime, double &sse, double &spd, const int &ndi, const int &nshr, const bool &start, double &tnew_dt)
