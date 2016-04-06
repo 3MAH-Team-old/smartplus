@@ -30,10 +30,15 @@ using namespace arma;
 
 namespace smart {
 
-///@brief The elastic UMAT requires 2 constants:
-///@brief props[0] : Young modulus
-///@brief props[1] : Poisson ratio
-///@brief props[2] : CTE
+///@brief The elastic istropic transverse UMAT requires 8 constants:
+///@brief props[0] : Axe of the longitudinal direction
+///@brief props[1] : Longitudinal Young modulus
+///@brief props[2] : Transverse Young modulus
+///@brief props[3] : Longitudinal-Transverse Poisson ratio
+///@brief props[4] : Transverse-Transverse Poisson ratio
+///@brief props[5] : Shear Modulus
+///@brief props[6] : Longitudinal thermal expansion coeficient
+///@brief props[7] : Transverse thermal expansion coeficient
 
 ///@brief No statev is required for thermoelastic constitutive law
 
