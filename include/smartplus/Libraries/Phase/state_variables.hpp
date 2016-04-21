@@ -39,16 +39,31 @@ class state_variables
 		arma::vec Etot;
 		arma::vec DEtot;
 		arma::vec sigma;
-		arma::mat L;
-		arma::mat Lt;
-		
+		arma::vec sigma_start;
+        double T;
+        double DT;
+        double sse; //Elastic energy
+        double spd; //Non-elastic energy
+    
+        int nstatev;
+        arma::vec statev;
+        arma::vec statev_start;
+    
 		state_variables(); 	//default constructor
-		state_variables(arma::vec, arma::vec, arma::vec, arma::mat, arma::mat); //Constructor with parameters
+		state_variables(const int &, const bool& = true, const double& = 0.);	//constructor - allocates memory for statev
+        state_variables(const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const double &, const double &, const double &, const double &, const int &, const arma::vec &, const arma::vec &); //Constructor with parameters
 		state_variables(const state_variables &);	//Copy constructor
-		~state_variables();
+		virtual ~state_variables();
 		
 		virtual state_variables& operator = (const state_variables&);
-		
+
+		virtual void resize();	//constructor - allocates memory for statev
+		virtual void resize(const int &, const bool& = true, const double& = 0.);	//constructor - allocates memory for statev
+        virtual void update(const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const double &, const double &, const double &, const double &, const int &, const arma::vec &, const arma::vec &); //Initialize with parameters
+		virtual int dimstatev () const {return nstatev;}       // returns the number of statev, nstatev    
+        virtual void to_start(); //sigma goes to sigma_start
+        virtual void set_start(); //sigma goes to sigma_start
+    
         virtual state_variables& rotate_l2g(const state_variables&, const double&, const double&, const double&);
         virtual state_variables& rotate_g2l(const state_variables&, const double&, const double&, const double&);
     
