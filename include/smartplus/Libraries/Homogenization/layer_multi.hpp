@@ -15,7 +15,7 @@
  
  */
 
-///@file layer_characteristics.hpp
+///@file layer_multi.hpp
 ///@brief Characteristics of a layer, similar to a phase in this version
 ///@version 1.0
 //
@@ -24,12 +24,12 @@
 #include <iostream>
 #include <string>
 #include <armadillo>
-#include "phase_characteristics.hpp"
+#include "phase_multi.hpp"
 
 namespace smart{
 
 //======================================
-class layer_characteristics : public phase_characteristics
+class layer_multi : public phase_multi
 //======================================
 {
 	private:
@@ -38,15 +38,14 @@ class layer_characteristics : public phase_characteristics
     
 	public :
 
-    layer_characteristics(); 	//default constructor
-    layer_characteristics(int, int, bool=true, double=0.);	//constructor - allocates memory for statev
-    layer_characteristics(int, std::string, double, double, double, double, int, const arma::vec&, int, const arma::vec&, const state_variables&, const state_variables&, const arma::mat&, const arma::mat&); //Constructor with parameters
-    layer_characteristics(const layer_characteristics&);	//Copy constructor
-        ~layer_characteristics();
-    
-    virtual layer_characteristics& operator = (const layer_characteristics&);
-    
-    friend std::ostream& operator << (std::ostream&, const layer_characteristics&);
+        layer_multi(); 	//default constructor
+        layer_multi(const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&); //Constructor with parameters
+        layer_multi(const layer_multi&);	//Copy constructor
+            ~layer_multi();
+        
+        virtual layer_multi& operator = (const layer_multi&);
+        
+        friend std::ostream& operator << (std::ostream&, const layer_multi&);
     
 };
 
