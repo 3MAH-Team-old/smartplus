@@ -38,23 +38,10 @@ protected:
     
 	public :
     
-    int coatingof;
-    int coatedby;
-    
-    double a1;
-    double a2;
-    double a3;
-    
-    double psi_geom;
-    double theta_geom;
-    double phi_geom;
-    
-    arma::mat S;
+/*    arma::mat S;
     arma::mat T;
     
-    ellipsoid_characteristics(); 	//default constructor
-    ellipsoid_characteristics(int, int, bool=true, double=0.);	//constructor - allocates memory for statev
-    ellipsoid_characteristics(int, int, int, std::string, double, double, double, double, double, double, double, double, double, double, int, const arma::vec&, int, const arma::vec&, const state_variables&, const state_variables&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&); //Constructor with parameters
+    ellipsoid_characteristics(const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&); //Constructor with parameters
     ellipsoid_characteristics(const ellipsoid_characteristics&);	//Copy constructor
     ~ellipsoid_characteristics();
     
@@ -64,7 +51,7 @@ protected:
 	virtual ellipsoid_characteristics& operator = (const ellipsoid_characteristics&);
     
     friend std::ostream& operator << (std::ostream&, const ellipsoid_characteristics&);
-    
+ */   
 };
 
 } //namespace smart
