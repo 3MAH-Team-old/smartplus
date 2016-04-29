@@ -89,7 +89,7 @@ void umat_plasticity_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, mat 
     EP(5) = statev(7);
     
     //Rotation of internal variables (tensors)
-    Rot_strain(EP, DR);
+    EP = rotate_strain(EP, DR);
     
 	///@brief Initialization
 	if(start)
@@ -263,13 +263,6 @@ void umat_plasticity_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, mat 
     
 	sse += Dsse;
 	spd += Dtde - Dsse;
-    
-    cout << "Lambdap = \n" << Lambdap << "\n";
-    cout << "Dp = \n" << p-p_start << "\n";
-    cout << "dp = \n" << p-p_temp << "\n";
-    cout << "Lt = \n" << Lt << "\n";
-    cout << "L = \n" << L << "\n";
-    
 }
     
 } //namespace smart
