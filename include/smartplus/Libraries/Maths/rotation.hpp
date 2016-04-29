@@ -72,4 +72,11 @@ arma::mat rotate_l2g_A(const arma::mat &, const double &, const double &, const 
 //To rotate from global to local a localisation matrix (6,6)
 arma::mat rotate_g2l_A(const arma::mat &, const double &, const double &, const double &);
 
+//To rotate from local to global a compliance matrix (6,6)
+arma::mat rotate_l2g_M(const arma::mat &, const double &, const double &, const double &);
+
+//To rotate from global to local a compliance matrix (6,6)
+arma::mat rotate_g2l_M(const arma::mat &, const double &, const double &, const double &);
+    
+    
 } //namespace smart
