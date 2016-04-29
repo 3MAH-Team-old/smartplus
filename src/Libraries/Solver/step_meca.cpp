@@ -28,6 +28,7 @@
 #include <smartplus/parameter.hpp>
 #include <smartplus/Libraries/Solver/step.hpp>
 #include <smartplus/Libraries/Solver/step_meca.hpp>
+#include <smartplus/Libraries/Phase/state_variables_M.hpp>
 
 using namespace std;
 using namespace arma;
@@ -47,11 +48,6 @@ step_meca::step_meca() : step()
     BC_meca = zeros(6);
     BC_T = 0.;
     cBC_T = 0;
-
-    Etot = zeros(6);
-    DEtot = zeros(6);
-    sigma = zeros(6);
-    T = 0.;
 }
 
 /*!
@@ -62,10 +58,10 @@ step_meca::step_meca() : step()
  Etot = mEtot;          current strain
  sigma = msigma;        current stress
  T = mT;                current temperature
- */
-
+ */    
+    
 //-------------------------------------------------------------
-step_meca::step_meca(int mnumber, int mDn_init, int mDn_mini, int mDn_inc, int mmode, const Col<int> &mcBC_meca, const vec &mBC_meca, const mat &mmecas, const double &mBC_T, const int &mcBC_T, const vec &mTs, const vec &mEtot, const vec &mDEtot, const vec &msigma, const double &mT) : step(mnumber, mDn_init, mDn_mini, mDn_inc, mmode)
+step_meca::step_meca(const int &mnumber, const double &mDn_init, const double &mDn_mini, const double &mDn_inc, const int &mmode, const Col<int> &mcBC_meca, const vec &mBC_meca, const mat &mmecas, const double &mBC_T, const int &mcBC_T, const vec &mTs) : step(mnumber, mDn_init, mDn_mini, mDn_inc, mmode)
 //-------------------------------------------------------------
 {
     cBC_meca = mcBC_meca;
@@ -74,11 +70,6 @@ step_meca::step_meca(int mnumber, int mDn_init, int mDn_mini, int mDn_inc, int m
     BC_T = mBC_T;
     cBC_T = mcBC_T;
     Ts = mTs;
-    
-    Etot = mEtot;
-    DEtot = mDEtot;
-    sigma = msigma;
-    T = mT;
 }
 
 /*!
@@ -96,11 +87,6 @@ step_meca::step_meca(const step_meca& stm) : step(stm)
     BC_T = stm.BC_T;
     cBC_T = stm.cBC_T;
     Ts = stm.Ts;
-    
-    Etot = stm.Etot;
-    DEtot = stm.DEtot;
-    sigma = stm.sigma;
-    T = stm.T;
 }
 
 /*!
@@ -110,7 +96,7 @@ step_meca::step_meca(const step_meca& stm) : step(stm)
 step_meca::~step_meca() {}
 
 //-------------------------------------------------------------
-void step_meca::generate(const double &mTime, const vec &msigma, const vec &mEtot, const double &mT)
+void step_meca::generate(const double &mTime, const vec &mEtot, const vec &msigma, const double &mT)
 //-------------------------------------------------------------
 {
     
@@ -136,11 +122,6 @@ void step_meca::generate(const double &mTime, const vec &msigma, const vec &mEto
     }
     
     step::generate();
-        
-    Time = mTime;
-    Etot = mEtot;
-    sigma = msigma;
-    T = mT;
     
     Ts = zeros(ninc);
     mecas = zeros(ninc, 6);
@@ -157,15 +138,15 @@ void step_meca::generate(const double &mTime, const vec &msigma, const vec &mEto
     
     if (mode < 3) {
         for (int i=0; i<ninc; i++) {
-            Ts(i) = (BC_T - T)/ninc;
+            Ts(i) = (BC_T - mT)/ninc;
             times(i) = (BC_Time)/ninc;
             
             for(int k = 0 ; k < 6 ; k++) {
                 if (cBC_meca(k) == 1){
-                    mecas(i,k) = inc_coef(i)*(BC_meca(k)-sigma(k))/ninc;
+                    mecas(i,k) = inc_coef(i)*(BC_meca(k)-msigma(k))/ninc;
                 }
                 else if (cBC_meca(k) == 0){
-                    mecas(i,k) = inc_coef(i)*(BC_meca(k)-Etot(k))/ninc;
+                    mecas(i,k) = inc_coef(i)*(BC_meca(k)-mEtot(k))/ninc;
                 }
             }
             
@@ -187,19 +168,19 @@ void step_meca::generate(const double &mTime, const vec &msigma, const vec &mEto
         vec BC_file_n = zeros(size_BC); //vector that temporarly stores the previous values
         vec BC_file = zeros(size_BC); //vector that temporarly stores the values
         
-        BC_file_n(0) = Time;
+        BC_file_n(0) = mTime;
         int kT = 0;
         if (cBC_T == 0) {
-            BC_file_n(kT+1) = T;
+            BC_file_n(kT+1) = mT;
             kT++;
         }
         for (int k=0; k<6; k++) {
             if (cBC_meca(k) == 0) {
-                BC_file_n(kT+1) = Etot(k);
+                BC_file_n(kT+1) = mEtot(k);
                 kT++;
             }
             if (cBC_meca(k) == 1) {
-                BC_file_n(kT+1) = sigma(k);
+                BC_file_n(kT+1) = msigma(k);
                 kT++;
             }
         }
@@ -247,28 +228,6 @@ void step_meca::generate(const double &mTime, const vec &msigma, const vec &mEto
 	}
     
 }
-
-//----------------------------------------------------------------------
-void step_meca::assess_inc(const double &tnew_dt, double &tinc, const double &Dtinc, vec &Etot, const vec &DEtot, double &T, const double &DT, double &Time, const double &DTime, vec &sigma, vec &sigma_start, vec &statev, vec&statev_start, mat &Lt, mat &Lt_start) {
-    //----------------------------------------------------------------------
-    
-    if(tnew_dt < 1.){
-        sigma = sigma_start;
-        statev = statev_start;
-        Lt = Lt_start;
-        
-    }
-    else {
-        tinc += Dtinc;
-        Etot += DEtot;
-        T += DT;
-        Time += DTime;
-        sigma_start = sigma;
-        statev_start = statev;
-        Lt_start = Lt;
-    }
-    
-}
     
 /*!
  \brief Standard operator = for block
@@ -285,7 +244,6 @@ step_meca& step_meca::operator = (const step_meca& stm)
 	ninc = stm.ninc;
 	mode = stm.mode;
     
-    Time = stm.Time;
     BC_Time = stm.BC_Time;
     
     cBC_meca = stm.cBC_meca;
@@ -293,53 +251,50 @@ step_meca& step_meca::operator = (const step_meca& stm)
     BC_T = stm.BC_T;
     cBC_T = stm.cBC_T;
     
-    Etot = stm.Etot;
-    DEtot = stm.DEtot;
-    sigma = stm.sigma;
-    T = stm.T;
-    
 	return *this;
 }
 
-void step_meca::output(ostream& output, const solver_output &so, const int &kblock, const int&kcycle, const int &kinc, const vec &statev) {
-   
+    
+    
+void step_meca::output(ostream& output, const solver_output &so, const int &kblock, const int&kcycle, const int &kinc, const state_variables_M &sv_M) {
+    
     output << kblock+1 << "\t";
     output << kcycle+1 << "\t";
     output << number+1 << "\t";
     output << kinc+1 << "\t";
-    output << Time << "\t\t";
+    output << times(kinc) << "\t\t";
     
     if (so.o_nb_T) {
-        output << T  << "\t";
+        output << sv_M.T  << "\t";
         output << 0 << "\t";                //This is for the flux
     }
     if (so.o_nb_meca) {
         for (int z=0; z<so.o_nb_meca; z++) {
-            output << Etot(so.o_meca(z)) << "\t";
+            output << sv_M.Etot(so.o_meca(z)) << "\t";
         }
         for (int z=0; z<so.o_nb_meca; z++) {
-            output << sigma(so.o_meca(z)) << "\t";
+            output << sv_M.sigma(so.o_meca(z)) << "\t";
         }
     }
     
     output << "\t";
     if(so.o_nw_statev != 0){
         if (so.o_wanted_statev(0) < 0) {
-            for(unsigned int k = 0 ; k < statev.n_elem ; k++)
-                output << statev(k) << "\t";
+            for(int k = 0 ; k < sv_M.nstatev ; k++)
+            output << sv_M.statev(k) << "\t";
         }
         else{
             for(int k = 0 ; k < so.o_nw_statev ; k++){
                 for (int l = so.o_wanted_statev(k); l < (so.o_range_statev(k)+1); l++){
-                    output << statev(l) << "\t";
+                    output << sv_M.statev(l) << "\t";
                 }
             }
         }
     }
     output << endl;
-        
+    
 }
-
+    
 //--------------------------------------------------------------------------
 ostream& operator << (ostream& s, const step_meca& stm)
 //--------------------------------------------------------------------------
