@@ -28,7 +28,7 @@
 #include <armadillo>
 #include <smartplus/parameter.hpp>
 #include <smartplus/Libraries/Material/ODF2Nphases.hpp>
-#include <smartplus/Libraries/Homogenization/ellipsoid_characteristics.hpp>
+#include <smartplus/Libraries/Geometry/ellipsoid.hpp>
 #include <smartplus/Libraries/Maths/random.hpp>
 #include <smartplus/Libraries/Maths/stats.hpp>
 
@@ -221,7 +221,7 @@ double ODF(const double& theta, const int& method, const vec& param, const bool&
 	}
 }
 
-void ODF2Nphases(const Col<int> &Nphases, const Col<int> &Angle, const Col<int> &method, const vector<string> &filename, const mat &paramODF, const bool &radian, const double& dec) {
+/*void ODF2Nphases(const Col<int> &Nphases, const Col<int> &Angle, const Col<int> &method, const vector<string> &filename, const mat &paramODF, const bool &radian, const double& dec) {
 /// WARNING: The paramODF is not passed as a parameter to the function ODF for the moment!
 		
 	cout << "Initializing...\n";
@@ -665,6 +665,6 @@ void ODF2Nphases(const Col<int> &Nphases, const Col<int> &Angle, const Col<int> 
 		cout << "Error: cannot write in Nphases.dat file using ODF2phases.hpp\n";
     
 	Nphases_file.close();
-}
+}*/
 
 } //namespace smart
