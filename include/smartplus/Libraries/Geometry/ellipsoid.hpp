@@ -50,7 +50,7 @@ class ellipsoid : public geometry
         double phi_geom;    //geometric orientation of the ellipsoid phi
     
 		ellipsoid(); 	//default constructor
-        ellipsoid(const double &, const int &, const int &, const double &,const double &, const double &, const double &,const double &, const double &);
+        ellipsoid(const double &, const int &, const int &, const double &,const double &, const double &, const double &, const double &, const double &);
 
 		ellipsoid(const ellipsoid&);	//Copy constructor
         virtual ~ellipsoid();
