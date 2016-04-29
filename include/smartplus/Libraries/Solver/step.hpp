@@ -24,6 +24,8 @@
 #include <iostream>
 #include <armadillo>
 #include "output.hpp"
+#include "../Phase/state_variables.hpp"
+#include "../Phase/phase_characteristics.hpp"
 
 namespace smart{
 
@@ -43,24 +45,24 @@ protected:
     int ninc;       //Number of milestones in the step (based on Dnmaxi)
     int mode;
     
-    double Time;
     arma::vec times;
     double BC_Time;
     
     std::string file; //  It is used for input/output values of the loading path
     
     step(); 	//default constructor
-    step(int, int, int, int, int);	//Constructor with parameters
+    step(const int &, const double &, const double &, const double &, const int &);	//Constructor with parameters
     step(const step &);	//Copy constructor
-    ~step();
+    virtual ~step();
    
     virtual void generate();
     virtual void compute_inc(double &, const int &, double &, double &, double &);
+    virtual void assess_inc(const double &, double &, const double &, phase_characteristics &, double &, const double &);
     
     virtual step& operator = (const step&);
 
     //This function serves to output
-    virtual void output(std::ostream&, const solver_output &, const int &, const int &, const int&, const arma::vec&);
+    virtual void output(std::ostream&, const solver_output &, const int &, const int &, const int&, const state_variables &);
     
     friend  std::ostream& operator << (std::ostream&, const step&);
 };
