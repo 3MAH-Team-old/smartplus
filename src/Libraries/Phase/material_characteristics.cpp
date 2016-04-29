@@ -15,11 +15,8 @@
  
  */
 
-///@file phase_characteristics.hpp
-///@brief Characteristics of a phase, the parent class of:
-// - general_characteristics
-// - ellipsoid_characteristics
-// - layer_characteristics
+///@file material_characteristics.cpp
+///@brief Characteristics of a material,
 ///@version 1.0
 
 #include <iostream>
@@ -27,38 +24,36 @@
 #include <string>
 #include <assert.h>
 #include <armadillo>
-#include <smartplus/Libraries/Homogenization/phase_characteristics.hpp>
-#include <smartplus/Libraries/Homogenization/state_variables.hpp>
+#include <smartplus/Libraries/Phase/material_characteristics.hpp>
 
 using namespace std;
 using namespace arma;
 
 namespace smart{
 
-//=====Private methods for phase_characteristics===================================
+//=====Private methods for material_characteristics===================================
 
-//=====Public methods for phase_characteristics============================================
+//=====Public methods for material_characteristics============================================
 
 /*!
   \brief default constructor
 */
 
 //-------------------------------------------------------------
-phase_characteristics::phase_characteristics() : A(6,6), B(6,6)
+material_characteristics::material_characteristics()
 //-------------------------------------------------------------
 {
-	number=0;
-	concentration=0.;
+	number=-1;
+    save = 0;
     
 	psi_mat=0.;
 	theta_mat=0.;
 	phi_mat=0.;
 	
 	nprops=0;
-	nstatev=0;
-	
-	A = zeros(6,6);
-	B = zeros(6,6);
+    
+    rho = 0.;
+    c_p = 0.;
 }
 
 /*!
@@ -71,15 +66,14 @@ phase_characteristics::phase_characteristics() : A(6,6), B(6,6)
 */
 
 //-------------------------------------------------------------
-phase_characteristics::phase_characteristics(int n, int m, bool init, double value) : A(6,6), B(6,6)
+material_characteristics::material_characteristics(const int &n, const bool &init, const double &value)
 //-------------------------------------------------------------
 {
 
 	assert(n>0);
-	assert(m>=0);  
   
-	number = 0;
-	concentration = 0.;
+	number = -1;
+    save = 0;
     
 	psi_mat=0.;
 	theta_mat=0.;
@@ -88,20 +82,13 @@ phase_characteristics::phase_characteristics(int n, int m, bool init, double val
     nprops = n;
     if (init) {
         props = value*ones(n);
-        
     }
     else{
         props = zeros(n);
-        statev = zeros(m);
     }
-    
-    nstatev = m;
-	if (m>0) {
-		if (init)
-            statev = value*ones(m);
-        else
-            statev = zeros(m);
-	}
+
+    rho = 0.;
+    c_p = 0.;
 }
 
 /*!
@@ -113,34 +100,24 @@ phase_characteristics::phase_characteristics(int n, int m, bool init, double val
 */
 
 //-------------------------------------------------------------
-phase_characteristics::phase_characteristics(int mnumber, string mumat_name, double mconcentration, double mpsi_mat, double mtheta_mat, double mphi_mat, int mnprops, const vec &mprops, int mnstatev, const vec &mstatev, const state_variables &mlocal, const state_variables &mglobal, const mat &mA, const mat &mB) : A(6,6), B(6,6)
+material_characteristics::material_characteristics(const int &mnumber, const string &mumat_name, const int &msave, const double &mpsi_mat, const double &mtheta_mat, const double &mphi_mat, const int &mnprops, const vec &mprops, const double &mrho, const double &mc_p)
 //-------------------------------------------------------------
 {	
 	assert(mnprops);
-
-	assert (mA.n_rows == 6);
-	assert (mA.n_cols == 6);	
-	assert (mB.n_rows == 6);
-	assert (mB.n_cols == 6);
 	
 	number = mnumber;
 	umat_name = mumat_name;
-	concentration = mconcentration;
+    save = msave;
     
     psi_mat = mpsi_mat;
 	theta_mat = mtheta_mat;
 	phi_mat = mphi_mat;
-	
-    local = mlocal;
-    global = mglobal;
     
-	A = mA;
-	B = mB;		
-	
 	nprops = mnprops;
 	props = mprops;
-	nstatev = mnstatev;
-	statev = mstatev;
+    
+    rho = mrho;
+    c_p = mc_p;
 }
 
 /*!
@@ -149,27 +126,22 @@ phase_characteristics::phase_characteristics(int mnumber, string mumat_name, dou
 */
 
 //------------------------------------------------------
-phase_characteristics::phase_characteristics(const phase_characteristics& sv) : A(6,6), B(6,6)
+material_characteristics::material_characteristics(const material_characteristics& sv)
 //------------------------------------------------------
 {
 	number = sv.number;
 	umat_name = sv.umat_name;
-	concentration = sv.concentration;
+    save = sv.save;
 
     psi_mat = sv.psi_mat;
 	theta_mat = sv.theta_mat;
 	phi_mat = sv.phi_mat;
     
-	local = sv.local;
-	global=sv.global;
-	
-	A = sv.A;
-	B = sv.B;
-	
 	nprops = sv.nprops;
 	props = sv.props;
-	nstatev = sv.nstatev;
-	statev = sv.statev;
+    
+    rho = sv.rho;
+    c_p = sv.c_p;
 }
 
 /*!
@@ -179,14 +151,22 @@ phase_characteristics::phase_characteristics(const phase_characteristics& sv) : 
 */
 
 //-------------------------------------
-phase_characteristics::~phase_characteristics() {}
+material_characteristics::~material_characteristics() {}
 //-------------------------------------
 
 //-------------------------------------------------------------
-void phase_characteristics::resize(int n, int m, bool init, double value)
+void material_characteristics::resize()
 //-------------------------------------------------------------
 {
-	
+    assert(nprops > 0);
+    props = zeros(nprops);
+}
+    
+//-------------------------------------------------------------
+void material_characteristics::resize(const int &n, const bool &init, const double &value)
+//-------------------------------------------------------------
+{
+    assert(n > 0);
     nprops = n;
     if (init) {
         props = value*ones(n);
@@ -194,67 +174,59 @@ void phase_characteristics::resize(int n, int m, bool init, double value)
     }
     else{
         props = zeros(n);
-        statev = zeros(m);
     }
-    
-    nstatev = m;
-	if (m>0) {
-		if (init)
-            statev = value*ones(m);
-        else
-            statev = zeros(m);
-	}
-
 }
 
 /*!
   \brief Standard operator = for phase_characteristics
 */
 
+//-------------------------------------------------------------
+void material_characteristics::update(const int &mnumber, const string &mumat_name, const int &msave, const double &mpsi_mat, const double &mtheta_mat, const double &mphi_mat, const int &mnprops, const vec &mprops, const double &mrho, const double &mc_p)
+//-------------------------------------------------------------
+{
+    assert(mnprops);
+    
+    number = mnumber;
+    umat_name = mumat_name;
+    save = msave;
+    
+    psi_mat = mpsi_mat;
+    theta_mat = mtheta_mat;
+    phi_mat = mphi_mat;
+    
+    nprops = mnprops;
+    props = mprops;
+    
+    rho = mrho;
+    c_p = mc_p;
+}
+    
 //----------------------------------------------------------------------
-phase_characteristics& phase_characteristics::operator = (const phase_characteristics& sv)
+material_characteristics& material_characteristics::operator = (const material_characteristics& sv)
 //----------------------------------------------------------------------
 {
 	assert(sv.nprops);
 
 	number = sv.number;
 	umat_name = sv.umat_name;
-	concentration = sv.concentration;
+    save = sv.save;
     
     psi_mat = sv.psi_mat;
 	theta_mat = sv.theta_mat;
 	phi_mat = sv.phi_mat;
-
-	local = sv.local;
-	global = sv.global;
-	
-	A = sv.A;
-	B = sv.B;		
-	
+		
 	nprops = sv.nprops;
 	props = sv.props;
-	nstatev = sv.nstatev;
-	statev = sv.statev;
+    
+    rho = sv.rho;
+    c_p = sv.c_p;
     
 	return *this;
 }
 
-//-------------------------------------------------------------
-void phase_characteristics::local2global()
-//-------------------------------------------------------------
-{
-	global.rotate_l2g(local, psi_mat, theta_mat, phi_mat);
-}
-
-//-------------------------------------------------------------
-void phase_characteristics::global2local()
-//-------------------------------------------------------------
-{
-	local.rotate_g2l(global, psi_mat, theta_mat, phi_mat);
-}
-
 //--------------------------------------------------------------------------
-ostream& operator << (ostream& s, const phase_characteristics& sv)
+ostream& operator << (ostream& s, const material_characteristics& sv)
 //--------------------------------------------------------------------------
 {
 	assert(sv.nprops);
@@ -262,25 +234,14 @@ ostream& operator << (ostream& s, const phase_characteristics& sv)
 	s << "Display state variables\n";
 	s << "Number of the phase: " << sv.number << "\n";
 	s << "Name of the material = " << sv.umat_name << "\n";
-	s << "concentration: " << sv.concentration << "\n";
 	s << "local material orientation: psi = " << sv.psi_mat << "\t theta = " << sv.theta_mat << "\t phi = " << sv.phi_mat << "\n";
 	s << "nprops: \n" << sv.nprops << "\n";
 	s << "props: \n";
     s << sv.props.t();
 	s << "\n";	
-
-	s << "local state variables: \n" << sv.local << "\n";
-	s << "global state variables: \n" << sv.global << "\n";
-	
-	s << "A: \n" << sv.A << "\n";
-	s << "B: \n" << sv.B << "\n";
-    
-	s << "nstatev: \n" << sv.nstatev << "\n";
-	if (sv.nstatev) {
-		s << "statev: \n";
-		s << sv.statev.t();
-		s << "\n";
-	}
+        
+    s << "rho: \n" << sv.rho << "\n";
+    s << "c_p: \n" << sv.c_p << "\n";
 
 	s << "\n\n";
 
