@@ -40,6 +40,7 @@ protected:
 	public :
     
     arma::mat S_loc;
+    arma::mat P_loc;
     arma::mat T_loc;
     arma::mat T;
     
@@ -51,12 +52,14 @@ protected:
     static arma::vec wy;
     
     ellipsoid_multi(); //default constructor
-    ellipsoid_multi(const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&); //Constructor with parameters
+    ellipsoid_multi(const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&); //Constructor with parameters
     ellipsoid_multi(const ellipsoid_multi&);	//Copy constructor
     ~ellipsoid_multi();
     
     virtual void fillS_loc(const arma::mat&, const ellipsoid &); //need the L_global of the matrix
+    virtual void fillP_loc(const arma::mat&, const ellipsoid &); //need the L_global of the matrix
     virtual void fillT(const arma::mat&, const arma::mat&, const ellipsoid &); //need the L_global of the matrix
+    virtual void fillT_m(const arma::mat&, const arma::mat&, const ellipsoid &); //need the L_global
     
 //    virtual void l2g_T();
 //    virtual void g2l_T();
