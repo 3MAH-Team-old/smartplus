@@ -28,6 +28,8 @@
 #include <smartplus/parameter.hpp>
 #include <smartplus/Libraries/Solver/step.hpp>
 #include <smartplus/Libraries/Solver/output.hpp>
+#include <smartplus/Libraries/Phase/phase_characteristics.hpp>
+#include <smartplus/Libraries/Phase/state_variables.hpp>
 
 using namespace std;
 using namespace arma;
@@ -50,7 +52,6 @@ step::step()
 	ninc=0;
 	mode=0;
     
-    Time = 0.;
     BC_Time = 0.;
     
     file = "";
@@ -64,7 +65,7 @@ step::step()
  */
 
 //-------------------------------------------------------------
-step::step(int mnumber, int mDn_init, int mDn_mini, int mDn_inc, int mmode)
+step::step(const int &mnumber, const double &mDn_init, const double &mDn_mini, const double &mDn_inc, const int &mmode)
 //-------------------------------------------------------------
 {
     
@@ -81,7 +82,6 @@ step::step(int mnumber, int mDn_init, int mDn_mini, int mDn_inc, int mmode)
     ninc = std::round(1./mDn_inc);
 	mode = mmode;
     
-    Time = 0.;
     times = zeros(ninc);
     BC_Time = 0.;
     
@@ -104,12 +104,10 @@ step::step(const step& st)
 	ninc = st.ninc;
 	mode = st.mode;
     
-    Time = st.Time;
     times = st.times;
     BC_Time = st.BC_Time;
     
     file = st.file;
-    
 }
 
 /*!
@@ -186,8 +184,8 @@ step& step::operator = (const step& st)
 	number = st.number;
 	ninc = st.ninc;
 	mode = st.mode;
-        
-    Time = st.Time;
+    
+    
     times = st.times;
     BC_Time = st.BC_Time;
     
@@ -195,8 +193,21 @@ step& step::operator = (const step& st)
         
 	return *this;
 }
-
-void step::output(ostream& output, const solver_output &so, const int &kblock, const int&kcycle, const int &kinc, const vec &statev) {
+    
+//----------------------------------------------------------------------
+void step::assess_inc(const double &tnew_dt, double &tinc, const double &Dtinc, phase_characteristics &rve, double &Time, const double &DTime) {
+    
+    if(tnew_dt < 1.){
+        rve.to_start();
+    }
+    else {
+        tinc += Dtinc;
+        Time += DTime;
+        rve.set_start();
+    }
+}
+    
+void step::output(ostream& output, const solver_output &so, const int &kblock, const int&kcycle, const int &kinc, const state_variables &sv) {
     
     output << kblock << "\t";
     output << kcycle << "\t";
@@ -219,13 +230,13 @@ void step::output(ostream& output, const solver_output &so, const int &kblock, c
     output << "\t";
     if(so.o_nw_statev != 0){
         if (so.o_wanted_statev(0) < 0) {
-            for(unsigned int k = 0 ; k < statev.n_elem ; k++)
-                output << statev(k) << "\t";
+            for(int k = 0 ; k < sv.nstatev ; k++)
+                output << sv.statev(k) << "\t";
         }
         else{
             for(int k = 0 ; k < so.o_nw_statev ; k++){
                 for (int l = so.o_wanted_statev(k); l < (so.o_range_statev(k)+1); l++){
-                    output << statev(l) << "\t";
+                    output << sv.statev(l) << "\t";
                 }
             }
         }
