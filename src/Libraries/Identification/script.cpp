@@ -158,6 +158,10 @@ void launch_solver(const generation &genrun, const int &nfiles, vector<parameter
             int nstatev = 0;
             vec props;
             
+            double psi_rve = 0.;
+            double theta_rve = 0.;
+            double phi_rve = 0.;
+            
             double rho = 0.;
             double c_p = 0.;
             
@@ -179,10 +183,10 @@ void launch_solver(const generation &genrun, const int &nfiles, vector<parameter
             apply_parameters(params, data);
             
             //Then read the material properties
-            read_matprops(umat_name, nprops, props, nstatev, rho, c_p);
+            read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p);
             
 			///Launching the solver with relevant parameters
-            solver(umat_name, props, nstatev, rho, c_p, pathfile.str(), outputfile.str());
+            solver(umat_name, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p, pathfile.str(), outputfile.str());
             
             outputfile.str(std::string());
             pathfile.str(std::string());

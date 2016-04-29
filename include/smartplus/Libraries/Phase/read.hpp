@@ -15,25 +15,24 @@
  
  */
 
-///@file Self-Consistent.hpp
-///@brief User subroutine for non-linear N-phases heterogeneous materials using
-///@brief Self-Consistent scheme
+///@file read.hpp
+///@brief To read from NphasesX.dat and NlayerX.dat
 ///@version 1.0
 
 #pragma once
-
 #include <armadillo>
-
-using namespace std;
-using namespace arma;
+#include <string>
+#include "phase_characteristics.hpp"
 
 namespace smart{
+    
+/// Function that reads the output parameters
+void read_phase(phase_characteristics &, const int &);
 
-///@brief props[0] : Number of phases
-///@brief props[1] : Number of the file NPhase[i].dat utilized
-///@brief props[2] : Number of integration points in the 1 direction
-///@brief props[3] : Number of integration points in the 2 direction
-
-    void umat_SC_N(const arma::vec &, const arma::vec &, arma::vec &, arma::mat &, const arma::mat &, const int &, const arma::vec &, const int &, arma::vec &, const double &, const double &,const double &,const double &, double &, double &, const int &, const int &, const bool &, double &);
+/// Function that reads the output parameters
+void read_layer(phase_characteristics &, const int &);
+    
+/// Function that checks the coherency between the path and the step increments provided
+void read_ellipsoid(phase_characteristics &, const int &);
 
 } //namespace smart

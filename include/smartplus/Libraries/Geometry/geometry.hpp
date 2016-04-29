@@ -15,24 +15,38 @@
  
  */
 
-///@file periodic_layer.hpp
-///@brief User subroutine for non-linear periodic layers
+///@file geometry.hpp
+///@brief Class that define the geometry of a phase
 ///@version 1.0
 
 #pragma once
 
-#include <armadillo>
-
-using namespace std;
-using namespace arma;
+#include <iostream>
+#include <string>
 
 namespace smart{
 
-///@brief props[0] : Number of phases
-///@brief props[1] : Number of the file NLayer[i].dat utilized
-///@brief props[2] : Number of integration points in the 1 direction
-///@brief props[3] : Number of integration points in the 2 direction
+//======================================
+class geometry
+//======================================
+{
+	private:
 
-    void umat_PL_N(const arma::vec &, const arma::vec &, arma::vec &, arma::mat &, const arma::mat &, const int &, const arma::vec &, const int &, arma::vec &, const double &, const double &,const double &,const double &, double &, double &, const int &, const int &, const bool &, double &);
+	protected:
+
+	public :
+
+        double concentration;
+    
+		geometry(); 	//default constructor
+		geometry(const double &);	//constructor with parameters - allocates memory for statev
+
+		geometry(const geometry&);	//Copy constructor
+        virtual ~geometry();
+    
+		virtual geometry& operator = (const geometry&);
+		
+        friend std::ostream& operator << (std::ostream&, const geometry&);
+};
 
 } //namespace smart

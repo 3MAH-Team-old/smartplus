@@ -15,17 +15,23 @@
  
  */
 
-///@file solver.hpp
-///@brief To solver an homogeneous thermomechanical problem
+///@file multiphase.hpp
+///@brief User subroutine for non-linear N-phases heterogeneous materials using the method
 ///@version 1.0
 
 #pragma once
+
 #include <armadillo>
-#include <string>
+#include "../Libraries/Phase/phase_characteristics.hpp"
 
 namespace smart{
 
-//function that solves a
-void solver(const std::string &, const arma::vec &, const double &, const double &, const double &, const double &, const double &, const double &, const std::string& = "path.txt", const std::string& = "result_job.txt");
+// The multiphase function works with the following material properties
+///@brief props[0] : Number of phases
+///@brief props[1] : Number of the file NPhase[i].dat utilized
+///@brief props[2] : Number of integration points in the 1 direction
+///@brief props[3] : Number of integration points in the 2 direction
+
+void umat_multi(phase_characteristics &, const arma::mat &, const double &,const double &, const int &, const int &, const bool &, double &, const int &);
 
 } //namespace smart

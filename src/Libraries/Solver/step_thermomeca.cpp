@@ -28,6 +28,7 @@
 #include <smartplus/parameter.hpp>
 #include <smartplus/Libraries/Solver/step.hpp>
 #include <smartplus/Libraries/Solver/step_thermomeca.hpp>
+#include <smartplus/Libraries/Phase/state_variables_T.hpp>
 
 using namespace std;
 using namespace arma;
@@ -47,12 +48,6 @@ step_thermomeca::step_thermomeca() : step()
     BC_meca = zeros(6);
     BC_T = 0.;
     cBC_T = 0;
-
-    Etot = zeros(6);
-    DEtot = zeros(6);
-    sigma = zeros(6);
-    T = 0.;
-    Q = 0.;
 }
 
 /*!
@@ -67,7 +62,7 @@ step_thermomeca::step_thermomeca() : step()
  */
 
 //-------------------------------------------------------------
-step_thermomeca::step_thermomeca(int mnumber, int mDn_init, int mDn_mini, int mDn_inc, int mmode, const Col<int> &mcBC_meca, const vec &mBC_meca, const mat &mmecas, const double &mBC_T, const int &mcBC_T, const vec &mTs, const vec &mEtot, const vec &mDEtot, const vec &msigma, const double &mT, const double &mQ) : step(mnumber, mDn_init, mDn_mini, mDn_inc, mmode)
+step_thermomeca::step_thermomeca(const int &mnumber, const double &mDn_init, const double &mDn_mini, const double &mDn_inc, const int &mmode, const Col<int> &mcBC_meca, const vec &mBC_meca, const mat &mmecas, const double &mBC_T, const int &mcBC_T, const vec &mTs) : step(mnumber, mDn_init, mDn_mini, mDn_inc, mmode)
 //-------------------------------------------------------------
 {
     cBC_meca = mcBC_meca;
@@ -76,12 +71,6 @@ step_thermomeca::step_thermomeca(int mnumber, int mDn_init, int mDn_mini, int mD
     BC_T = mBC_T;
     cBC_T = mcBC_T;
     Ts = mTs;
-    
-    Etot = mEtot;
-    DEtot = mDEtot;
-    sigma = msigma;
-    T = mT;
-    Q = mQ;
 }
 
 /*!
@@ -99,12 +88,6 @@ step_thermomeca::step_thermomeca(const step_thermomeca& stm) : step(stm)
     BC_T = stm.BC_T;
     cBC_T = stm.cBC_T;
     Ts = stm.Ts;
-    
-    Etot = stm.Etot;
-    DEtot = stm.DEtot;
-    sigma = stm.sigma;
-    T = stm.T;
-    Q = stm.Q;
 }
 
 /*!
@@ -141,11 +124,6 @@ void step_thermomeca::generate(const double &mTime, const vec &msigma, const vec
     
     step::generate();
     
-    Time = mTime;
-    Etot = mEtot;
-    sigma = msigma;
-    T = mT;
-    
     Ts = zeros(ninc);
     mecas = zeros(ninc, 6);
     
@@ -165,10 +143,10 @@ void step_thermomeca::generate(const double &mTime, const vec &msigma, const vec
             
             for(int k = 0 ; k < 6 ; k++) {
                 if (cBC_meca(k) == 1){
-                    mecas(i,k) = inc_coef(i)*(BC_meca(k)-sigma(k))/ninc;
+                    mecas(i,k) = inc_coef(i)*(BC_meca(k)-msigma(k))/ninc;
                 }
                 else if (cBC_meca(k) == 0){
-                    mecas(i,k) = inc_coef(i)*(BC_meca(k)-Etot(k))/ninc;
+                    mecas(i,k) = inc_coef(i)*(BC_meca(k)-mEtot(k))/ninc;
                 }
             }
             
@@ -176,7 +154,7 @@ void step_thermomeca::generate(const double &mTime, const vec &msigma, const vec
                 Ts(i) = BC_T;                   //Note that here it is the flux that is imposed
             }
             else if(cBC_T == 0) {
-                Ts(i) = inc_coef(i)*(BC_T - T)/ninc;
+                Ts(i) = inc_coef(i)*(BC_T - mT)/ninc;
             }
             
         }
@@ -197,10 +175,10 @@ void step_thermomeca::generate(const double &mTime, const vec &msigma, const vec
         vec BC_file_n = zeros(size_BC); //vector that temporarly stores the previous values
         vec BC_file = zeros(size_BC); //vector that temporarly stores the values
         
-        BC_file_n(0) = Time;
+        BC_file_n(0) = mTime;
         int kT = 0;
         if (cBC_T == 0) {
-            BC_file_n(kT+1) = T;
+            BC_file_n(kT+1) = mT;
             kT++;
         }
         else if (cBC_T == 1) {
@@ -210,11 +188,11 @@ void step_thermomeca::generate(const double &mTime, const vec &msigma, const vec
         
         for (int k=0; k<6; k++) {
             if (cBC_meca(k) == 0) {
-                BC_file_n(kT+1) = Etot(k);
+                BC_file_n(kT+1) = mEtot(k);
                 kT++;
             }
             if (cBC_meca(k) == 1) {
-                BC_file_n(kT+1) = sigma(k);
+                BC_file_n(kT+1) = msigma(k);
                 kT++;
             }
         }
@@ -270,37 +248,6 @@ void step_thermomeca::generate(const double &mTime, const vec &msigma, const vec
 	}
     
 }
-
-//----------------------------------------------------------------------
-void step_thermomeca::assess_inc(const double &tnew_dt, double &tinc, const double &Dtinc, vec &Etot, const vec &DEtot, double &T, const double &DT, double &Time, const double &DTime, vec &sigma, vec &sigma_start, vec &statev, vec&statev_start, mat &dSdE, mat &dSdE_start, mat &dSdT, mat &dSdT_start, mat &dQdE, mat &dQdE_start, mat &dQdT, mat &dQdT_start) {
-    //----------------------------------------------------------------------
-    
-    if(tnew_dt < 1.){
-        sigma = sigma_start;
-        statev = statev_start;
-        
-        dSdE = dSdE_start;
-        dSdT = dSdT_start;
-        dQdE = dQdE_start;
-        dQdT = dQdT_start;
-        
-    }
-    else {
-        tinc += Dtinc;
-        Etot += DEtot;
-        T += DT;
-        Time += DTime;
-        sigma_start = sigma;
-        statev_start = statev;
-
-        dSdE_start = dSdE;
-        dSdT_start = dSdT;
-        dQdE_start = dQdE;
-        dQdT_start = dQdT;
-        
-    }
-    
-}
     
 /*!
  \brief Standard operator = for block
@@ -317,62 +264,55 @@ step_thermomeca& step_thermomeca::operator = (const step_thermomeca& stm)
 	ninc = stm.ninc;
 	mode = stm.mode;
     
-    Time = stm.Time;
     BC_Time = stm.BC_Time;
     
     cBC_meca = stm.cBC_meca;
     BC_meca = stm.BC_meca;
     BC_T = stm.BC_T;
-    cBC_T = stm.cBC_T;
-    
-    Etot = stm.Etot;
-    DEtot = stm.DEtot;
-    sigma = stm.sigma;
-    T = stm.T;
-    Q = stm.Q;
+    cBC_T = stm.cBC_T;    
     
 	return *this;
 }
 
-void step_thermomeca::output(ostream& output, const solver_output &so, const int &kblock, const int&kcycle, const int &kinc, const vec &statev) {
-   
+void step_thermomeca::output(ostream& output, const solver_output &so, const int &kblock, const int&kcycle, const int &kinc, const state_variables_T &sv_T) {
+    
     output << kblock+1 << "\t";
     output << kcycle+1 << "\t";
     output << number+1 << "\t";
     output << kinc+1 << "\t";
-    output << Time << "\t\t";
+    output << times(kinc) << "\t\t";
     
     if (so.o_nb_T) {
-        output << T  << "\t";
-        output << Q << "\t";                //This is for the flux
+        output << sv_T.T  << "\t";
+        output << 0 << "\t";                //This is for the flux
     }
     if (so.o_nb_meca) {
         for (int z=0; z<so.o_nb_meca; z++) {
-            output << Etot(so.o_meca(z)) << "\t";
+            output << sv_T.Etot(so.o_meca(z)) << "\t";
         }
         for (int z=0; z<so.o_nb_meca; z++) {
-            output << sigma(so.o_meca(z)) << "\t";
+            output << sv_T.sigma(so.o_meca(z)) << "\t";
         }
     }
     
     output << "\t";
     if(so.o_nw_statev != 0){
         if (so.o_wanted_statev(0) < 0) {
-            for(unsigned int k = 0 ; k < statev.n_elem ; k++)
-                output << statev(k) << "\t";
+            for(int k = 0 ; k < sv_T.nstatev ; k++)
+            output << sv_T.statev(k) << "\t";
         }
         else{
             for(int k = 0 ; k < so.o_nw_statev ; k++){
                 for (int l = so.o_wanted_statev(k); l < (so.o_range_statev(k)+1); l++){
-                    output << statev(l) << "\t";
+                    output << sv_T.statev(l) << "\t";
                 }
             }
         }
     }
     output << endl;
-        
+    
 }
-
+    
 //--------------------------------------------------------------------------
 ostream& operator << (ostream& s, const step_thermomeca& stm)
 //--------------------------------------------------------------------------

@@ -15,14 +15,15 @@
  
  */
 
-///@file Mori-Tanaka.hpp
-///@brief User subroutine for non-linear N-phases heterogeneous materials using
+///@file schemes.hpp
+///@brief micromechanical schemes for non-linear N-phases heterogeneous materials:
 ///@brief Mori-Tanaka scheme 
 ///@version 1.0
 
 #pragma once
 
 #include <armadillo>
+#include "../Libraries/Phase/phase_characteristics.hpp"
 
 namespace smart{
 
@@ -32,6 +33,12 @@ namespace smart{
 ///@brief props[2] : Number of integration points in the 1 direction
 ///@brief props[3] : Number of integration points in the 2 direction
 
-void umat_MT_N(const arma::vec &, const arma::vec &, arma::vec &, arma::mat &, const arma::mat &, const int &, const arma::vec &, const int &, arma::vec &, const double &, const double &,const double &,const double &, double &, double &, const int &, const int &, const bool &, double &);
-
+void Homogeneous_E(phase_characteristics &);
+    
+void Mori_Tanaka(phase_characteristics &);
+    
+void Self_Consistent(phase_characteristics &, const bool &, const int &);
+    
+void Periodic_Layer(phase_characteristics &);
+    
 } //namespace smart

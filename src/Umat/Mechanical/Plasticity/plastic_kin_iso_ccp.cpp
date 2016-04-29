@@ -54,11 +54,11 @@ namespace smart {
 ///@brief statev[6] : Plastic strain 13: EP(0,2) (*2)
 ///@brief statev[7] : Plastic strain 23: EP(1,2) (*2)
 ///@brief statev[8] : Backstress 11: X(0,0)
-///@brief statev[9] : Backstress 22: X(1,1)
-///@brief statev[10] : Backstress 33: X(2,2)
-///@brief statev[11] : Backstress 12: X(0,1)
-///@brief statev[12] : Backstress 13: X(0,2)
-///@brief statev[13] : Backstress 23: X(1,2)
+///@brief statev[9] : Backstress 11: X(1,1)
+///@brief statev[10] : Backstress 11: X(2,2)
+///@brief statev[11] : Backstress 11: X(0,1)
+///@brief statev[12] : Backstress 11: X(0,2)
+///@brief statev[13] : Backstress 11: X(1,2)
     
 
 void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT,const double &Time,const double &DTime, double &sse, double &spd, const int &ndi, const int &nshr, const bool &start, double &tnew_dt)
@@ -108,8 +108,8 @@ void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, 
     X(5) = statev(13);
     
     //Rotation of internal variables (tensors)
-    Rot_strain(EP, DR);
-    Rot_stress(X, DR);
+    EP = rotate_strain(EP, DR);
+    X = rotate_stress(X, DR);
     
 	///@brief Initialization
 	if(start)

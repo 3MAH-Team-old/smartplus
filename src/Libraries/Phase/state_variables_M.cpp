@@ -15,15 +15,16 @@
  
  */
 
-///@file state_variables.cpp
-///@brief State variables of a phase, in a defined coordinate system:
+///@file state_variables_M.cpp
+///@brief State variables of a mechanical material, in a defined coordinate system:
 ///@version 1.0
 
 #include <iostream>
 #include <fstream>
 #include <assert.h>
 #include <armadillo>
-#include <smartplus/Libraries/Homogenization/state_variables.hpp>
+#include <smartplus/Libraries/Phase/state_variables.hpp>
+#include <smartplus/Libraries/Phase/state_variables_M.hpp>
 #include <smartplus/parameter.hpp>
 #include <smartplus/Libraries/Maths/rotation.hpp>
 
@@ -41,13 +42,9 @@ namespace smart{
 */
 
 //-------------------------------------------------------------
-state_variables::state_variables() : Etot(6), DEtot(6), sigma(6), L(6,6), Lt(6,6)
+state_variables_M::state_variables_M() : state_variables(), L(6,6), Lt(6,6)
 //-------------------------------------------------------------
 {
-
-	Etot = zeros(6);
-	DEtot = zeros(6);
-	sigma = zeros(6);
 	L = zeros(6,6);
 	Lt = zeros(6,6);
 }
@@ -59,21 +56,15 @@ state_variables::state_variables() : Etot(6), DEtot(6), sigma(6), L(6,6), Lt(6,6
 */
 
 //-------------------------------------------------------------
-state_variables::state_variables(vec mEtot, vec mDEtot, vec msigma, mat mL, mat mLt) : Etot(6), DEtot(6), sigma(6), L(6,6), Lt(6,6)
+state_variables_M::state_variables_M(const vec &mEtot, const vec &mDEtot, const vec &msigma, const vec &msigma_start, const double &mT, const double &mDT, const double &msse, const double &mspd, const int &mnstatev, const vec &mstatev, const vec &mstatev_start, const mat &mL, const mat &mLt) : state_variables(mEtot, mDEtot, msigma, msigma_start, mT, mDT, msse, mspd, mnstatev, mstatev, mstatev_start), L(6,6), Lt(6,6)
 //-------------------------------------------------------------
 {	
-	assert (mEtot.size() == 6);
-	assert (mDEtot.size() == 6);
-	assert (msigma.size() == 6);
 	assert (mL.n_rows == 6);
 	assert (mL.n_cols == 6);
 	assert (mLt.n_rows == 6);
 	assert (mLt.n_cols == 6);	
 	
-	Etot = mEtot;
-	DEtot = mDEtot;
-	sigma = msigma;
-	L = mL;	
+	L = mL;
 	Lt = mLt;
 }
 
@@ -83,12 +74,9 @@ state_variables::state_variables(vec mEtot, vec mDEtot, vec msigma, mat mL, mat 
 */
 
 //------------------------------------------------------
-state_variables::state_variables(const state_variables& sv) : Etot(6), DEtot(6), sigma(6), L(6,6), Lt(6,6)
+state_variables_M::state_variables_M(const state_variables_M& sv) : state_variables(sv), L(6,6), Lt(6,6)
 //------------------------------------------------------
 {
-	Etot = sv.Etot;
-	DEtot = sv.DEtot;
-	sigma = sv.sigma;
 	L = sv.L;
 	Lt = sv.Lt;
 }
@@ -100,7 +88,7 @@ state_variables::state_variables(const state_variables& sv) : Etot(6), DEtot(6),
 */
 
 //-------------------------------------
-state_variables::~state_variables()
+state_variables_M::~state_variables_M()
 //-------------------------------------
 {
 
@@ -111,84 +99,81 @@ state_variables::~state_variables()
 */
 
 //----------------------------------------------------------------------
-state_variables& state_variables::operator = (const state_variables& sv)
+state_variables_M& state_variables_M::operator = (const state_variables_M& sv)
 //----------------------------------------------------------------------
 {
 	Etot = sv.Etot;
 	DEtot = sv.DEtot;
 	sigma = sv.sigma;
+	sigma_start = sv.sigma_start;
 	L = sv.L;
 	Lt = sv.Lt;
+    T = sv.T;
+    DT = sv.DT;
+    sse = sv.sse;
+    spd = sv.spd;
 
 	return *this;
 
 }
 
+//-------------------------------------------------------------
+void state_variables_M::update(const vec &mEtot, const vec &mDEtot, const vec &msigma, const vec &msigma_start, const double &mT, const double &mDT, const double &msse, const double &mspd, const int &mnstatev, const vec &mstatev, const vec &mstatev_start,  const mat &mL, const mat &mLt)
+//-------------------------------------------------------------
+{
+    state_variables::update(mEtot, mDEtot, msigma, msigma_start, mT, mDT, msse, mspd, mnstatev, mstatev, mstatev_start);
+    
+    assert (mL.n_rows == 6);
+    assert (mL.n_cols == 6);
+    assert (mLt.n_rows == 6);
+    assert (mLt.n_cols == 6);
+    
+    L = mL;
+    Lt = mLt;
+}
+        
 //----------------------------------------------------------------------
-state_variables& state_variables::rotate_l2g(const state_variables& sv, const double &psi, const double &theta, const double &phi)
+state_variables_M& state_variables_M::rotate_l2g(const state_variables_M& sv, const double &psi, const double &theta, const double &phi)
 //----------------------------------------------------------------------
 {
     
-	Etot = sv.Etot;
-	DEtot = sv.DEtot;
-	sigma = sv.sigma;
+    state_variables::rotate_l2g(sv, psi, theta, phi);
+    
 	L = sv.L;
 	Lt = sv.Lt;
     
   	if(fabs(phi) > iota) {
-		Etot = rotate_strain(Etot, -phi, axis_phi);
-		DEtot = rotate_strain(DEtot, -phi, axis_phi);
-		sigma = rotate_stress(sigma, -phi, axis_phi);
-		Lt = rotateL(Lt, -phi, axis_phi);
 		L = rotateL(L, -phi, axis_phi);
+		Lt = rotateL(Lt, -phi, axis_phi);
 	}
   	if(fabs(theta) > iota) {
-		Etot = rotate_strain(Etot, -theta, axis_theta);
-		DEtot = rotate_strain(DEtot, -theta, axis_theta);
-		sigma = rotate_stress(sigma, -theta, axis_theta);				
-		L = rotateL(L, -theta, axis_theta);		
 		Lt = rotateL(Lt, -theta, axis_theta);
+		L = rotateL(L, -theta, axis_theta);
 	}
 	if(fabs(psi) > iota) {
-		Etot = rotate_strain(Etot, -psi, axis_psi);
-		DEtot = rotate_strain(DEtot, -psi, axis_psi);
-		sigma = rotate_stress(sigma, -psi, axis_psi);
-		L = rotateL(L, -psi, axis_psi);
 		Lt = rotateL(Lt, -psi, axis_psi);
+		L = rotateL(L, -psi, axis_psi);        
 	}
     
 	return *this;
 }
 
 //----------------------------------------------------------------------
-state_variables& state_variables::rotate_g2l(const state_variables& sv, const double &psi, const double &theta, const double &phi)
+state_variables_M& state_variables_M::rotate_g2l(const state_variables_M& sv, const double &psi, const double &theta, const double &phi)
 //----------------------------------------------------------------------
 {
 
-	Etot = sv.Etot;
-	DEtot = sv.DEtot;
-	sigma = sv.sigma;
-	L = sv.L;
-	Lt = sv.Lt;
+    state_variables::rotate_g2l(sv, psi, theta, phi);
     
   	if(fabs(psi) > iota) {
-		Etot = rotate_strain(Etot, psi, axis_psi);
-		DEtot = rotate_strain(DEtot, psi, axis_psi);
-		sigma = rotate_stress(sigma, psi, axis_psi);
 		L = rotateL(L, psi, axis_psi);
 		Lt = rotateL(Lt, psi, axis_psi);
 	}			
 	if(fabs(theta) > iota) {
-		Etot = rotate_strain(Etot, theta, axis_theta);
-		DEtot = rotate_strain(DEtot, theta, axis_theta);
-		sigma = rotate_stress(sigma, theta, axis_theta);
-		L = rotateL(L, theta, axis_theta);	
+		L = rotateL(L, theta, axis_theta);
 		Lt = rotateL(Lt, theta, axis_theta);
 	}
 	if(fabs(phi) > iota) {
-		Etot = rotate_strain(Etot, phi, axis_phi);
-		DEtot = rotate_strain(DEtot, phi, axis_phi);
-		sigma = rotate_stress(sigma, phi, axis_phi);
 		L = rotateL(L, phi, axis_phi);
 		Lt = rotateL(Lt, phi, axis_phi);
     }
@@ -197,16 +182,30 @@ state_variables& state_variables::rotate_g2l(const state_variables& sv, const do
 }
 
 //--------------------------------------------------------------------------
-ostream& operator << (ostream& s, const state_variables& sv)
+ostream& operator << (ostream& s, const state_variables_M& sv)
 //--------------------------------------------------------------------------
 {
 	s << "Etot: \n" << sv.Etot << "\n";
 	s << "DEtot: \n" << sv.DEtot << "\n";
 	s << "sigma: \n" << sv.sigma << "\n";
+	s << "sigma_start: \n" << sv.sigma_start << "\n";
+    s << "T: \n" << sv.T << "\n";
+    s << "DT: \n" << sv.DT << "\n";
+    s << "sse: \n" << sv.sse << "\n";
+    s << "spd: \n" << sv.spd << "\n";    
 	s << "L: \n" << sv.L << "\n";
 	s << "Lt: \n" << sv.Lt << "\n";
 	s << "\n";
 
+    s << "nstatev: \n" << sv.nstatev << "\n";
+    if (sv.nstatev) {
+        s << "statev: \n";
+        s << sv.statev.t();
+        s << "\n";
+        s << sv.statev_start.t();
+        s << "\n";
+    }
+    
 	return s;
 }
 

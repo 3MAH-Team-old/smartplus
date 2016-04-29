@@ -24,6 +24,7 @@
 #include <iostream>
 #include <armadillo>
 #include "step.hpp"
+#include "../Phase/state_variables_T.hpp"
 
 namespace smart{
 
@@ -44,25 +45,18 @@ protected:
     int cBC_T;         //True (1) is for a heat flux entering in a material point, 0 is for fixed temperature
     arma::vec Ts;
     
-    arma::vec Etot;
-    arma::vec DEtot;
-    arma::vec sigma;
-    double T;
-    double Q;
-    
     step_thermomeca(); 	//default constructor
-    step_thermomeca(int, int, int, int, int, const arma::Col<int>&, const arma::vec&, const arma::mat&, const double&, const int&, const arma::vec&, const arma::vec&, const arma::vec&, const arma::vec&, const double&, const double&); //Constructor with parameters
+    step_thermomeca(const int &, const double &, const double &, const double &, const int &, const arma::Col<int>&, const arma::vec&, const arma::mat&, const double&, const int&, const arma::vec&); //Constructor with parameters
     step_thermomeca(const step_thermomeca&);	//Copy constructor
-    ~step_thermomeca();
+    virtual ~step_thermomeca();
     
     using step::generate;
     virtual void generate(const double&, const arma::vec&, const arma::vec&, const double&);
-    virtual void assess_inc(const double &, double &, const double &, arma::vec &, const arma::vec &, double &, const double &, double &, const double &, arma::vec &, arma::vec &, arma::vec &, arma::vec&, arma::mat &, arma::mat &, arma::mat &, arma::mat &, arma::mat &, arma::mat &, arma::mat &, arma::mat &);
     
+    using step::output;
+    virtual void output(std::ostream&, const solver_output &, const int &, const int &, const int&, const state_variables_T &);
     virtual step_thermomeca& operator = (const step_thermomeca&);
-    
-    virtual void output(std::ostream&, const solver_output&, const int&, const int&, const int&, const arma::vec&);
-    
+        
     friend  std::ostream& operator << (std::ostream&, const step_thermomeca&);
 };
 

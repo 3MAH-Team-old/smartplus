@@ -25,8 +25,13 @@
 #include <string>
 #include <assert.h>
 #include <math.h>
+#include <memory>
 #include <armadillo>
 #include <smartplus/parameter.hpp>
+#include <smartplus/Libraries/Phase/material_characteristics.hpp>
+#include <smartplus/Libraries/Phase/state_variables.hpp>
+#include <smartplus/Libraries/Phase/state_variables_M.hpp>
+#include <smartplus/Libraries/Phase/state_variables_T.hpp>
 #include <smartplus/Umat/umat_smart.hpp>
 #include <smartplus/Libraries/Solver/read.hpp>
 #include <smartplus/Libraries/Solver/block.hpp>
@@ -39,58 +44,66 @@ using namespace arma;
 
 namespace smart{
 
-void solver(const string &umat_name, const vec &props, const double &nstatev, const double &rho, const double &c_p, const string &pathfile, const string &outputfile) {
-
-    const char *car;
-    car = outputfile.c_str();
-    ofstream output(car);
+void solver(const string &umat_name, const vec &props, const double &nstatev, const double &psi_rve, const double &theta_rve, const double &phi_rve,const double &rho, const double &c_p, const string &pathfile, const string &outputfile) {
+    
+//    ofstream output(outputfile);
     
 	///Usefull UMAT variables
 	int ndi = 3;
-	int nshr = 3;
-    
-    mat dSdE = zeros(6,6);
-    mat dSdT = zeros(1,6);
-    mat dQdE = zeros(6,1);
-    mat dQdT = zeros(1,1);
-    
-    vector<block> blocks;
-    
-	///Material properties reading, use "material.dat" to specify parameters values
-	vec statev = zeros(nstatev);
-    double nprops = props.n_elem;
+	int nshr = 3;    
+    std::vector<block> blocks;  //loading blocks
+    phase_characteristics rve;  // Representative volume element
     
 	bool start = true;
 	double Time = 0.;
 	double DTime = 0.;
-	double T = 0.;
-	double DT = 0.;
+    double T_init = 0.;
+//	double T = 0.;
+//	double DT = 0.;
     double tnew_dt = 1.;
-	vec sigma = zeros(6);
-    double Q = 0.;
-    double rpl = 0.;            //The part of the heat linked with material's behavior (thermoelasticity, dissipation, phase change..)
-	vec Etot = zeros(6);
-	vec DEtot = zeros(6);
-	mat Lt = zeros(6,6);
-	mat DR = eye(3,3);
+//    double Q = 0.;
+//    double rpl = 0.;            //The part of the heat linked with material's behavior (thermoelasticity, dissipation, phase change..)
+//    double sse = 0.;
+//    double spd = 0.;
     
-    double sse = 0.;
-    double spd = 0.;
+    //What follows constitutes the base variables to solve the mechanical/thermomechanical problem
+//    vec sigma = zeros(6);
+//    vec sigma_start = zeros(6);
+//    vec Etot = zeros(6);
+//    vec DEtot = zeros(6);
+    mat L = zeros(6,6);
+    mat Lt = zeros(6,6);
+    mat DR = eye(3,3);
+    
+//    mat dSdE = zeros(6,6);
+//    mat dSdT = zeros(1,6);
+//    mat dQdE = zeros(6,1);
+//    mat dQdT = zeros(1,1);
     
     //read the material properties
     //Read the loading path
-    read_path(blocks, T, pathfile);
+    read_path(blocks, T_init, pathfile);
+    
+    for(auto b : blocks) {
+        cout << "blocks = " << b << "\n";
+    }
+    
+//    std::vector<shared_ptr<material_characteristics> > rve_save(1); //There is at least one material, the effective one
+//    shared_ptr<material_characteristics> eff_material = rve_save[0]; //There is at least one material, the effective one
+//    shared_ptr<material_characteristics> eff_material
+    
+    ///Material properties reading, use "material.dat" to specify parameters values
+    rve.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props, rho, c_p);
     
     //Output
     int o_ncount = 0;
     double o_tcount = 0.;
     solver_output so(blocks.size());
+//    std::vector<solver_output> rve_so;   //This is to output the response of the phases
     read_output(so, blocks.size(), nstatev);
     
-    //Chck output and step files
+    //Check output and step files
     check_path_output(blocks, so);
-    
-    vec statev_start = statev;
     
     double error = 0.;
     vec residual;
@@ -105,7 +118,6 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
     double Dtinc=0.;
     double Dtinc_cur=0.;
     double tau = 0.;        //Time constant for convexion thermal mechanical conditions
-    double Tinit = T;       //Initial temperature
     
     /// Block loop
     for(unsigned int i = 0 ; i < blocks.size() ; i++){
@@ -114,27 +126,49 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
         
         switch(blocks[i].type) {
             case 1: {
-        
+                
                 /// resize the problem to solve
                 residual = zeros(6);
                 Delta = zeros(6);
-                K = zeros(6, 6);
-                invK = zeros(6, 6);
+                K = zeros(6,6);
+                invK = zeros(6,6);
                 
-                vec sigma_start = sigma;
-                Lt = zeros(6,6);
+                shared_ptr<state_variables_M> sv_M;
                 
-                DEtot = zeros(6);
+                if(start) {
+                    rve.construct(0,blocks[i].type);
+                    rve.sptr_sv_global->update(zeros(6), zeros(6), zeros(6), zeros(6), T_init, 0., 0., 0., nstatev, zeros(nstatev), zeros(nstatev));
+                    sv_M = std::dynamic_pointer_cast<state_variables_M>(rve.sptr_sv_global);
+                }
+                else {
+                    //Dynamic cast from some other (possible state_variable_M/T)
+                    /*sv_M = std::dynamic_pointer_cast<state_variables_M>(rve.sptr_sv_global);
+                    rve.construct(0,blocks[i].type);
+                    rve.sptr_sv_global->update(sv_M->Etot, sv_M->DEtot, sv_M->sigma, sv_M->sigma_start, sv_M->T, sv_M->DT, sv_M->sse, sv_M->spd, nstatev, sv_M->statev, sv_M->statev_start);*/
+                    //sv_M is reassigned properly
+                    sv_M = std::dynamic_pointer_cast<state_variables_M>(rve.sptr_sv_global);
+                }
+                
+                sv_M->L = zeros(6,6);
+                sv_M->Lt = zeros(6,6);
+                
                 DR = eye(3,3);
                 DTime = 0.;
-                DT = 0.;
+                sv_M->DEtot = zeros(6);
+                sv_M->DT = 0.;
                 
                 //Run the umat for the first time in the block. So that we get the proper tangent properties
-                run_umat(umat_name, Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
+                run_umat_M(rve, DR, Time, DTime, ndi, nshr, start, tnew_dt);
                 
-                statev_start = statev;
+                if(start) {
+                    //Use the number of phases saved to define the files
+                    rve.define_output(outputfile);
+                    //Write the initial results
+                    rve.output(so, -1, -1, -1, -1, Time);
+                }
+                //Set the start values of sigma_start=sigma and statev_start=statev for all phases
+                rve.set_start(); //DEtot = 0 and DT = 0 so we can use it safely here
                 start = false;
-                mat Lt_start = Lt;
                 
                 /// Cycle loop
                 for(int n = 0; n < blocks[i].ncycle; n++){
@@ -143,14 +177,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                     for(int j = 0; j < blocks[i].nstep; j++){
                         
                         shared_ptr<step_meca> sptr_meca = std::dynamic_pointer_cast<step_meca>(blocks[i].steps[j]);
-                        
-                        sptr_meca->generate(Time, sigma, Etot, T);
-                        
-                        //Write the initial results
-                        if ((n == 0)&&(j == 0)) {
-                            //Write the results
-                            sptr_meca->output(output, so, i, n, 0, statev);
-                        }
+                        sptr_meca->generate(Time, sv_M->Etot, sv_M->sigma, sv_M->T);
                         
                         nK = sum(sptr_meca->cBC_meca);
                         
@@ -173,11 +200,11 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                 
                                 if(nK == 0){
                                     
-                                    DEtot = Dtinc*sptr_meca->mecas.row(inc).t();
-                                    DT = Dtinc*sptr_meca->Ts(inc);
+                                    sv_M->DEtot = Dtinc*sptr_meca->mecas.row(inc).t();
+                                    sv_M->DT = Dtinc*sptr_meca->Ts(inc);
                                     DTime = Dtinc*sptr_meca->times(inc);
                                     
-                                    run_umat(umat_name, Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
+                                    run_umat_M(rve, DR, Time, DTime, ndi, nshr, start, tnew_dt);
                                 }
                                 else{
                                     /// ********************** SOLVING THE MIXED PROBLEM NRSTRUCT ***********************************
@@ -185,16 +212,15 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                     
                                     error = 1.;
                                    
-                                    DEtot = zeros(6);
-                                    Lt = Lt_start;
+                                    sv_M->DEtot = zeros(6);
                                     
                                     for(int k = 0 ; k < 6 ; k++)
                                     {
                                         if (sptr_meca->cBC_meca(k)) {
-                                            residual(k) = sigma(k) - sigma_start(k) - Dtinc*sptr_meca->mecas(inc,k);
+                                            residual(k) = sv_M->sigma(k) - sv_M->sigma_start(k) - Dtinc*sptr_meca->mecas(inc,k);
                                         }
                                         else {
-                                            residual(k) = lambda_solver*(DEtot(k) - Dtinc*sptr_meca->mecas(inc,k));
+                                            residual(k) = lambda_solver*(sv_M->DEtot(k) - Dtinc*sptr_meca->mecas(inc,k));
                                         }
                                     }
                                     
@@ -202,7 +228,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                         
                                         ///Prediction of the strain increment using the tangent modulus given from the umat_ function
                                         //we use the ddsdde (Lt) from the previous increment
-                                        Lt_2_K(Lt, K, sptr_meca->cBC_meca, lambda_solver);
+                                        Lt_2_K(sv_M->Lt, K, sptr_meca->cBC_meca, lambda_solver);
                                         
                                         ///jacobian inversion
                                         invK = inv(K);
@@ -210,28 +236,26 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                         /// Prediction of the component of the strain tensor
                                         Delta = -invK * residual;
                                         
-                                        DEtot += Delta;
-                                        DT = Dtinc*sptr_meca->Ts(inc);
+                                        sv_M->DEtot += Delta;
+                                        sv_M->DT = Dtinc*sptr_meca->Ts(inc);
                                         DTime = Dtinc*sptr_meca->times(inc);
                                         
-                                        sigma = sigma_start;
-                                        statev = statev_start;
-                                        
-                                        run_umat(umat_name, Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
+                                        rve.to_start();
+                                        run_umat_M(rve, DR, Time, DTime, ndi, nshr, start, tnew_dt);
                                         
                                         for(int k = 0 ; k < 6 ; k++)
                                         {
                                             if (sptr_meca->cBC_meca(k)) {
-                                                residual(k) = sigma(k) - sigma_start(k) - Dtinc*sptr_meca->mecas(inc,k);
+                                                residual(k) = sv_M->sigma(k) - sv_M->sigma_start(k) - Dtinc*sptr_meca->mecas(inc,k);
                                             }
                                             else {
-                                                residual(k) = lambda_solver*(DEtot(k) - Dtinc*sptr_meca->mecas(inc,k));
+                                                residual(k) = lambda_solver*(sv_M->DEtot(k) - Dtinc*sptr_meca->mecas(inc,k));
                                             }
                                         }
-
+                                        
                                         compteur++;
-                                        error = sqrt(norm(residual, 2.));
-
+                                        error = norm(residual, 2.);
+                                        
                                         if(tnew_dt < 1.) {
                                             if((fabs(Dtinc_cur - sptr_meca->Dn_mini) > iota)||(inforce_solver == 0)) {
                                                 compteur = maxiter_solver;
@@ -250,7 +274,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                 
                                 if(error > precision_solver) {
                                     if((Dtinc_cur == sptr_meca->Dn_mini)&&(inforce_solver == 1)) {
-                                        cout << "The solver has been inforced to proceed (Solver issue) at step:" << sptr_meca->number << " inc: " << inc << " and fraction:" << tinc << "\n";
+                                        cout << "The solver has been inforced to proceed (Solver issue) at step:" << sptr_meca->number << " inc: " << inc << " and fraction:" << tinc << ", with the error: " << error << "\n";
                                         cout << "The next increment has integrated the error to avoid propagation\n";
                                         //The solver has been inforced!
                                         tnew_dt = 1.;
@@ -275,8 +299,8 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                 }
                                 compteur = 0;
                                 
-                                sptr_meca->assess_inc(tnew_dt, tinc, Dtinc, Etot, DEtot, T, DT, Time, DTime, sigma, sigma_start, statev, statev_start, Lt, Lt_start);
-                            
+                                sptr_meca->assess_inc(tnew_dt, tinc, Dtinc, rve ,Time, DTime);
+                                //start variables ready for the next increment
                                 
                             }
                             
@@ -288,15 +312,11 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                 o_tcount+=DTime;
                             }
                             
-                            sptr_meca->Time = Time;
-                            sptr_meca->Etot = Etot;
-                            sptr_meca->sigma = sigma;
-                            sptr_meca->T = T;
-                            
                             //Write the results
                             if (((so.o_type(i) == 1)&&(o_ncount == so.o_nfreq(i)))||(((so.o_type(i) == 2)&&(fabs(o_tcount - so.o_tfreq(i)) < 1.E-12)))) {
                                 
-                                sptr_meca->output(output, so, i, n, inc, statev);
+                                rve.output(so, i, n, j, inc, Time);
+
                                 
                                 if (so.o_type(i) == 1) {
                                     o_ncount = 0;
@@ -315,7 +335,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                 }
                 break;
             } //Mechanical
-            case 2: {
+/*            case 2: {
                 
                 /// resize the problem to solve
                 residual = zeros(7);
@@ -339,7 +359,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                 DT = 0.;
                 
                 //Run the umat for the first time in the block. So that we get the proper tangent properties
-                run_umat_T(umat_name, Etot, DEtot, sigma, rpl, dSdE, dSdT, drpldE, drpldT, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
+                run_umat_T(umat_name, Etot, DEtot, sigma, rpl, dSdE, dSdT, drpldE, drpldT, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt, rve_save);
                 
                 Q = -1.*rpl;    //Since DTime=0;
                 
@@ -361,7 +381,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                     for(int j = 0; j < blocks[i].nstep; j++){
                         
                         shared_ptr<step_thermomeca> sptr_thermomeca = std::dynamic_pointer_cast<step_thermomeca>(blocks[i].steps[j]);
-                        sptr_thermomeca->generate(Time, sigma, Etot, T);
+                        sptr_thermomeca->generate(Time, Etot, sigma, T);
                         
                         //Write the initial results
                         if ((n == 0)&&(j == 0)) {
@@ -401,7 +421,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                     DT = Dtinc*sptr_thermomeca->Ts(inc);
                                     DTime = Dtinc*sptr_thermomeca->times(inc);
 
-                                    run_umat_T(umat_name, Etot, DEtot, sigma, rpl, dSdE, dSdT, drpldE, drpldT, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
+                                    run_umat_T(umat_name, Etot, DEtot, sigma, rpl, dSdE, dSdT, drpldE, drpldT, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt, rve_save);
                                     
                                     if (DTime < 1.E-12) {
                                         Q = -1.*rpl;    //Since DTime=0;
@@ -477,7 +497,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                         sigma = sigma_start;
                                         statev = statev_start;
                                         
-                                        run_umat_T(umat_name, Etot, DEtot, sigma, rpl, dSdE, dSdT, drpldE, drpldT, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
+                                        run_umat_T(umat_name, Etot, DEtot, sigma, rpl, dSdE, dSdT, drpldE, drpldT, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt, rve_save);
 
                                         if (DTime < 1.E-12) {
                                             Q = -1.*rpl;    //Since DTime=0;
@@ -525,7 +545,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                         }
 
                                         
-                                        error = sqrt(norm(residual, 2.));
+                                        error = norm(residual, 2.);
                                         compteur++;
                                                                             
                                     }
@@ -596,7 +616,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                     
                 }
                 break;
-            } //Thermomechanical
+            } //Thermomechanical */
             default: {
                 cout << "the block type is not defined!\n";
                 break;

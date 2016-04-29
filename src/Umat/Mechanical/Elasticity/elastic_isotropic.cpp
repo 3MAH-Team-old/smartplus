@@ -59,7 +59,7 @@ void umat_elasticity_iso(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt,
 	// ######################  Elastic compliance and stiffness #################################			
 	//defines L
 	Lt = L_iso(E, nu, "Enu");
-	
+    
 	if(start) { //Initialization
 		sigma = zeros(6);
 	}

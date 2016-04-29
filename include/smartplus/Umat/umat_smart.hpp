@@ -7,9 +7,7 @@
 
 #pragma once
 #include <armadillo>
-
-using namespace std;
-using namespace arma;
+#include "../Libraries/Phase/phase_characteristics.hpp"
 
 namespace smart{
 
@@ -32,18 +30,17 @@ namespace smart{
 ///@param layer layer number - not used
 ///@param kspt section point number within the current layer - not used
 ///@param kstep step number
-///@param kinc increment number
-
-
+///@param kinc increment number    
+    
 void abaqus2smart(double *, double *, const double *, const double *, const double *, const double &, const double &, const double &, const int &,const double *, const int &, double *, const double &, const int &, const int &, const double *, arma::vec &, arma::mat &, arma::vec &, arma::vec &, double &, double &, double &, double &, arma::vec &, arma::vec &, double &, arma::mat &, bool &);
 
-void select_umat_T(const std::string &, const arma::vec &, const arma::vec &, arma::vec &, double &, arma::mat &, arma::mat &, arma::mat &, arma::mat &, const arma::mat &, const int &, const arma::vec &, const int &, arma::vec &, const double &, const double &,const double &,const double &, double &, double &, const int &, const int &, bool &, double &);
+void select_umat_T(phase_characteristics &, const arma::mat &, const double &, const double &, const int &, const int &, const bool &, double &);
     
-void select_umat(const std::string &, const arma::vec &, const arma::vec &, arma::vec &, arma::mat &, const arma::mat &, const int &, const arma::vec &, const int &, arma::vec &, const double &, const double &,const double &,const double &, double &, double &, const int &, const int &, const bool &, double &);
+void select_umat_M(phase_characteristics &, const arma::mat &, const double &, const double &, const int &, const int &, const bool &, double &);
 
-void run_umat_T(const std::string &, const arma::vec &, const arma::vec &, arma::vec &, double &, arma::mat &, arma::mat &, arma::mat &, arma::mat &, const arma::mat &, const int &, const arma::vec &, const int &, arma::vec &, const double &, const double &,const double &,const double &, double &, double &, const int &, const int &, bool &, double &);
+void run_umat_T(phase_characteristics &, const arma::mat &, const double &, const double &, const int &, const int &, bool &, double &);
 
-    void run_umat(const std::string &, const arma::vec &, const arma::vec &, arma::vec &, arma::mat &, const arma::mat &, const int &, const arma::vec &, const int &, arma::vec &, const double &, const double &,const double &,const double &, double &, double &, const int &, const int &, bool &, double &);
+void run_umat_M(phase_characteristics &, const arma::mat &, const double &, const double &, const int &, const int &, bool &, double &);
 
 void smart2abaqus(double *, double *, double *, const int &, const int &, const arma::vec &, const arma::mat &, const arma::vec &, double &, const double &);
     
