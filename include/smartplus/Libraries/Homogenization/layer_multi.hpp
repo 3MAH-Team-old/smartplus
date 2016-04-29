@@ -38,8 +38,21 @@ class layer_multi : public phase_multi
     
 	public :
 
+/*        static arma::mat sumDnn;
+        static arma::mat sumcDsig;
+        static double m;*/
+        //Those static variables are redefined in fonction to help multithread in case of n-order micromechanics
+        
+        //Part of the tangent modulus (usefull derivative)
+        arma::mat Dnn;
+        arma::mat Dnt;
+        //Derivatives of the gradient / x1
+        arma::mat dXn;
+        arma::mat dXt;
+
+    
         layer_multi(); 	//default constructor
-        layer_multi(const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&); //Constructor with parameters
+        layer_multi(const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&); //Constructor with parameters
         layer_multi(const layer_multi&);	//Copy constructor
             ~layer_multi();
         
