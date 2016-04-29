@@ -37,12 +37,17 @@ class layer : public geometry
 	protected:
 
 	public :
-
+    
         int layerup;
         int layerdown;
     
+        //a stack of layer have the same direction, it is attributed to each one of them since ther might be several stacks (one per inclusion, for instance..)
+        double psi_geom;
+        double theta_geom;
+        double phi_geom;    
+    
 		layer(); 	//default constructor
-        layer(const double &, const int &, const int &); //Constructor with parameters
+        layer(const double &, const int &, const int &, const double &,const double &, const double &); //Constructor with parameters
 
 		layer(const layer&);	//Copy constructor
         virtual ~layer();
