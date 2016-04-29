@@ -24,6 +24,7 @@
 #include <iostream>
 #include <armadillo>
 #include "step.hpp"
+#include "../Phase/state_variables_M.hpp"
 
 namespace smart{
 
@@ -44,24 +45,19 @@ protected:
     int cBC_T;
     arma::vec Ts;
     
-    arma::vec Etot;
-    arma::vec DEtot;
-    arma::vec sigma;
-    double T;
- 
     step_meca(); 	//default constructor
-    step_meca(int, int, int, int, int, const arma::Col<int>&, const arma::vec&, const arma::mat&, const double&, const int&, const arma::vec&, const arma::vec&, const arma::vec&, const arma::vec&, const double&); //Constructor with parameters
+    step_meca(const int &, const double &, const double &, const double &, const int &, const arma::Col<int>&, const arma::vec&, const arma::mat&, const double&, const int&, const arma::vec&); //Constructor with parameters
+    
     step_meca(const step_meca&);	//Copy constructor
-    ~step_meca();
+    virtual ~step_meca();
     
     using step::generate;
     virtual void generate(const double&, const arma::vec&, const arma::vec&, const double&);
-    virtual void assess_inc(const double &, double &, const double &, arma::vec &, const arma::vec &, double &, const double &, double &, const double &, arma::vec &, arma::vec &, arma::vec &, arma::vec&, arma::mat &, arma::mat &);
     
+    using step::output;
+    virtual void output(std::ostream&, const solver_output &, const int &, const int &, const int&, const state_variables_M &);
     virtual step_meca& operator = (const step_meca&);
-    
-    virtual void output(std::ostream&, const solver_output&, const int&, const int&, const int&, const arma::vec&);
-    
+        
     friend  std::ostream& operator << (std::ostream&, const step_meca&);
 };
 
