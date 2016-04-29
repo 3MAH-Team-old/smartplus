@@ -25,6 +25,7 @@
 #include <assert.h>
 #include <math.h>
 #include <armadillo>
+#include <memory>
 #include <smartplus/Libraries/Solver/block.hpp>
 #include <smartplus/Libraries/Solver/step_meca.hpp>
 #include <smartplus/Libraries/Solver/step_thermomeca.hpp>
