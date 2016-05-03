@@ -43,15 +43,27 @@ using namespace arma;
 
 namespace smart{
   
-void Homogeneous_E(phase_characteristics &phase) {
+void Lt_Homogeneous_E(phase_characteristics &phase) {
     
     //Compute the strain concentration tensor A
     for(auto r : phase.sub_phases) {
         r.sptr_multi->A = eye(6,6);
     }
 }
+
+void DE_Homogeneous_E(phase_characteristics &phase) {
     
-void Mori_Tanaka(phase_characteristics &phase) {
+    std::shared_ptr<state_variables_M> sv_r;
+    std::shared_ptr<state_variables_M> sv_eff = std::dynamic_pointer_cast<state_variables_M>(phase.sptr_sv_local);
+    
+    //Compute the strain concentration tensor A
+    for(auto r : phase.sub_phases) {
+        r.sptr_multi->A = eye(6,6);
+        sv_r->DEtot = r.sptr_multi->A*sv_eff->DEtot; //Recall that the global coordinates of subphases is the local coordinates of the generic phase
+    }
+}
+
+void Lt_Mori_Tanaka(phase_characteristics &phase) {
     
     mat sumT = zeros(6,6);
     mat inv_sumT = zeros(6,6);
@@ -60,6 +72,7 @@ void Mori_Tanaka(phase_characteristics &phase) {
     std::shared_ptr<ellipsoid> elli;
     //ptr on the matrix properties
     std::shared_ptr<state_variables_M> sv_0 = std::dynamic_pointer_cast<state_variables_M>(phase.sub_phases[0].sptr_sv_global);
+    std::shared_ptr<state_variables_M> sv_eff = std::dynamic_pointer_cast<state_variables_M>(phase.sptr_sv_local);
     std::shared_ptr<state_variables_M> sv_r;
     
     //Compute the Eshelby tensor and the interaction tensor for each phase
@@ -83,21 +96,55 @@ void Mori_Tanaka(phase_characteristics &phase) {
     }
 }
     
-void Self_Consistent(phase_characteristics &phase, const bool &start, const int &option_start = 0) {
+void DE_Mori_Tanaka(phase_characteristics &phase) {
+    
+    mat sumT = zeros(6,6);
+    mat inv_sumT = zeros(6,6);
+    
+    std::shared_ptr<ellipsoid_multi> elli_multi;
+    std::shared_ptr<ellipsoid> elli;
+    //ptr on the matrix properties
+    std::shared_ptr<state_variables_M> sv_0 = std::dynamic_pointer_cast<state_variables_M>(phase.sub_phases[0].sptr_sv_global);
+    std::shared_ptr<state_variables_M> sv_eff = std::dynamic_pointer_cast<state_variables_M>(phase.sptr_sv_local);
+    std::shared_ptr<state_variables_M> sv_r;
+    
+    //Compute the Eshelby tensor and the interaction tensor for each phase
+    for(auto r : phase.sub_phases) {
+        elli_multi = std::dynamic_pointer_cast<ellipsoid_multi>(r.sptr_multi);
+        elli = std::dynamic_pointer_cast<ellipsoid>(r.sptr_shape);
+        sv_r = std::dynamic_pointer_cast<state_variables_M>(r.sptr_sv_global);
+        
+        //Note The tangent modulus are turned in the coordinate system of the ellipspoid in the fillT function
+        elli_multi->fillT(sv_0->Lt, sv_r->Lt, *elli);
+        //Compute the normalization interaction tensir sumT
+        sumT += elli->concentration*elli_multi->T;
+    }
+    
+    inv_sumT = inv(sumT);
+    
+    //Compute the strain concentration tensor A
+    for(auto r : phase.sub_phases) {
+        elli_multi = std::dynamic_pointer_cast<ellipsoid_multi>(r.sptr_multi);
+        elli_multi->A = elli_multi->T*inv_sumT;
+        sv_r->DEtot = elli_multi->A*sv_eff->DEtot; //Recall that the global coordinates of subphases is the local coordinates of the generic phase
+    }
+}
+
+void Lt_Self_Consistent(phase_characteristics &phase, const bool &start, const int &option_start = 0) {
     
     std::shared_ptr<ellipsoid_multi> elli_multi;
     std::shared_ptr<ellipsoid> elli;
     //ptr on the matrix properties
     std::shared_ptr<state_variables_M> sv_r;
     std::shared_ptr<state_variables_M> sv_eff = std::dynamic_pointer_cast<state_variables_M>(phase.sptr_sv_local);
-
+    
     //In the self_consistent scheme we need to have the effective tangent modulus first, based on some guessed initial concentration tensor.
     if(start) {
         //ensure that the Lt of phase is actually 0
         if(option_start == 0)
-            Homogeneous_E(phase);
+            Lt_Homogeneous_E(phase);
         else if(option_start == 1)
-            Mori_Tanaka(phase);
+            Lt_Mori_Tanaka(phase);
         else {
             cout << "error , option is not valid for the start option of Self-Consistent scheme (0 : MT, 1 : h_E)";
         }
@@ -122,44 +169,155 @@ void Self_Consistent(phase_characteristics &phase, const bool &start, const int 
         
         //Compute the strain concentration tensor A
         elli_multi->A = elli_multi->T;
+        sv_r->DEtot = elli_multi->A*sv_eff->DEtot; //Recall that the global coordinates of subphases is the local coordinates of the generic phase
+    }
+    
+}
+    
+void DE_Self_Consistent(phase_characteristics &phase, const bool &start, const int &option_start = 0) {
+    
+    std::shared_ptr<ellipsoid_multi> elli_multi;
+    std::shared_ptr<ellipsoid> elli;
+    //ptr on the matrix properties
+    std::shared_ptr<state_variables_M> sv_r;
+    std::shared_ptr<state_variables_M> sv_eff = std::dynamic_pointer_cast<state_variables_M>(phase.sptr_sv_local);
+
+    //In the self_consistent scheme we need to have the effective tangent modulus first, based on some guessed initial concentration tensor.
+    if(start) {
+        //ensure that the Lt of phase is actually 0
+        if(option_start == 0)
+            Lt_Homogeneous_E(phase);
+        else if(option_start == 1)
+            Lt_Mori_Tanaka(phase);
+        else {
+            cout << "error , option is not valid for the start option of Self-Consistent scheme (0 : MT, 1 : h_E)";
+        }
+        
+        //Compute the effective tensor from the previous strain localization tensors
+        mat Lt_eff = zeros(6,6);
+        for(auto r : phase.sub_phases) {
+            sv_r = std::dynamic_pointer_cast<state_variables_M>(r.sptr_sv_global);
+            Lt_eff += r.sptr_shape->concentration*r.sptr_multi->A*sv_r->Lt;
+        }
+        sv_eff->Lt = Lt_eff;
+    }
+    
+    //Compute the Eshelby tensor and the interaction tensor for each phase
+    for(auto r : phase.sub_phases) {
+        elli_multi = std::dynamic_pointer_cast<ellipsoid_multi>(r.sptr_multi);
+        elli = std::dynamic_pointer_cast<ellipsoid>(r.sptr_shape);
+        sv_r = std::dynamic_pointer_cast<state_variables_M>(r.sptr_sv_global);
+        
+        //Note The tangent modulus are turned in the coordinate system of the ellipspoid in the fillT function
+        elli_multi->fillT(sv_eff->Lt, sv_r->Lt, *elli);
+        
+        //Compute the strain concentration tensor A
+        elli_multi->A = elli_multi->T;
+        sv_r->DEtot = elli_multi->A*sv_eff->DEtot; //Recall that the global coordinates of subphases is the local coordinates of the generic phase
     }
 
 }
     
-void Periodic_Layer(phase_characteristics &phase) {
+void dE_Periodic_Layer(phase_characteristics &phase, const int &nbiter) {
+    
+    std::shared_ptr<layer_multi> lay_multi;
+    std::shared_ptr<layer> lay;
+    //ptr on the matrix properties
+    std::shared_ptr<state_variables_M> sv_r;
+    std::shared_ptr<state_variables_M> sv_eff = std::dynamic_pointer_cast<state_variables_M>(phase.sptr_sv_local);
+    
+    mat Lt_loc = zeros(6,6);
+    
+    if (nbiter == 0) {
+        for (auto r : phase.sub_phases) {
+            r.sptr_sv_global->DEtot = sv_eff->DEtot;
+        }
+    }
+    
+    //Compute the increment of strain
+    mat sumDnn = zeros(3,3);
+	vec sumcDsig = zeros(3);
+    for(auto r : phase.sub_phases) {
+        
+        sv_r = std::dynamic_pointer_cast<state_variables_M>(r.sptr_sv_global);
+        lay_multi = std::dynamic_pointer_cast<layer_multi>(r.sptr_multi);
+        lay = std::dynamic_pointer_cast<layer>(r.sptr_shape);
+        Lt_loc = rotate_g2l_L(sv_r->Lt, lay->psi_geom, lay->theta_geom, lay->phi_geom);
+        
+        lay_multi->Dnn(0,0) = Lt_loc(0,0);
+        lay_multi->Dnn(0,1) = Lt_loc(0,3);
+        lay_multi->Dnn(0,2) = Lt_loc(0,4);
+        lay_multi->Dnn(1,0) = Lt_loc(3,0);
+        lay_multi->Dnn(1,1) = Lt_loc(3,3);
+        lay_multi->Dnn(1,2) = Lt_loc(3,4);
+        lay_multi->Dnn(2,0) = Lt_loc(4,0);
+        lay_multi->Dnn(2,1) = Lt_loc(4,3);
+        lay_multi->Dnn(2,2) = Lt_loc(4,4);
+        
+        lay_multi->sigma_hat(0) = sv_r->sigma(0);
+        lay_multi->sigma_hat(1) = sv_r->sigma(3);
+        lay_multi->sigma_hat(2) = sv_r->sigma(4);
+        
+
+    }
+    
+    for(auto r : phase.sub_phases) {
+        lay_multi = std::dynamic_pointer_cast<layer_multi>(r.sptr_multi);
+        lay = std::dynamic_pointer_cast<layer>(r.sptr_shape);
+        sumDnn += lay->concentration*inv(lay_multi->Dnn);
+        sumcDsig += lay->concentration*inv(lay_multi->Dnn)*lay_multi->sigma_hat;
+    }
+    vec m = inv(sumDnn)*sumcDsig;
+    
+    for(auto r : phase.sub_phases) {
+        
+        sv_r = std::dynamic_pointer_cast<state_variables_M>(r.sptr_sv_global);
+        lay_multi = std::dynamic_pointer_cast<layer_multi>(r.sptr_multi);
+        lay_multi->dzdx1 = inv(lay_multi->Dnn)*(m-lay_multi->sigma_hat);
+        
+        sv_r->DEtot(0) += lay_multi->dzdx1(0);
+        sv_r->DEtot(3) += lay_multi->dzdx1(1);
+        sv_r->DEtot(4) += lay_multi->dzdx1(2);
+    }
+}
+    
+void Lt_Periodic_Layer(phase_characteristics &phase) {
     
     std::shared_ptr<layer_multi> lay_multi;
     std::shared_ptr<layer> lay;
     //ptr on the matrix properties
     std::shared_ptr<state_variables_M> sv_r;
     
-    //We need to get the axis
+    mat Lt_loc = zeros(6,6);
+    mat A_loc = zeros(6,6);
     
     //Compute the strain concentration tensor A
     for(auto r : phase.sub_phases) {
         
         sv_r = std::dynamic_pointer_cast<state_variables_M>(r.sptr_sv_global);
         lay_multi = std::dynamic_pointer_cast<layer_multi>(r.sptr_multi);
+        lay = std::dynamic_pointer_cast<layer>(r.sptr_shape);
+        Lt_loc = rotate_g2l_L(sv_r->Lt, lay->psi_geom, lay->theta_geom, lay->phi_geom);
         
-        lay_multi->Dnn(0,0) = sv_r->Lt(0,0);
-        lay_multi->Dnn(0,1) = sv_r->Lt(0,3);
-        lay_multi->Dnn(0,2) = sv_r->Lt(0,4);
-        lay_multi->Dnn(1,0) = sv_r->Lt(3,0);
-        lay_multi->Dnn(1,1) = sv_r->Lt(3,3);
-        lay_multi->Dnn(1,2) = sv_r->Lt(3,4);
-        lay_multi->Dnn(2,0) = sv_r->Lt(4,0);
-        lay_multi->Dnn(2,1) = sv_r->Lt(4,3);
-        lay_multi->Dnn(2,2) = sv_r->Lt(4,4);
+        lay_multi->Dnn(0,0) = Lt_loc(0,0);
+        lay_multi->Dnn(0,1) = Lt_loc(0,3);
+        lay_multi->Dnn(0,2) = Lt_loc(0,4);
+        lay_multi->Dnn(1,0) = Lt_loc(3,0);
+        lay_multi->Dnn(1,1) = Lt_loc(3,3);
+        lay_multi->Dnn(1,2) = Lt_loc(3,4);
+        lay_multi->Dnn(2,0) = Lt_loc(4,0);
+        lay_multi->Dnn(2,1) = Lt_loc(4,3);
+        lay_multi->Dnn(2,2) = Lt_loc(4,4);
         
-        lay_multi->Dnt(0,0) = sv_r->Lt(0,1);
-        lay_multi->Dnt(0,1) = sv_r->Lt(0,2);
-        lay_multi->Dnt(0,2) = sv_r->Lt(0,5);
-        lay_multi->Dnt(1,0) = sv_r->Lt(3,1);
-        lay_multi->Dnt(1,1) = sv_r->Lt(3,2);
-        lay_multi->Dnt(1,2) = sv_r->Lt(3,5);
-        lay_multi->Dnt(2,0) = sv_r->Lt(4,1);
-        lay_multi->Dnt(2,1) = sv_r->Lt(4,2);
-        lay_multi->Dnt(2,2) = sv_r->Lt(4,5);
+        lay_multi->Dnt(0,0) = Lt_loc(0,1);
+        lay_multi->Dnt(0,1) = Lt_loc(0,2);
+        lay_multi->Dnt(0,2) = Lt_loc(0,5);
+        lay_multi->Dnt(1,0) = Lt_loc(3,1);
+        lay_multi->Dnt(1,1) = Lt_loc(3,2);
+        lay_multi->Dnt(1,2) = Lt_loc(3,5);
+        lay_multi->Dnt(2,0) = Lt_loc(4,1);
+        lay_multi->Dnt(2,1) = Lt_loc(4,2);
+        lay_multi->Dnt(2,2) = Lt_loc(4,5);
     }
     
     mat sumDnn = zeros(3,3);
@@ -175,31 +333,34 @@ void Periodic_Layer(phase_characteristics &phase) {
 
     for(auto r : phase.sub_phases) {
         lay_multi = std::dynamic_pointer_cast<layer_multi>(r.sptr_multi);
+        lay = std::dynamic_pointer_cast<layer>(r.sptr_shape);        
         lay_multi->dXn = inv(lay_multi->Dnn)*(m_n-lay_multi->Dnn);
         lay_multi->dXt = inv(lay_multi->Dnn)*(m_t-lay_multi->Dnt);
+        
+        A_loc = eye(6,6);
+        
+        A_loc(0,0) += lay_multi->dXn(0,0);
+        A_loc(0,1) += lay_multi->dXt(0,0);
+        A_loc(0,2) += lay_multi->dXt(0,1);
+        A_loc(0,3) += lay_multi->dXn(0,1);
+        A_loc(0,4) += lay_multi->dXn(0,2);
+        A_loc(0,5) += lay_multi->dXt(0,2);
+        
+        A_loc(3,0) += lay_multi->dXn(1,0);
+        A_loc(3,1) += lay_multi->dXt(1,0);
+        A_loc(3,2) += lay_multi->dXt(1,1);
+        A_loc(3,3) += lay_multi->dXn(1,1);
+        A_loc(3,4) += lay_multi->dXn(1,2);
+        A_loc(3,5) += lay_multi->dXt(1,2);
+        
+        A_loc(4,0) += lay_multi->dXn(2,0);
+        A_loc(4,1) += lay_multi->dXt(2,0);
+        A_loc(4,2) += lay_multi->dXt(2,1);
+        A_loc(4,3) += lay_multi->dXn(2,1);
+        A_loc(4,4) += lay_multi->dXn(2,2);
+        A_loc(4,5) += lay_multi->dXt(2,2);
 
-        lay_multi->A = eye(6,6);
-        
-        lay_multi->A(0,0) += lay_multi->dXn(0,0);
-        lay_multi->A(0,1) += lay_multi->dXt(0,0);
-        lay_multi->A(0,2) += lay_multi->dXt(0,1);
-        lay_multi->A(0,3) += lay_multi->dXn(0,1);
-        lay_multi->A(0,4) += lay_multi->dXn(0,2);
-        lay_multi->A(0,5) += lay_multi->dXt(0,2);
-        
-        lay_multi->A(3,0) += lay_multi->dXn(1,0);
-        lay_multi->A(3,1) += lay_multi->dXt(1,0);
-        lay_multi->A(3,2) += lay_multi->dXt(1,1);
-        lay_multi->A(3,3) += lay_multi->dXn(1,1);
-        lay_multi->A(3,4) += lay_multi->dXn(1,2);
-        lay_multi->A(3,5) += lay_multi->dXt(1,2);
-        
-        lay_multi->A(4,0) += lay_multi->dXn(2,0);
-        lay_multi->A(4,1) += lay_multi->dXt(2,0);
-        lay_multi->A(4,2) += lay_multi->dXt(2,1);
-        lay_multi->A(4,3) += lay_multi->dXn(2,1);
-        lay_multi->A(4,4) += lay_multi->dXn(2,2);
-        lay_multi->A(4,5) += lay_multi->dXt(2,2);
+        lay_multi->A = rotate_l2g_L(A_loc, lay->psi_geom, lay->theta_geom, lay->phi_geom);
     }
     
 }
