@@ -97,7 +97,7 @@ step_thermomeca::step_thermomeca(const step_thermomeca& stm) : step(stm)
 step_thermomeca::~step_thermomeca() {}
 
 //-------------------------------------------------------------
-void step_thermomeca::generate(const double &mTime, const vec &msigma, const vec &mEtot, const double &mT)
+void step_thermomeca::generate(const double &mTime, const vec &mEtot, const vec &msigma, const double &mT)
 //-------------------------------------------------------------
 {
     
@@ -272,45 +272,6 @@ step_thermomeca& step_thermomeca::operator = (const step_thermomeca& stm)
     cBC_T = stm.cBC_T;    
     
 	return *this;
-}
-
-void step_thermomeca::output(ostream& output, const solver_output &so, const int &kblock, const int&kcycle, const int &kinc, const state_variables_T &sv_T) {
-    
-    output << kblock+1 << "\t";
-    output << kcycle+1 << "\t";
-    output << number+1 << "\t";
-    output << kinc+1 << "\t";
-    output << times(kinc) << "\t\t";
-    
-    if (so.o_nb_T) {
-        output << sv_T.T  << "\t";
-        output << 0 << "\t";                //This is for the flux
-    }
-    if (so.o_nb_meca) {
-        for (int z=0; z<so.o_nb_meca; z++) {
-            output << sv_T.Etot(so.o_meca(z)) << "\t";
-        }
-        for (int z=0; z<so.o_nb_meca; z++) {
-            output << sv_T.sigma(so.o_meca(z)) << "\t";
-        }
-    }
-    
-    output << "\t";
-    if(so.o_nw_statev != 0){
-        if (so.o_wanted_statev(0) < 0) {
-            for(int k = 0 ; k < sv_T.nstatev ; k++)
-            output << sv_T.statev(k) << "\t";
-        }
-        else{
-            for(int k = 0 ; k < so.o_nw_statev ; k++){
-                for (int l = so.o_wanted_statev(k); l < (so.o_range_statev(k)+1); l++){
-                    output << sv_T.statev(l) << "\t";
-                }
-            }
-        }
-    }
-    output << endl;
-    
 }
     
 //--------------------------------------------------------------------------
