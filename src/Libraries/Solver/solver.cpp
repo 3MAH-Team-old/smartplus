@@ -77,8 +77,8 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
     
 //    mat dSdE = zeros(6,6);
 //    mat dSdT = zeros(1,6);
-//    mat dQdE = zeros(6,1);
-//    mat dQdT = zeros(1,1);
+    mat dQdE = zeros(6,1);
+    mat dQdT = zeros(1,1);
     
     //read the material properties
     //Read the loading path
@@ -121,11 +121,9 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
     
     /// Block loop
     for(unsigned int i = 0 ; i < blocks.size() ; i++){
-        
-//        cout << blocks[i];
-        
+
         switch(blocks[i].type) {
-            case 1: {
+            case 1: { //Mechanical
                 
                 /// resize the problem to solve
                 residual = zeros(6);
@@ -192,7 +190,6 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                     }
                                 }
                             }
-                            
                             
                             while (tinc<1.) {
                                 
@@ -334,45 +331,56 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                         
                 }
                 break;
-            } //Mechanical
-/*            case 2: {
+            }
+            case 2: { //Thermomechanical
                 
                 /// resize the problem to solve
                 residual = zeros(7);
                 Delta = zeros(7);
-                K = zeros(7, 7);
-                invK = zeros(7, 7);
+                K = zeros(7,7);
+                invK = zeros(7,7);
                 
-                vec sigma_start = sigma;
-                // double Q_start = Q;
-                dSdE = zeros(6,6);
-                dSdT = zeros(1,6);
-                dQdE = zeros(6,1);
+                shared_ptr<state_variables_T> sv_T;
+                
+                if(start) {
+                    rve.construct(0,blocks[i].type);
+                    rve.sptr_sv_global->update(zeros(6), zeros(6), zeros(6), zeros(6), T_init, 0., 0., 0., nstatev, zeros(nstatev), zeros(nstatev));
+                    sv_T = std::dynamic_pointer_cast<state_variables_T>(rve.sptr_sv_global);
+                }
+                else {
+                    //Dynamic cast from some other (possible state_variable_M/T)
+                    /*sv_M = std::dynamic_pointer_cast<state_variables_M>(rve.sptr_sv_global);
+                     rve.construct(0,blocks[i].type);
+                     rve.sptr_sv_global->update(sv_M->Etot, sv_M->DEtot, sv_M->sigma, sv_M->sigma_start, sv_M->T, sv_M->DT, sv_M->sse, sv_M->spd, nstatev, sv_M->statev, sv_M->statev_start);*/
+                    //sv_M is reassigned properly
+                    sv_T = std::dynamic_pointer_cast<state_variables_T>(rve.sptr_sv_global);
+                }
+                
+                sv_T->dSdE = zeros(6,6);
+                sv_T->dSdT = zeros(6,1);
+                dQdE = zeros(1,6);
                 dQdT = zeros(1,1);
                 
-                mat drpldE = dQdE.t();
-                mat drpldT = dQdT;
-                
-                DEtot = zeros(6);
                 DR = eye(3,3);
                 DTime = 0.;
-                DT = 0.;
+                sv_T->DEtot = zeros(6);
+                sv_T->DT = 0.;
                 
                 //Run the umat for the first time in the block. So that we get the proper tangent properties
-                run_umat_T(umat_name, Etot, DEtot, sigma, rpl, dSdE, dSdT, drpldE, drpldT, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt, rve_save);
+                run_umat_T(rve, DR, Time, DTime, ndi, nshr, start, tnew_dt);
                 
-                Q = -1.*rpl;    //Since DTime=0;
+                sv_T->Q = -1.*sv_T->rpl;    //Since DTime=0;
+                dQdT = lambda_solver;  //To avoid any singularity in the system                
                 
-                dQdE = -drpldE.t();
-                dQdT = lambda_solver;
-
-                statev_start = statev;                
+                if(start) {
+                    //Use the number of phases saved to define the files
+                    rve.define_output(outputfile);
+                    //Write the initial results
+                    rve.output(so, -1, -1, -1, -1, Time);
+                }
+                //Set the start values of sigma_start=sigma and statev_start=statev for all phases
+                rve.set_start(); //DEtot = 0 and DT = 0 so we can use it safely here
                 start = false;
-                mat dSdE_start = dSdE;
-                mat dSdT_start = dSdT;
-                mat dQdE_start = dQdE;
-                mat dQdT_start = dQdT;
-                
                 
                 /// Cycle loop
                 for(int n = 0; n < blocks[i].ncycle; n++){
@@ -380,21 +388,15 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                     /// Step loop
                     for(int j = 0; j < blocks[i].nstep; j++){
                         
-                        shared_ptr<step_thermomeca> sptr_thermomeca = std::dynamic_pointer_cast<step_thermomeca>(blocks[i].steps[j]);
-                        sptr_thermomeca->generate(Time, Etot, sigma, T);
                         
-                        //Write the initial results
-                        if ((n == 0)&&(j == 0)) {
-                            //Write the results
-                            sptr_thermomeca->output(output, so, i, n, 0, statev);
-                        }
+                        shared_ptr<step_thermomeca> sptr_thermomeca = std::dynamic_pointer_cast<step_thermomeca>(blocks[i].steps[j]);
+                        sptr_thermomeca->generate(Time, sv_T->Etot, sv_T->sigma, sv_T->T);
                         
                         nK = sum(sptr_thermomeca->cBC_meca);
                         
                         inc = 0;
                         if(sptr_thermomeca->cBC_T == 3)
                             tau = sptr_thermomeca->BC_T;
-                            
                         
                         while(inc < sptr_thermomeca->ninc) {
                             
@@ -412,62 +414,52 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                             }
                             
                             while (tinc<1.) {
-
+                                
                                 sptr_thermomeca->compute_inc(tnew_dt, inc, tinc, Dtinc, Dtinc_cur);
                                 
                                 if(nK + sptr_thermomeca->cBC_T == 0){
                                     
-                                    DEtot = Dtinc*sptr_thermomeca->mecas.row(inc).t();
-                                    DT = Dtinc*sptr_thermomeca->Ts(inc);
+                                    sv_T->DEtot = Dtinc*sptr_thermomeca->mecas.row(inc).t();
+                                    sv_T->DT = Dtinc*sptr_thermomeca->Ts(inc);
                                     DTime = Dtinc*sptr_thermomeca->times(inc);
-
-                                    run_umat_T(umat_name, Etot, DEtot, sigma, rpl, dSdE, dSdT, drpldE, drpldT, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt, rve_save);
+                                    
+                                    run_umat_T(rve, DR, Time, DTime, ndi, nshr, start, tnew_dt);
                                     
                                     if (DTime < 1.E-12) {
-                                        Q = -1.*rpl;    //Since DTime=0;
+                                        sv_T->Q = -1.*sv_T->rpl;    //Since DTime=0;
                                     }
                                     else{
-                                        if(sptr_thermomeca->cBC_T == 3)
-                                            Q = rho*c_p*DT*(1./DTime) - rpl;
-                                        else
-                                            Q = rho*c_p*DT/DTime - rpl;
+                                        sv_T->Q = rve.sptr_matprops->rho*rve.sptr_matprops->c_p*sv_T->DT*(1./DTime) - sv_T->rpl;
                                     }
                                     
                                 }
                                 else{
                                     /// ********************** SOLVING THE MIXED PROBLEM NRSTRUCT ***********************************
                                     ///Saving stress and stress set point at the beginning of the loop
-                                    //                                    Etot_start ?
                                     
                                     error = 1.;
                                     
-                                    DEtot = zeros(6);
-                                    dSdE = dSdE_start;
-                                    dSdT = dSdT_start;
-                                    dQdE = dQdE_start;
-                                    dQdT = dQdT_start;
+                                    sv_T->DEtot = zeros(6);
+                                    sv_T->DT = 0.;
                                     
-                                    DEtot = zeros(6);
-                                    DT = 0.;
-                                                                    
                                     //Construction of the initial residual
                                     for(int k = 0 ; k < 6 ; k++)
                                     {
                                         if (sptr_thermomeca->cBC_meca(k)) {
-                                            residual(k) = sigma(k) - sigma_start(k) - Dtinc*sptr_thermomeca->mecas(inc,k);
+                                            residual(k) = sv_T->sigma(k) - sv_T->sigma_start(k) - Dtinc*sptr_thermomeca->mecas(inc,k);
                                         }
                                         else {
-                                            residual(k) = lambda_solver*(DEtot(k) - Dtinc*sptr_thermomeca->mecas(inc,k));
+                                            residual(k) = lambda_solver*(sv_T->DEtot(k) - Dtinc*sptr_thermomeca->mecas(inc,k));
                                         }
                                     }
                                     if (sptr_thermomeca->cBC_T == 1) {
-                                        residual(6) = Q - sptr_thermomeca->Ts(inc);
+                                        residual(6) = sv_T->Q - sptr_thermomeca->Ts(inc);
                                     }
                                     else if(sptr_thermomeca->cBC_T == 0) {
-                                        residual(6) = lambda_solver*(DT - Dtinc*sptr_thermomeca->Ts(inc));
+                                        residual(6) = lambda_solver*(sv_T->DT - Dtinc*sptr_thermomeca->Ts(inc));
                                     }
                                     else if(sptr_thermomeca->cBC_T == 3) { //Special case of 0D convexion that depends on temperature assumption
-                                        residual(6) = Q + (rho*c_p/tau)*(T-Tinit);
+                                        residual(6) = sv_T->Q + (rve.sptr_matprops->rho*rve.sptr_matprops->c_p/tau)*(sv_T->T-T_init);
                                     }
                                     else {
                                         cout << "error : The Thermal BC is not recognized\n";
@@ -478,8 +470,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                         
                                         ///Prediction of the strain increment using the tangent modulus given from the umat_ function
                                         //we use the ddsdde (Lt) from the previous increment
-                                                                        
-                                        Lth_2_K(dSdE, dSdT, dQdE, dQdT, K, sptr_thermomeca->cBC_meca, sptr_thermomeca->cBC_T, lambda_solver);
+                                        Lth_2_K(sv_T->dSdE, sv_T->dSdT, dQdE, dQdT, K, sptr_thermomeca->cBC_meca, sptr_thermomeca->cBC_T, lambda_solver);
                                         
                                         ///jacobian inversion
                                         invK = inv(K);
@@ -489,65 +480,71 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                         
                                         for(int k = 0 ; k < 6 ; k++)
                                         {
-                                            DEtot(k) += Delta(k);
+                                            sv_T->DEtot(k) += Delta(k);
                                         }
-                                        DT += Delta(6);
+                                        sv_T->DT += Delta(6);
                                         DTime = Dtinc*sptr_thermomeca->times(inc);
                                         
-                                        sigma = sigma_start;
-                                        statev = statev_start;
+                                        rve.to_start();
+                                        run_umat_T(rve, DR, Time, DTime, ndi, nshr, start, tnew_dt);
                                         
-                                        run_umat_T(umat_name, Etot, DEtot, sigma, rpl, dSdE, dSdT, drpldE, drpldT, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt, rve_save);
-
                                         if (DTime < 1.E-12) {
-                                            Q = -1.*rpl;    //Since DTime=0;
+                                            sv_T->Q = -1.*sv_T->rpl;    //Since DTime=0;
                                             
-                                            dQdE = -drpldE.t();
+                                            dQdE = -sv_T->drpldE.t();
                                             dQdT = lambda_solver;  //To avoid any singularity in the system
-                                            
+                     
                                         }
                                         else{
-                                            if(sptr_thermomeca->cBC_T == 3)
-                                                Q = rho*c_p*DT*(1./DTime) + rho*c_p/tau  - rpl;
-                                            else
-                                                Q = rho*c_p*DT/DTime - rpl;
-                        
-                                            dQdE = -drpldE.t();
+                                            //Attention here, we solve Phi = Q - rho*c_p*(1./tau)*(sv_T->T-T_init) = rho*c_p*DT*(1./DTime) - rpl -(-rho*c_p*(1./tau)*(sv_T->T-T_init)) = 0
+                                            //So the derivative / T has the extra rho*c_p*(1./tau)
+                                            //It is actually icluded here in dQdT
+                                            sv_T->Q = rve.sptr_matprops->rho*rve.sptr_matprops->c_p*sv_T->DT*(1./DTime) - sv_T->rpl;
                                             
-                                            if(sptr_thermomeca->cBC_T == 3)
-                                                dQdT = rho*c_p*(1./DTime) - drpldT;
-                                            else
-                                                dQdT = rho*c_p/DTime - drpldT;
+                                            dQdE = -sv_T->drpldE.t();
+                                            
+                                            if (sptr_thermomeca->cBC_T < 3) {
+                                                dQdT = rve.sptr_matprops->rho*rve.sptr_matprops->c_p*(1./DTime) - sv_T->drpldT;
+                                            }
+                                            else if(sptr_thermomeca->cBC_T == 3) {
+                                                dQdT = rve.sptr_matprops->rho*rve.sptr_matprops->c_p*(1./DTime) - sv_T->drpldT + rve.sptr_matprops->rho*rve.sptr_matprops->c_p*(1./tau);
+
+                                            }
                                             
                                         }
                                         
                                         for(int k = 0 ; k < 6 ; k++)
                                         {
                                             if (sptr_thermomeca->cBC_meca(k)) {
-                                                residual(k) = sigma(k) - sigma_start(k) - Dtinc*sptr_thermomeca->mecas(inc,k);
+                                                residual(k) = sv_T->sigma(k) - sv_T->sigma_start(k) - Dtinc*sptr_thermomeca->mecas(inc,k);
                                             }
-                                            else{
-                                                residual(k) = lambda_solver*(DEtot(k) - Dtinc*sptr_thermomeca->mecas(inc,k));
+                                            else {
+                                                residual(k) = lambda_solver*(sv_T->DEtot(k) - Dtinc*sptr_thermomeca->mecas(inc,k));
                                             }
                                         }
                                         if (sptr_thermomeca->cBC_T == 1) {
-                                            residual(6) = Q - sptr_thermomeca->Ts(inc);
+                                            residual(6) = sv_T->Q - sptr_thermomeca->Ts(inc);
                                         }
                                         else if(sptr_thermomeca->cBC_T == 0) {
-                                            residual(6) = lambda_solver*(DT - Dtinc*sptr_thermomeca->Ts(inc));
+                                            residual(6) = lambda_solver*(sv_T->DT - Dtinc*sptr_thermomeca->Ts(inc));
                                         }
                                         else if(sptr_thermomeca->cBC_T == 3) { //Special case of 0D convexion that depends on temperature assumption
-                                            residual(6) = Q + (rho*c_p/tau)*(T-Tinit);
+                                            residual(6) = sv_T->Q + (rve.sptr_matprops->rho*rve.sptr_matprops->c_p/tau)*(sv_T->T-T_init);
                                         }
                                         else {
                                             cout << "error : The Thermal BC is not recognized\n";
                                             exit(0);
                                         }
-
                                         
-                                        error = norm(residual, 2.);
                                         compteur++;
-                                                                            
+                                        error = norm(residual, 2.);
+                                        
+                                        if(tnew_dt < 1.) {
+                                            if((fabs(Dtinc_cur - sptr_thermomeca->Dn_mini) > iota)||(inforce_solver == 0)) {
+                                                compteur = maxiter_solver;
+                                            }
+                                        }
+                                        
                                     }
                                     
                                 }
@@ -560,10 +557,19 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                 
                                 if(error > precision_solver) {
                                     if((Dtinc_cur == sptr_thermomeca->Dn_mini)&&(inforce_solver == 1)) {
-                                        cout << "The solver has been inforced to proceed (Solver issue) at step:" << sptr_thermomeca->number << " inc: " << inc << " and fraction:" << tinc << "\n";
+                                        cout << "The solver has been inforced to proceed (Solver issue) at step:" << sptr_thermomeca->number << " inc: " << inc << " and fraction:" << tinc << ", with the error: " << error << "\n";
                                         cout << "The next increment has integrated the error to avoid propagation\n";
                                         //The solver has been inforced!
                                         tnew_dt = 1.;
+                                        
+                                        if (inc+1<sptr_thermomeca->ninc) {
+                                            for(int k = 0 ; k < 6 ; k++)
+                                            {
+                                                if(sptr_thermomeca->cBC_meca(k)) {
+                                                    sptr_thermomeca->mecas(inc+1,k) -= residual(k);
+                                                }
+                                            }
+                                        }
                                         
                                     }
                                     else {
@@ -576,10 +582,11 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                 }
                                 compteur = 0;
                                 
-                                sptr_thermomeca->assess_inc(tnew_dt, tinc, Dtinc, Etot, DEtot, T, DT, Time, DTime, sigma, sigma_start, statev, statev_start, dSdE, dSdE_start, dSdT, dSdT_start, dQdE, dQdE_start, dQdT, dQdT_start);
+                                sptr_thermomeca->assess_inc(tnew_dt, tinc, Dtinc, rve ,Time, DTime);
+                                //start variables ready for the next increment
                                 
                             }
-
+                            
                             //At the end of each increment, check if results should be written
                             if (so.o_type(i) == 1) {
                                 o_ncount++;
@@ -588,17 +595,10 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                 o_tcount+=DTime;
                             }
                             
-                            sptr_thermomeca->Time = Time;
-                            sptr_thermomeca->Etot = Etot;
-                            sptr_thermomeca->sigma = sigma;
-                            sptr_thermomeca->T = T;
-                            sptr_thermomeca->Q = Q;
-                            
                             //Write the results
                             if (((so.o_type(i) == 1)&&(o_ncount == so.o_nfreq(i)))||(((so.o_type(i) == 2)&&(fabs(o_tcount - so.o_tfreq(i)) < 1.E-12)))) {
                                 
-                                sptr_thermomeca->output(output, so, i, n, inc, statev);
-                                
+                                rve.output(so, i, n, j, inc, Time);
                                 if (so.o_type(i) == 1) {
                                     o_ncount = 0;
                                 }
@@ -609,14 +609,13 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                             
                             tinc = 0.;
                             inc++;
-                            
                         }
                         
                     }
                     
                 }
                 break;
-            } //Thermomechanical */
+            }
             default: {
                 cout << "the block type is not defined!\n";
                 break;
