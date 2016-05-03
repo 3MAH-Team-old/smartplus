@@ -40,7 +40,7 @@ namespace smart{
 */
 
 //-------------------------------------------------------------
-layer_multi::layer_multi() : phase_multi(), Dnn(3,3), Dnt(3,3), dXn(3,3), dXt(3,3)
+layer_multi::layer_multi() : phase_multi(), Dnn(3,3), Dnt(3,3), dXn(3,3), dXt(3,3), sigma_hat(3), dzdx1(3)
 //-------------------------------------------------------------
 {
 
@@ -51,13 +51,15 @@ layer_multi::layer_multi() : phase_multi(), Dnn(3,3), Dnt(3,3), dXn(3,3), dXt(3,
 */
 
 //-------------------------------------------------------------
-layer_multi::layer_multi(const mat &mA, const mat &mA_start, const mat &mB, const mat &mB_start, const mat &mDnn, const mat &mDnt, const mat &mdXn, const mat &mdXt) : phase_multi(mA, mA_start, mB, mB_start), Dnn(3,3), Dnt(3,3), dXn(3,3), dXt(3,3)
+layer_multi::layer_multi(const mat &mA, const mat &mA_start, const mat &mB, const mat &mB_start, const mat &mDnn, const mat &mDnt, const mat &mdXn, const mat &mdXt, const vec &msigma_hat, const vec &mdzdx1) : phase_multi(mA, mA_start, mB, mB_start), Dnn(3,3), Dnt(3,3), dXn(3,3), dXt(3,3), sigma_hat(3), dzdx1(3)
 //-------------------------------------------------------------
 {
     Dnn = mDnn;
     Dnt = mDnt;
     dXn = mdXn;
     dXt = mdXt;
+    sigma_hat = msigma_hat;
+    dzdx1 = mdzdx1;
 }
 
 /*!
@@ -73,6 +75,8 @@ layer_multi::layer_multi(const layer_multi& pc) : phase_multi(pc)
     Dnt = pc.Dnt;
     dXn = pc.dXn;
     dXt = pc.dXt;
+    sigma_hat = pc.sigma_hat;
+    dzdx1 = pc.dzdx1;
 }
 
 /*!
@@ -88,7 +92,7 @@ layer_multi::~layer_multi() {}
 /*!
   \brief Standard operator = for phase_multi
 */
-    
+
 //----------------------------------------------------------------------
 layer_multi& layer_multi::operator = (const layer_multi& pc)
 //----------------------------------------------------------------------
@@ -103,8 +107,10 @@ layer_multi& layer_multi::operator = (const layer_multi& pc)
     Dnt = pc.Dnt;
     dXn = pc.dXn;
     dXt = pc.dXt;
+    sigma_hat = pc.sigma_hat;
+    dzdx1 = pc.dzdx1;
     
-	return *this;
+    return *this;
 }
     
 //--------------------------------------------------------------------------
