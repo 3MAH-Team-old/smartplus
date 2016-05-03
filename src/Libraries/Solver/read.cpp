@@ -64,7 +64,7 @@ void Lt_2_K(const mat &Lt, mat &K, const Col<int> &cBC_meca, const double &lambd
 void Lth_2_K(const mat &dSdE, mat &dSdT, mat &dQdE, mat &dQdT, mat &K, const Col<int> &cBC_meca, const int &cBC_T, const double &lambda)
 {
 	K = zeros(7,7);
-    
+        
     K.submat(0, 0, 5, 5) = dSdE;
     K.submat(0, 6, 5, 6) = dSdT;
     K.submat(6, 0, 6, 5) = dQdE;
