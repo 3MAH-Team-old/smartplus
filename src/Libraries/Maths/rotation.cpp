@@ -37,15 +37,15 @@ mat fillR(const double &alpha, const int &axis) {
     
     switch(axis) {
         case 1: {
-            R = { {1,0,0}, {0,c,s}, {0,-s,c} };
+            R = { {1,0,0}, {0,c,-s}, {0,s,c} };
             break;
         }
         case 2: {
-            R = { {c, 0, -s}, {0,1,0}, {s,0,c}};
+            R = { {c, 0, s}, {0,1,0}, {-s,0,c}};
             break;
         }
         case 3: {
-            R = { {c,s,0}, {-s,c, 0}, {0,0,1}};
+            R = { {c,-s,0}, {s,c, 0}, {0,0,1}};
             break;
         }
         default: {
@@ -194,51 +194,51 @@ mat fillQS(const double &alpha, const int &axis) {
 mat fillQS(const mat &DR) {
     
     double a = DR(0,0);
-    double b = DR(0,1);
-    double c = DR(0,2);
-    double d = DR(1,0);
+    double d = DR(0,1);
+    double g = DR(0,2);
+    double b = DR(1,0);
     double e = DR(1,1);
-    double f = DR(1,2);
-    double g = DR(2,0);
-    double h = DR(2,1);
+    double h = DR(1,2);
+    double c = DR(2,0);
+    double f = DR(2,1);
     double i = DR(2,2);
     
     mat QS= zeros(6,6);
     QS(0,0) = a*a;
-    QS(0,1) = b*b;
-    QS(0,2) = c*c;
-    QS(0,3) = 2.*a*b;
-    QS(0,4) = 2.*a*c;
-    QS(0,5) = 2.*b*c;
-    QS(1,0) = d*d;
+    QS(0,1) = d*d;
+    QS(0,2) = g*g;
+    QS(0,3) = 2.*a*d;
+    QS(0,4) = 2.*a*g;
+    QS(0,5) = 2.*d*g;
+    QS(1,0) = b*b;
     QS(1,1) = e*e;
-    QS(1,2) = f*f;
-    QS(1,3) = 2.*d*e;
-    QS(1,4) = 2.*d*f;
-    QS(1,5) = 2.*e*f;
-    QS(2,0) = g*g;
-    QS(2,1) = h*h;
+    QS(1,2) = h*h;
+    QS(1,3) = 2.*b*e;
+    QS(1,4) = 2.*b*h;
+    QS(1,5) = 2.*e*h;
+    QS(2,0) = c*c;
+    QS(2,1) = f*f;
     QS(2,2) = i*i;
-    QS(2,3) = 2.*g*h;
-    QS(2,4) = 2.*g*i;
-    QS(2,5) = 2.*h*i;
-    QS(3,0) = a*d;
-    QS(3,1) = b*e;
-    QS(3,2) = c*f;
+    QS(2,3) = 2.*c*f;
+    QS(2,4) = 2.*c*i;
+    QS(2,5) = 2.*f*i;
+    QS(3,0) = a*b;
+    QS(3,1) = d*e;
+    QS(3,2) = g*h;
     QS(3,3) = b*d+a*e;
-    QS(3,4) = c*d+a*f;
-    QS(3,5) = c*e+b*f;
-    QS(4,0) = a*g;
-    QS(4,1) = b*h;
-    QS(4,2) = c*i;
-    QS(4,3) = b*g+a*h;
+    QS(3,4) = b*g+a*h;
+    QS(3,5) = e*g+d*h;
+    QS(4,0) = a*c;
+    QS(4,1) = d*f;
+    QS(4,2) = g*i;
+    QS(4,3) = c*d+a*f;
     QS(4,4) = c*g+a*i;
-    QS(4,5) = c*h+b*i;
-    QS(5,0) = d*g;
-    QS(5,1) = e*h;
-    QS(5,2) = f*i;
-    QS(5,3) = e*g+d*h;
-    QS(5,4) = f*g+d*i;
+    QS(4,5) = f*g+d*i;
+    QS(5,0) = b*c;
+    QS(5,1) = e*f;
+    QS(5,2) = h*i;
+    QS(5,3) = c*e+b*f;
+    QS(5,4) = c*h+b*i;
     QS(5,5) = f*h+e*i;
     
     return QS;
@@ -378,51 +378,51 @@ mat fillQE(const double &alpha, const int &axis) {
 mat fillQE(const mat &DR) {
     
     double a = DR(0,0);
-    double b = DR(0,1);
-    double c = DR(0,2);
-    double d = DR(1,0);
+    double d = DR(0,1);
+    double g = DR(0,2);
+    double b = DR(1,0);
     double e = DR(1,1);
-    double f = DR(1,2);
-    double g = DR(2,0);
-    double h = DR(2,1);
+    double h = DR(1,2);
+    double c = DR(2,0);
+    double f = DR(2,1);
     double i = DR(2,2);
     
     mat QE= zeros(6,6);
     QE(0,0) = a*a;
-    QE(0,1) = b*b;
-    QE(0,2) = c*c;
-    QE(0,3) = a*b;
-    QE(0,4) = a*c;
-    QE(0,5) = b*c;
-    QE(1,0) = d*d;
+    QE(0,1) = d*d;
+    QE(0,2) = g*g;
+    QE(0,3) = a*d;
+    QE(0,4) = a*g;
+    QE(0,5) = d*g;
+    QE(1,0) = b*b;
     QE(1,1) = e*e;
-    QE(1,2) = f*f;
-    QE(1,3) = d*e;
-    QE(1,4) = d*f;
-    QE(1,5) = e*f;
-    QE(2,0) = g*g;
-    QE(2,1) = h*h;
+    QE(1,2) = h*h;
+    QE(1,3) = b*e;
+    QE(1,4) = b*h;
+    QE(1,5) = e*h;
+    QE(2,0) = c*c;
+    QE(2,1) = f*f;
     QE(2,2) = i*i;
-    QE(2,3) = g*h;
-    QE(2,4) = g*i;
-    QE(2,5) = h*i;
-    QE(3,0) = 2.*a*d;
-    QE(3,1) = 2.*b*e;
-    QE(3,2) = 2.*c*f;
+    QE(2,3) = c*f;
+    QE(2,4) = c*i;
+    QE(2,5) = f*i;
+    QE(3,0) = 2.*a*b;
+    QE(3,1) = 2.*d*e;
+    QE(3,2) = 2.*g*h;
     QE(3,3) = b*d+a*e;
-    QE(3,4) = c*d+a*f;
-    QE(3,5) = c*e+b*f;
-    QE(4,0) = 2.*a*g;
-    QE(4,1) = 2.*b*h;
-    QE(4,2) = 2.*c*i;
-    QE(4,3) = b*g+a*h;
+    QE(3,4) = b*g+a*h;
+    QE(3,5) = e*g+d*h;
+    QE(4,0) = 2.*a*c;
+    QE(4,1) = 2.*d*f;
+    QE(4,2) = 2.*g*i;
+    QE(4,3) = c*d+a*f;
     QE(4,4) = c*g+a*i;
-    QE(4,5) = c*h+b*i;
-    QE(5,0) = 2.*d*g;
-    QE(5,1) = 2.*e*h;
-    QE(5,2) = 2.*f*i;
-    QE(5,3) = e*g+d*h;
-    QE(5,4) = f*g+d*i;
+    QE(4,5) = f*g+d*i;
+    QE(5,0) = 2.*b*c;
+    QE(5,1) = 2.*e*f;
+    QE(5,2) = 2.*h*i;
+    QE(5,3) = c*e+b*f;
+    QE(5,4) = c*h+b*i;
     QE(5,5) = f*h+e*i;
     
     return QE;
