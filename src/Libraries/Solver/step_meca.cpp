@@ -253,47 +253,6 @@ step_meca& step_meca::operator = (const step_meca& stm)
     
 	return *this;
 }
-
-    
-    
-void step_meca::output(ostream& output, const solver_output &so, const int &kblock, const int&kcycle, const int &kinc, const state_variables_M &sv_M) {
-    
-    output << kblock+1 << "\t";
-    output << kcycle+1 << "\t";
-    output << number+1 << "\t";
-    output << kinc+1 << "\t";
-    output << times(kinc) << "\t\t";
-    
-    if (so.o_nb_T) {
-        output << sv_M.T  << "\t";
-        output << 0 << "\t";                //This is for the flux
-    }
-    if (so.o_nb_meca) {
-        for (int z=0; z<so.o_nb_meca; z++) {
-            output << sv_M.Etot(so.o_meca(z)) << "\t";
-        }
-        for (int z=0; z<so.o_nb_meca; z++) {
-            output << sv_M.sigma(so.o_meca(z)) << "\t";
-        }
-    }
-    
-    output << "\t";
-    if(so.o_nw_statev != 0){
-        if (so.o_wanted_statev(0) < 0) {
-            for(int k = 0 ; k < sv_M.nstatev ; k++)
-            output << sv_M.statev(k) << "\t";
-        }
-        else{
-            for(int k = 0 ; k < so.o_nw_statev ; k++){
-                for (int l = so.o_wanted_statev(k); l < (so.o_range_statev(k)+1); l++){
-                    output << sv_M.statev(l) << "\t";
-                }
-            }
-        }
-    }
-    output << endl;
-    
-}
     
 //--------------------------------------------------------------------------
 ostream& operator << (ostream& s, const step_meca& stm)
