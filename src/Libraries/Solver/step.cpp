@@ -206,44 +206,6 @@ void step::assess_inc(const double &tnew_dt, double &tinc, const double &Dtinc, 
         rve.set_start();
     }
 }
-    
-void step::output(ostream& output, const solver_output &so, const int &kblock, const int&kcycle, const int &kinc, const state_variables &sv) {
-    
-    output << kblock << "\t";
-    output << kcycle << "\t";
-    output << number << "\t";
-    output << kinc << "\t";
-    output << times(kinc) << "\t\t";
-    
-    if (so.o_nb_T) {
-        output << 0  << "\t";
-        output << 0 << "\t";                //This is for the flux
-    }
-    if (so.o_nb_meca) {
-        for (int z=0; z<so.o_nb_meca; z++) {
-            output << 0 << "\t";
-        }
-        for (int z=0; z<so.o_nb_meca; z++) {
-            output << 0 << "\t";
-        }
-    }
-    output << "\t";
-    if(so.o_nw_statev != 0){
-        if (so.o_wanted_statev(0) < 0) {
-            for(int k = 0 ; k < sv.nstatev ; k++)
-                output << sv.statev(k) << "\t";
-        }
-        else{
-            for(int k = 0 ; k < so.o_nw_statev ; k++){
-                for (int l = so.o_wanted_statev(k); l < (so.o_range_statev(k)+1); l++){
-                    output << sv.statev(l) << "\t";
-                }
-            }
-        }
-    }
-    output << endl;
-    
-}
 
 //--------------------------------------------------------------------------
 ostream& operator << (ostream& s, const step& st)
