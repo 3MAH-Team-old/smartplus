@@ -104,32 +104,31 @@ void umat_multi(phase_characteristics &phase, const mat &DR, const double &Time,
         }
 
         //Compute the strain concentration tensor for each phase:
-        
+        //Also update of all the local strain increment
         switch (method) {
                 
             case 100: {
-                Homogeneous_E(phase);
+                DE_Homogeneous_E(phase);
                 break;
             }
             case 101: {
-                Mori_Tanaka(phase);
+                DE_Mori_Tanaka(phase);
                 break;
             }
             case 102: {
-                Self_Consistent(phase, start, 0);
+                DE_Self_Consistent(phase, start, 0);
                 break;
             }
             case 104: {
-                Periodic_Layer(phase);
+                dE_Periodic_Layer(phase, nbiter);
                 break;
             }
         
         }
     
         for (auto r : phase.sub_phases) {
-            r.sptr_sv_global->DEtot = r.sptr_multi->A*umat_phase_M->DEtot; //Recall that the global coordinates of subphases is the local coordinates of the generic phase
             r.sptr_sv_global->to_start();
-
+            
             //Theta method for the tangent modulus
             //mat Lt_start = umat_sub_phases_M->Lt
             select_umat_M(r, DR, Time, DTime, ndi, nshr, start, tnew_dt);
@@ -147,6 +146,28 @@ void umat_multi(phase_characteristics &phase, const mat &DR, const double &Time,
     
         nbiter++;
 	}
+    
+    //Now we can calculate the concentration tensors only for the tangent modulus
+    switch (method) {
+            
+            case 100: {
+                Lt_Homogeneous_E(phase);
+                break;
+            }
+            case 101: {
+                Lt_Mori_Tanaka(phase);
+                break;
+            }
+            case 102: {
+                Lt_Self_Consistent(phase, start, 0);
+                break;
+            }
+            case 104: {
+                Lt_Periodic_Layer(phase);
+                break;
+            }
+            
+    }
     
     //	Homogenization
 	//Compute the effective stress
