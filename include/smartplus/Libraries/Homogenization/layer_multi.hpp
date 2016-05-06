@@ -49,13 +49,16 @@ class layer_multi : public phase_multi
         //Derivatives of the gradient / x1
         arma::mat dXn;
         arma::mat dXt;
-
+    
+        //local and global increments of the concentration strain / x1
+        arma::vec sigma_hat;
+        arma::vec dzdx1;
     
         layer_multi(); 	//default constructor
-        layer_multi(const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&); //Constructor with parameters
+        layer_multi(const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::vec&, const arma::vec&); //Constructor with parameters
         layer_multi(const layer_multi&);	//Copy constructor
             ~layer_multi();
-        
+    
         virtual layer_multi& operator = (const layer_multi&);
         
         friend std::ostream& operator << (std::ostream&, const layer_multi&);
