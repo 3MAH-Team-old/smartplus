@@ -44,9 +44,15 @@ using namespace arma;
 
 namespace smart{
 
-void solver(const string &umat_name, const vec &props, const double &nstatev, const double &psi_rve, const double &theta_rve, const double &phi_rve,const double &rho, const double &c_p, const string &pathfile, const string &outputfile) {
+    void solver(const string &umat_name, const vec &props, const double &nstatev, const double &psi_rve, const double &theta_rve, const double &phi_rve,const double &rho, const double &c_p, const std::string &pathfile, const std::string &outputfile) {
     
 //    ofstream output(outputfile);
+    
+    std::string ext_filename = outputfile.substr(outputfile.length()-4,outputfile.length());
+    std::string filename = outputfile.substr(0,outputfile.length()-4); //to remove the extension
+    
+    std::string outputfile_global = filename + "_global" + ext_filename;
+    std::string outputfile_local = filename + "_local" + ext_filename;;
     
 	///Usefull UMAT variables
 	int ndi = 3;
@@ -160,9 +166,11 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                 
                 if(start) {
                     //Use the number of phases saved to define the files
-                    rve.define_output(outputfile);
+                    rve.define_output(outputfile_global, "global");
+                    rve.define_output(outputfile_local, "local");
                     //Write the initial results
-                    rve.output(so, -1, -1, -1, -1, Time);
+                    rve.output(so, -1, -1, -1, -1, Time, "global");
+                    rve.output(so, -1, -1, -1, -1, Time, "local");
                 }
                 //Set the start values of sigma_start=sigma and statev_start=statev for all phases
                 rve.set_start(); //DEtot = 0 and DT = 0 so we can use it safely here
@@ -312,8 +320,8 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                             //Write the results
                             if (((so.o_type(i) == 1)&&(o_ncount == so.o_nfreq(i)))||(((so.o_type(i) == 2)&&(fabs(o_tcount - so.o_tfreq(i)) < 1.E-12)))) {
                                 
-                                rve.output(so, i, n, j, inc, Time);
-
+                                rve.output(so, i, n, j, inc, Time, "global");
+                                rve.output(so, i, n, j, inc, Time, "local");
                                 
                                 if (so.o_type(i) == 1) {
                                     o_ncount = 0;
@@ -374,9 +382,11 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                 
                 if(start) {
                     //Use the number of phases saved to define the files
-                    rve.define_output(outputfile);
+                    rve.define_output(outputfile_global, "global");
+                    rve.define_output(outputfile_local, "local");
                     //Write the initial results
-                    rve.output(so, -1, -1, -1, -1, Time);
+                    rve.output(so, -1, -1, -1, -1, Time, "global");
+                    rve.output(so, -1, -1, -1, -1, Time, "local");
                 }
                 //Set the start values of sigma_start=sigma and statev_start=statev for all phases
                 rve.set_start(); //DEtot = 0 and DT = 0 so we can use it safely here
@@ -598,7 +608,8 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                             //Write the results
                             if (((so.o_type(i) == 1)&&(o_ncount == so.o_nfreq(i)))||(((so.o_type(i) == 2)&&(fabs(o_tcount - so.o_tfreq(i)) < 1.E-12)))) {
                                 
-                                rve.output(so, i, n, j, inc, Time);
+                                rve.output(so, i, n, j, inc, Time, "global");
+                                rve.output(so, i, n, j, inc, Time, "local");
                                 if (so.o_type(i) == 1) {
                                     o_ncount = 0;
                                 }
