@@ -50,13 +50,15 @@ class phase_characteristics
         std::shared_ptr<material_characteristics> sptr_matprops;
         std::shared_ptr<state_variables> sptr_sv_global;
         std::shared_ptr<state_variables> sptr_sv_local;
-        std::shared_ptr<std::ofstream> sptr_out;
+        std::shared_ptr<std::ofstream> sptr_out_global;
+        std::shared_ptr<std::ofstream> sptr_out_local;
     
         std::vector<phase_characteristics> sub_phases;
+        std::string sub_phases_file;
     
 		phase_characteristics(); 	//default constructor
     
-        phase_characteristics(const int &, const int &, const std::shared_ptr<geometry> &, const std::shared_ptr<phase_multi> &, const std::shared_ptr<material_characteristics> &, const std::shared_ptr<state_variables> &, const std::shared_ptr<state_variables> &, const std::shared_ptr<std::ofstream> &);
+        phase_characteristics(const int &, const int &, const std::shared_ptr<geometry> &, const std::shared_ptr<phase_multi> &, const std::shared_ptr<material_characteristics> &, const std::shared_ptr<state_variables> &, const std::shared_ptr<state_variables> &, const std::shared_ptr<std::ofstream> &, const std::shared_ptr<std::ofstream> &, const std::string &);
 
 		phase_characteristics(const phase_characteristics&);	//Copy constructor
         virtual ~phase_characteristics();
@@ -70,7 +72,7 @@ class phase_characteristics
     
 		virtual phase_characteristics& operator = (const phase_characteristics&);
     
-        virtual void define_output(const std::string &);
+        virtual void define_output(const std::string &, const std::string & = "global");
         virtual void output(const solver_output &, const int &, const int &, const int &, const int &, const double &, const std::string & = "global");
     
     
