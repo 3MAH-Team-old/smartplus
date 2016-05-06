@@ -518,6 +518,75 @@ vec rotate_strain(const vec &V, const mat &DR) {
     return QE*V;
 }
     
+
+//To rotate from local to global a strain tensor (6)
+mat rotate_l2g_strain(const vec &E, const double &psi, const double &theta, const double &phi) {
+    
+    mat E_temp = E;
+    if(fabs(phi) > iota) {
+        E_temp = rotate_strain(E_temp, -phi, axis_phi);
+    }
+    if(fabs(theta) > iota) {
+        E_temp = rotate_strain(E_temp, -theta, axis_theta);
+    }
+    if(fabs(psi) > iota) {
+        E_temp = rotate_strain(E_temp, -psi, axis_psi);
+    }
+    
+    return E_temp;
+}
+    
+//To rotate from global to local a strain tensor (6)
+mat rotate_g2l_strain(const vec &E, const double &psi, const double &theta, const double &phi) {
+    
+    mat E_temp = E;
+    if(fabs(psi) > iota) {
+        E_temp = rotate_strain(E_temp, psi, axis_psi);
+    }
+    if(fabs(theta) > iota) {
+        E_temp = rotate_strain(E_temp, theta, axis_theta);
+    }
+    if(fabs(phi) > iota) {
+        E_temp = rotate_strain(E_temp, phi, axis_phi);
+    }
+    
+    return E_temp;
+}
+
+//To rotate from local to global a stress tensor (6)
+mat rotate_l2g_stress(const vec &S, const double &psi, const double &theta, const double &phi) {
+    
+    mat S_temp = S;
+    if(fabs(phi) > iota) {
+        S_temp = rotate_stress(S_temp, -phi, axis_phi);
+    }
+    if(fabs(theta) > iota) {
+        S_temp = rotate_stress(S_temp, -theta, axis_theta);
+    }
+    if(fabs(psi) > iota) {
+        S_temp = rotate_stress(S_temp, -psi, axis_psi);
+    }
+    
+    return S_temp;
+}
+
+//To rotate from global to local a stress tensor (6)
+mat rotate_g2l_stress(const vec &S, const double &psi, const double &theta, const double &phi) {
+    
+    mat S_temp = S;
+    if(fabs(psi) > iota) {
+        S_temp = rotate_stress(S_temp, psi, axis_psi);
+    }
+    if(fabs(theta) > iota) {
+        S_temp = rotate_stress(S_temp, theta, axis_theta);
+    }
+    if(fabs(phi) > iota) {
+        S_temp = rotate_stress(S_temp, phi, axis_phi);
+    }
+    
+    return S_temp;
+}
+    
 //To rotate from local to global a stiffness matrix (6,6)
 mat rotate_l2g_L(const mat &Lt, const double &psi, const double &theta, const double &phi) {
     
