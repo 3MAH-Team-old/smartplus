@@ -60,9 +60,6 @@ protected:
     virtual void assess_inc(const double &, double &, const double &, phase_characteristics &, double &, const double &);
     
     virtual step& operator = (const step&);
-
-    //This function serves to output
-    virtual void output(std::ostream&, const solver_output &, const int &, const int &, const int&, const state_variables &);
     
     friend  std::ostream& operator << (std::ostream&, const step&);
 };

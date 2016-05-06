@@ -54,8 +54,6 @@ protected:
     using step::generate;
     virtual void generate(const double&, const arma::vec&, const arma::vec&, const double&);
     
-    using step::output;
-    virtual void output(std::ostream&, const solver_output &, const int &, const int &, const int&, const state_variables_M &);
     virtual step_meca& operator = (const step_meca&);
         
     friend  std::ostream& operator << (std::ostream&, const step_meca&);
