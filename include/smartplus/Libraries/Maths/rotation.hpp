@@ -59,6 +59,18 @@ arma::vec rotate_stress(const arma::vec &, const arma::mat &);
 //To rotate a strain vector (6)
 arma::vec rotate_strain(const arma::vec &, const double &, const int &);
 arma::vec rotate_strain(const arma::vec &, const arma::mat &);
+
+//To rotate from local to global a strain tensor (6)
+arma::mat rotate_l2g_strain(const arma::vec &, const double &, const double &, const double &);
+
+//To rotate from global to local a strain tensor (6)
+arma::mat rotate_g2l_strain(const arma::vec &, const double &, const double &, const double &);
+
+//To rotate from local to global a stress tensor (6)
+arma::mat rotate_l2g_stress(const arma::vec &, const double &, const double &, const double &);
+
+//To rotate from global to local a stress tensor (6)
+arma::mat rotate_g2l_stress(const arma::vec &, const double &, const double &, const double &);
     
 //To rotate from local to global a stiffness matrix (6,6)
 arma::mat rotate_l2g_L(const arma::mat &, const double &, const double &, const double &);
