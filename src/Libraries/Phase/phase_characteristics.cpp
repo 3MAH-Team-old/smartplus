@@ -25,6 +25,7 @@
 #include <string>
 #include <assert.h>
 #include <armadillo>
+#include <memory>
 #include <smartplus/Libraries/Phase/phase_characteristics.hpp>
 #include <smartplus/Libraries/Geometry/geometry.hpp>
 #include <smartplus/Libraries/Geometry/layer.hpp>
@@ -62,8 +63,7 @@ namespace smart{
     sptr_matprops = std::make_shared<material_characteristics>();
     
     //Note : the construction of sptr_shape = std::make_shared.. and sptr_sv = std::make_shared.. is made in construct(int, int)
-
-    
+   
 }
 
 /*!
@@ -72,7 +72,7 @@ namespace smart{
 */
 
 //-------------------------------------------------------------
-    phase_characteristics::phase_characteristics(const int &mshape_type, const int &msv_type, const std::shared_ptr<geometry> &msptr_shape, const std::shared_ptr<phase_multi> &msptr_multi, const std::shared_ptr<material_characteristics> &msptr_matprops, const std::shared_ptr<state_variables> &msptr_sv_global, const std::shared_ptr<state_variables> &msptr_sv_local, const std::shared_ptr<std::ofstream> &msptr_out)
+    phase_characteristics::phase_characteristics(const int &mshape_type, const int &msv_type, const std::shared_ptr<geometry> &msptr_shape, const std::shared_ptr<phase_multi> &msptr_multi, const std::shared_ptr<material_characteristics> &msptr_matprops, const std::shared_ptr<state_variables> &msptr_sv_global, const std::shared_ptr<state_variables> &msptr_sv_local, const std::shared_ptr<std::ofstream> &msptr_out_global, const std::shared_ptr<std::ofstream> &msptr_out_local, const std::string &msub_phases_file)
 //-------------------------------------------------------------
 {
     shape_type = mshape_type;
@@ -82,7 +82,9 @@ namespace smart{
     sptr_matprops = msptr_matprops;
     sptr_sv_global = msptr_sv_global;
     sptr_sv_local = msptr_sv_local;
-    sptr_out = msptr_out;
+    sptr_out_global = msptr_out_global;
+    sptr_out_local = msptr_out_local;
+    sub_phases_file = msub_phases_file;
 }
 
 /*!
@@ -101,7 +103,11 @@ phase_characteristics::phase_characteristics(const phase_characteristics& pc)
     sptr_matprops = pc.sptr_matprops;
     sptr_sv_global = pc.sptr_sv_global;
     sptr_sv_local = pc.sptr_sv_local;
-    sptr_out = pc.sptr_out;
+    sptr_out_global = pc.sptr_out_global;
+    sptr_out_local = pc.sptr_out_local;
+    
+    sub_phases = pc.sub_phases;
+    sub_phases_file = pc.sub_phases_file;
 }
 
 /*!
@@ -278,28 +284,37 @@ phase_characteristics& phase_characteristics::operator = (const phase_characteri
     sptr_matprops = pc.sptr_matprops;
     sptr_sv_global = pc.sptr_sv_global;
     sptr_sv_local = pc.sptr_sv_local;
-    sptr_out = pc.sptr_out;
+    sptr_out_global = pc.sptr_out_global;
+    sptr_out_local = pc.sptr_out_local;
+    
+    sub_phases = pc.sub_phases;
+    sub_phases_file = pc.sub_phases_file;
     
 	return *this;
 }
 
 //----------------------------------------------------------------------
-void phase_characteristics::define_output(const std::string &outputfile)
+void phase_characteristics::define_output(const std::string &outputfile, const std::string &coordsys)
 //----------------------------------------------------------------------
 {
 
     std::string ext_filename = outputfile.substr(outputfile.length()-4,outputfile.length());
     std::string filename = outputfile.substr(0,outputfile.length()-4); //to remove the extension
 //    if(sptr_matprops->number > 0)
-        filename = filename + '-' + std::to_string(sptr_matprops->number) + ext_filename;
+    filename = filename + '-' + std::to_string(sptr_matprops->number) + ext_filename;
 //    else
 //        filename = filename + ext_filename;
     
     std::ofstream of_file(filename);
-    sptr_out = make_shared<ofstream>(filename);
+    if(coordsys == "global") {
+        sptr_out_global = make_shared<ofstream>(filename);
+    }
+    else if(coordsys == "local") {
+        sptr_out_local = make_shared<ofstream>(filename);
+    }
     
     for(unsigned int i=0; i<sub_phases.size(); i++) {
-        sub_phases[i].define_output(filename);
+        sub_phases[i].define_output(filename, coordsys);
     }
     
 }
@@ -308,29 +323,31 @@ void phase_characteristics::define_output(const std::string &outputfile)
 void phase_characteristics::output(const solver_output &so, const int &kblock, const int &kcycle, const int&kstep, const int &kinc, const double & Time, const std::string &coordsys)
 //----------------------------------------------------------------------
 {
-    
-        *sptr_out << kblock+1 << "\t";
-        *sptr_out << kcycle+1 << "\t";
-        *sptr_out << kstep+1 << "\t";
-        *sptr_out << kinc+1 << "\t";
-        *sptr_out << Time << "\t\t";
+
+    if(coordsys == "global") {
+        
+        *sptr_out_global << kblock+1 << "\t";
+        *sptr_out_global << kcycle+1 << "\t";
+        *sptr_out_global << kstep+1 << "\t";
+        *sptr_out_global << kinc+1 << "\t";
+        *sptr_out_global << Time << "\t\t";
     
         //Switch case for the state_variables type of the phase
         if (so.o_nb_T) {
     
             switch (sv_type) {
                 case 1: {
-                    *sptr_out << sptr_sv_global->T  << "\t";
-                    *sptr_out << 0 << "\t";                //This is for the flux Q
-                    *sptr_out << 0 << "\t";                //This is for the rpl
+                    *sptr_out_global << sptr_sv_global->T  << "\t";
+                    *sptr_out_global << 0 << "\t";                //This is for the flux Q
+                    *sptr_out_global << 0 << "\t";                //This is for the rpl
                     break;
                 }
                 case 2: {
                     //We need to cast sv
                     std::shared_ptr<state_variables_T> sv_T = std::dynamic_pointer_cast<state_variables_T>(sptr_sv_global);
-                    *sptr_out << sv_T->T  << "\t";
-                    *sptr_out << sv_T->Q << "\t";                //This is for the flux
-                    *sptr_out << sv_T->rpl << "\t";                //This is for the rpl
+                    *sptr_out_global << sv_T->T  << "\t";
+                    *sptr_out_global << sv_T->Q << "\t";                //This is for the flux
+                    *sptr_out_global << sv_T->rpl << "\t";                //This is for the rpl
                     break;
                 }
                 default: {
@@ -341,66 +358,103 @@ void phase_characteristics::output(const solver_output &so, const int &kblock, c
             }
         }
     
-        if(coordsys == "global") {
+        //output
+        if (so.o_nb_meca) {
+            for (int z=0; z<so.o_nb_meca; z++) {
+                *sptr_out_global << sptr_sv_global->Etot(so.o_meca(z)) << "\t";
+            }
+            for (int z=0; z<so.o_nb_meca; z++) {
+                *sptr_out_global << sptr_sv_global->sigma(so.o_meca(z)) << "\t";
+            }
+        }
     
-            //output
-            if (so.o_nb_meca) {
-                for (int z=0; z<so.o_nb_meca; z++) {
-                    *sptr_out << sptr_sv_global->Etot(so.o_meca(z)) << "\t";
-                }
-                for (int z=0; z<so.o_nb_meca; z++) {
-                    *sptr_out << sptr_sv_global->sigma(so.o_meca(z)) << "\t";
+        *sptr_out_global << "\t";
+        if(so.o_nw_statev != 0){
+            if (so.o_wanted_statev(0) < 0) {
+                for(int k = 0 ; k < sptr_sv_global->nstatev ; k++)
+                *sptr_out_global << sptr_sv_global->statev(k) << "\t";
+            }
+            else{
+                for(int k = 0 ; k < so.o_nw_statev ; k++){
+                    for (int l = so.o_wanted_statev(k); l < (so.o_range_statev(k)+1); l++){
+                        *sptr_out_global << sptr_sv_global->statev(l) << "\t";
+                    }
                 }
             }
+        }
+        *sptr_out_global << endl;
         
-            *sptr_out << "\t";
-            if(so.o_nw_statev != 0){
-                if (so.o_wanted_statev(0) < 0) {
-                    for(int k = 0 ; k < sptr_sv_global->nstatev ; k++)
-                    *sptr_out << sptr_sv_global->statev(k) << "\t";
-                }
-                else{
-                    for(int k = 0 ; k < so.o_nw_statev ; k++){
-                        for (int l = so.o_wanted_statev(k); l < (so.o_range_statev(k)+1); l++){
-                            *sptr_out << sptr_sv_global->statev(l) << "\t";
-                        }
-                    }
-                }
-            }
+        for(auto r : sub_phases) {
+            r.output(so, kblock, kcycle, kstep, kinc, Time, "global");
         }
-        else if(coordsys == "local") {
-
-            //output
-            if (so.o_nb_meca) {
-                for (int z=0; z<so.o_nb_meca; z++) {
-                    *sptr_out << sptr_sv_local->Etot(so.o_meca(z)) << "\t";
-                }
-                for (int z=0; z<so.o_nb_meca; z++) {
-                    *sptr_out << sptr_sv_local->sigma(so.o_meca(z)) << "\t";
-                }
-            }
-            
-            *sptr_out << "\t";
-            if(so.o_nw_statev != 0){
-                if (so.o_wanted_statev(0) < 0) {
-                    for(int k = 0 ; k < sptr_sv_local->nstatev ; k++)
-                    *sptr_out << sptr_sv_local->statev(k) << "\t";
-                }
-                else{
-                    for(int k = 0 ; k < so.o_nw_statev ; k++){
-                        for (int l = so.o_wanted_statev(k); l < (so.o_range_statev(k)+1); l++){
-                            *sptr_out << sptr_sv_local->statev(l) << "\t";
-                        }
-                    }
-                }
-            }
-            
-        }
-        *sptr_out << endl;
-    
-    for(auto r : sub_phases) {
-        r.output(so, kblock, kcycle, kstep, kinc, Time, "global");
     }
+    else if(coordsys == "local") {
+    
+        *sptr_out_local << kblock+1 << "\t";
+        *sptr_out_local << kcycle+1 << "\t";
+        *sptr_out_local << kstep+1 << "\t";
+        *sptr_out_local << kinc+1 << "\t";
+        *sptr_out_local << Time << "\t\t";
+        
+        //Switch case for the state_variables type of the phase
+        if (so.o_nb_T) {
+            
+            switch (sv_type) {
+                    case 1: {
+                        *sptr_out_local << sptr_sv_local->T  << "\t";
+                        *sptr_out_local << 0 << "\t";                //This is for the flux Q
+                        *sptr_out_local << 0 << "\t";                //This is for the rpl
+                        break;
+                    }
+                    case 2: {
+                        //We need to cast sv
+                        std::shared_ptr<state_variables_T> sv_T = std::dynamic_pointer_cast<state_variables_T>(sptr_sv_local);
+                        *sptr_out_local << sv_T->T  << "\t";
+                        *sptr_out_local << sv_T->Q << "\t";                //This is for the flux
+                        *sptr_out_local << sv_T->rpl << "\t";                //This is for the rpl
+                        break;
+                    }
+                default: {
+                    cout << "error: The state_variable type does not correspond (1 for Mechanical, 2 for Thermomechanical)\n";
+                    exit(0);
+                    break;
+                }
+            }
+        }
+    
+        //output
+        if (so.o_nb_meca) {
+            for (int z=0; z<so.o_nb_meca; z++) {
+                *sptr_out_local << sptr_sv_local->Etot(so.o_meca(z)) << "\t";
+            }
+            for (int z=0; z<so.o_nb_meca; z++) {
+                *sptr_out_local << sptr_sv_local->sigma(so.o_meca(z)) << "\t";
+            }
+        }
+        
+        *sptr_out_local << "\t";
+        if(so.o_nw_statev != 0){
+            if (so.o_wanted_statev(0) < 0) {
+                for(int k = 0 ; k < sptr_sv_local->nstatev ; k++)
+                *sptr_out_local << sptr_sv_local->statev(k) << "\t";
+            }
+            else{
+                for(int k = 0 ; k < so.o_nw_statev ; k++){
+                    for (int l = so.o_wanted_statev(k); l < (so.o_range_statev(k)+1); l++){
+                        *sptr_out_local << sptr_sv_local->statev(l) << "\t";
+                    }
+                }
+            }
+        }
+        *sptr_out_local << endl;
+        
+        for(auto r : sub_phases) {
+            r.output(so, kblock, kcycle, kstep, kinc, Time, "local");
+        }
+        
+    }
+        
+
     
 }
     
