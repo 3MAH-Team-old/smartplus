@@ -254,11 +254,10 @@ void dE_Periodic_Layer(phase_characteristics &phase, const int &nbiter) {
         lay_multi->Dnn(2,1) = Lt_loc(4,3);
         lay_multi->Dnn(2,2) = Lt_loc(4,4);
         
-        lay_multi->sigma_hat(0) = sv_r->sigma(0);
-        lay_multi->sigma_hat(1) = sv_r->sigma(3);
-        lay_multi->sigma_hat(2) = sv_r->sigma(4);
-        
-
+        mat sigma_local = rotate_g2l_strain(sv_r->sigma, lay->psi_geom, lay->theta_geom, lay->phi_geom);;
+        lay_multi->sigma_hat(0) = sigma_local(0);
+        lay_multi->sigma_hat(1) = sigma_local(3);
+        lay_multi->sigma_hat(2) = sigma_local(4);
     }
     
     for(auto r : phase.sub_phases) {
@@ -274,10 +273,15 @@ void dE_Periodic_Layer(phase_characteristics &phase, const int &nbiter) {
         sv_r = std::dynamic_pointer_cast<state_variables_M>(r.sptr_sv_global);
         lay_multi = std::dynamic_pointer_cast<layer_multi>(r.sptr_multi);
         lay_multi->dzdx1 = inv(lay_multi->Dnn)*(m-lay_multi->sigma_hat);
+        lay = std::dynamic_pointer_cast<layer>(r.sptr_shape);
         
-        sv_r->DEtot(0) += lay_multi->dzdx1(0);
-        sv_r->DEtot(3) += lay_multi->dzdx1(1);
-        sv_r->DEtot(4) += lay_multi->dzdx1(2);
+        mat dEtot_local = zeros(6);
+        dEtot_local(0) = lay_multi->dzdx1(0);
+        dEtot_local(3) = lay_multi->dzdx1(1);
+        dEtot_local(4) = lay_multi->dzdx1(2);
+        mat dEtot_global = rotate_l2g_strain(dEtot_local, lay->psi_geom, lay->theta_geom, lay->phi_geom);
+        
+        sv_r->DEtot += dEtot_global;
     }
 }
     
