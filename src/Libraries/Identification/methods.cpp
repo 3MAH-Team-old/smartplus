@@ -81,7 +81,7 @@ void to_run(generation &gensons, generation &gboys, generation &genrun, const do
 
     int z = 0;
     int maxpop = gensons.nindividuals;
-    int n_param = n_param = params.size();
+    int n_param = params.size();
     
     //genrun part of the genetic
     if (maxpop > 1) {
