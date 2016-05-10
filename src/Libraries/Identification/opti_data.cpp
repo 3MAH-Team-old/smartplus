@@ -157,8 +157,6 @@ void opti_data::import(string folder, string exten, int nexp)
     const char *car;
     string sar;
     double temp = 0.;
-    int colind = 0;
-    int row = 0;
     
     sstm << folder << "/" << name << "." << exten;
     sar = sstm.str();
@@ -179,8 +177,6 @@ void opti_data::import(string folder, string exten, int nexp)
     
     ifdata.open(car, ios::in);
     temp = 0.;
-    colind = 0;
-    row=0;
     
     if ((nexp == 0)||(ndata < nexp)) {
         constructdata();
