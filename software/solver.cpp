@@ -50,9 +50,13 @@ int main() {
     
     double rho = 0.;
     double c_p = 0.;
+        
+	double psi_rve = 0.;
+	double theta_rve = 0.;
+	double phi_rve = 0.;
     
-    read_matprops(umat_name, nprops, props, nstatev, rho, c_p);
-    solver(umat_name, props, nstatev, rho, c_p, pathfile, outputfile);
+    read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p);
+    solver(umat_name, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p, pathfile, outputfile);
 
 	return 0;
 }
