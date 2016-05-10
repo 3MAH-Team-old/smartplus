@@ -21,10 +21,10 @@ option(DEBUG "Compile with debugging information" OFF)
 
 # configure a header file to pass some CMake settings
 # to the source code
-configure_file (
-  "${PROJECT_SOURCE_DIR}/configuration.hpp.in"
-  "${PROJECT_BINARY_DIR}/configuration.hpp"
-)
+#configure_file (
+#  "${PROJECT_SOURCE_DIR}/configuration.hpp.in"
+#  "${PROJECT_BINARY_DIR}/configuration.hpp"
+#)
 
 #Setup CMake to run tests
 enable_testing()
@@ -92,7 +92,7 @@ include_directories(include)
 include_directories("${PROJECT_BINARY_DIR}")
 
 #Command file to get all the files in the src/ and include/
-file(GLOB_RECURSE source_files src/* src_priv/* include/* include_priv/*)
+file(GLOB_RECURSE source_files src/* include/*)
 
 #Add the files to the lib
 add_library(smartplus SHARED ${source_files})
@@ -142,7 +142,33 @@ endforeach(testSrc)
 
 
 add_library(umat OBJECT software/umat_single.cpp)
-set_property(TARGET umat PROPERTY COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -c -openm -larmadillo -std=c++11 -DARMA_DONT_USE_WRAPPER -I ${CMAKE_CURRENT_SOURCE_DIR}")
+set_property(TARGET umat PROPERTY COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -c -openm -larmadillo -std=c++11 -DARMA_DONT_USE_WRAPPER")
 
 add_library(umatT OBJECT software/umat_singleT.cpp)
 set_property(TARGET umatT PROPERTY COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -c -openm -larmadillo -std=c++11 -DARMA_DONT_USE_WRAPPER")
+
+
+################################################################################
+# INSTALL CONFIGURATION
+
+if(NOT INSTALL_INCLUDE_DIR)
+  set(INSTALL_INCLUDE_DIR "include")
+endif()
+
+if(NOT INSTALL_LIB_DIR)
+  set(INSTALL_LIB_DIR "lib")
+endif()
+
+# executables destination
+if(NOT INSTALL_BIN_DIR)
+  set(INSTALL_BIN_DIR "bin")
+endif()
+
+message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "INSTALL_LIB_DIR      = ${INSTALL_LIB_DIR}"     )
+message(STATUS "INSTALL_INCLUDE_DIR  = ${INSTALL_INCLUDE_DIR}" )
+message(STATUS "INSTALL_BIN_DIR      = ${INSTALL_BIN_DIR}"    )
+
+install(DIRECTORY include/ DESTINATION ${INSTALL_INCLUDE_DIR})
+install(TARGETS smartplus DESTINATION ${INSTALL_LIB_DIR})
+
