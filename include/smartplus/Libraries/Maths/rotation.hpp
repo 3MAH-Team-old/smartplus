@@ -78,11 +78,17 @@ arma::mat rotate_l2g_L(const arma::mat &, const double &, const double &, const 
 //To rotate from global to local a stiffness matrix (6,6)
 arma::mat rotate_g2l_L(const arma::mat &, const double &, const double &, const double &);
 
-//To rotate from local to global a localisation matrix (6,6)
+//To rotate from local to global a strain localisation matrix (6,6)
 arma::mat rotate_l2g_A(const arma::mat &, const double &, const double &, const double &);
 
-//To rotate from global to local a localisation matrix (6,6)
+//To rotate from global to local a strain localisation matrix (6,6)
 arma::mat rotate_g2l_A(const arma::mat &, const double &, const double &, const double &);
+
+//To rotate from local to global a stress localisation matrix (6,6)
+arma::mat rotate_l2g_B(const arma::mat &, const double &, const double &, const double &);
+
+//To rotate from global to local a stress localisation matrix (6,6)
+arma::mat rotate_g2l_B(const arma::mat &, const double &, const double &, const double &);
 
 //To rotate from local to global a compliance matrix (6,6)
 arma::mat rotate_l2g_M(const arma::mat &, const double &, const double &, const double &);
