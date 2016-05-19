@@ -41,11 +41,11 @@ mat fillR(const double &alpha, const int &axis) {
             break;
         }
         case 2: {
-            R = { {c, 0, s}, {0,1,0}, {-s,0,c}};
+            R = mat {{c, 0, s}, {0,1,0}, {-s,0,c}};
             break;
         }
         case 3: {
-            R = { {c,-s,0}, {s,c, 0}, {0,0,1}};
+            R = {{c,-s,0}, {s,c, 0}, {0,0,1}};
             break;
         }
         default: {
@@ -53,7 +53,6 @@ mat fillR(const double &alpha, const int &axis) {
         }
     }
     return R;
-    
 }
     
 mat fillQS(const double &alpha, const int &axis) {
@@ -622,7 +621,7 @@ mat rotate_g2l_L(const mat &Lt, const double &psi, const double &theta, const do
 }
 
 
-//To rotate from local to global a localisation matrix (6,6)
+//To rotate from local to global a strain localisation matrix (6,6)
 mat rotate_l2g_A(const mat &A, const double &psi, const double &theta, const double &phi) {
     
     mat A_temp = A;
@@ -639,7 +638,7 @@ mat rotate_l2g_A(const mat &A, const double &psi, const double &theta, const dou
 	return A_temp;
 }
 
-//To rotate from global to local a localisation matrix (6,6)
+//To rotate from global to local a strain localisation matrix (6,6)
 mat rotate_g2l_A(const mat &A, const double &psi, const double &theta, const double &phi) {
     
     mat A_temp = A;
@@ -656,7 +655,41 @@ mat rotate_g2l_A(const mat &A, const double &psi, const double &theta, const dou
 	return A_temp;
 }
 
-//To rotate from local to global a localisation matrix (6,6)
+//To rotate from local to global a stress localisation matrix (6,6)
+mat rotate_l2g_B(const mat &B, const double &psi, const double &theta, const double &phi) {
+    
+    mat B_temp = B;
+  	if(fabs(phi) > iota) {
+		B_temp = rotateB(B_temp, -phi, axis_phi);
+	}
+  	if(fabs(theta) > iota) {
+		B_temp = rotateB(B_temp, -theta, axis_theta);
+	}
+	if(fabs(psi) > iota) {
+		B_temp = rotateB(B_temp, -psi, axis_psi);
+	}
+    
+	return B_temp;
+}
+
+//To rotate from global to local a stress localisation matrix (6,6)
+mat rotate_g2l_B(const mat &B, const double &psi, const double &theta, const double &phi) {
+    
+    mat B_temp = B;
+  	if(fabs(psi) > iota) {
+		B_temp = rotateB(B_temp, psi, axis_psi);
+	}
+	if(fabs(theta) > iota) {
+		B_temp = rotateB(B_temp, theta, axis_theta);
+	}
+	if(fabs(phi) > iota) {
+		B_temp = rotateB(B_temp, phi, axis_phi);
+    }
+    
+	return B_temp;
+}
+
+//To rotate from local to global a  localisation matrix (6,6)
 mat rotate_l2g_M(const mat &M, const double &psi, const double &theta, const double &phi) {
     
     mat M_temp = M;
