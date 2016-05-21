@@ -1,9 +1,24 @@
-///@file abaqus2smart.hpp
-///@brief Procedure that transfer the abaqus format to a SMART+ format:
+/* This file is part of SMART+.
+ 
+ SMART+ is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ SMART+ is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with SMART+.  If not, see <http://www.gnu.org/licenses/>.
+ 
+ */
+
+///@file umat_smart.hpp
+///@brief Selection of constitutive laws and transfer to between Abaqus and SMART+ formats
 ///@brief Implemented in 1D-2D-3D
-///@author Chemisky
 ///@version 1.0
-///@date 12/03/2013
 
 #pragma once
 #include <armadillo>
