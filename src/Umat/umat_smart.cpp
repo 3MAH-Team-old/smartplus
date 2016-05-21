@@ -1,9 +1,24 @@
-///@file abaqus2smart.hpp
-///@brief Procedure that transfer the abaqus format to a SMART+ format:
+/* This file is part of SMART+.
+ 
+ SMART+ is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ SMART+ is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with SMART+.  If not, see <http://www.gnu.org/licenses/>.
+ 
+ */
+
+///@file umat_smart.cpp
+///@brief Selection of constitutive laws and transfer to between Abaqus and SMART+ formats
 ///@brief Implemented in 1D-2D-3D
-///@author Chemisky
 ///@version 1.0
-///@date 12/03/2013
 
 #include <iostream>
 #include <map>
@@ -21,6 +36,7 @@
 #include <smartplus/Umat/Mechanical/Elasticity/elastic_orthotropic.hpp>
 #include <smartplus/Umat/Mechanical/Plasticity/plastic_isotropic_ccp.hpp>
 #include <smartplus/Umat/Mechanical/Plasticity/plastic_kin_iso_ccp.hpp>
+#include <smartplus/Umat/Mechanical/Damage/damage_LLD_0.hpp>
 
 #include <smartplus/Umat/Thermomechanical/Elasticity/elastic_isotropic.hpp>
 
@@ -200,8 +216,9 @@ void select_umat_T(phase_characteristics &rve, const mat &DR,const double &Time,
 {
     std::map<string, int> list_umat;
     list_umat = {{"ELISO",1}};
-    
-    shared_ptr<state_variables_T> umat_T = std::dynamic_pointer_cast<state_variables_T>(rve.sptr_sv_global);
+
+    rve.global2local();
+    auto umat_T = std::dynamic_pointer_cast<state_variables_T>(rve.sptr_sv_local);
     
     switch (list_umat[rve.sptr_matprops->umat_name]) {
         case 1: {
@@ -214,6 +231,7 @@ void select_umat_T(phase_characteristics &rve, const mat &DR,const double &Time,
                 exit(0);
         }
     }
+    rve.local2global();
     
 }
     
@@ -221,7 +239,7 @@ void select_umat_M(phase_characteristics &rve, const mat &DR,const double &Time,
 {
 	
     std::map<string, int> list_umat;
-    list_umat = {{"ELISO",1},{"ELIST",2},{"ELORT",3},{"EPICP",4},{"EPKCP",5},{"MIHEN",100},{"MIMTN",101},{"MISCN",102},{"MIPCW",103},{"MIPLN",104}};
+    list_umat = {{"ELISO",1},{"ELIST",2},{"ELORT",3},{"EPICP",4},{"EPKCP",5},{"LLDM0",6},{"MIHEN",100},{"MIMTN",101},{"MISCN",102},{"MIPCW",103},{"MIPLN",104}};
     
         rve.global2local();
         auto umat_M = std::dynamic_pointer_cast<state_variables_M>(rve.sptr_sv_local);
@@ -247,6 +265,10 @@ void select_umat_M(phase_characteristics &rve, const mat &DR,const double &Time,
             }
             case 5: {
                 umat_plasticity_kin_iso_CCP(umat_M->Etot, umat_M->DEtot, umat_M->sigma, umat_M->Lt, DR, rve.sptr_matprops->nprops, rve.sptr_matprops->props, umat_M->nstatev, umat_M->statev, umat_M->T, umat_M->DT, Time, DTime, umat_M->sse, umat_M->spd, ndi, nshr, start, tnew_dt);
+                break;
+            }
+            case 6: {
+                umat_damage_LLD_0(umat_M->Etot, umat_M->DEtot, umat_M->sigma, umat_M->Lt, DR, rve.sptr_matprops->nprops, rve.sptr_matprops->props, umat_M->nstatev, umat_M->statev, umat_M->T, umat_M->DT, Time, DTime, umat_M->sse, umat_M->spd, ndi, nshr, start, tnew_dt);
                 break;
             }
             case 100: case 101: case 102: case 103: case 104: {
