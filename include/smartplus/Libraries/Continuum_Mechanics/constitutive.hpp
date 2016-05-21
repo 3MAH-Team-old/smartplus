@@ -53,29 +53,30 @@ arma::vec Ir05();
 //The two first arguments are a couple of Lamé coefficients. The third argument specify which couple has been provided and the order of coefficients.
 //Exhaustive list of possible third argument :
 // ‘Enu’,’nuE,’Kmu’,’muK’, ‘KG’, ‘GK’, ‘lambdamu’, ‘mulambda’, ‘lambdaG’, ‘Glambda’.
-arma::mat L_iso(const double &, const double &, std::string);
+arma::mat L_iso(const double &, const double &, const std::string& = "Enu");
 
 //Provides the elastic compliance tensor for an isotropic material.
 //The two first arguments are a couple of Lamé coefficients. The third argument specify which couple has been provided and the order of coefficients.
 //Exhaustive list of possible third argument :
 //‘Enu’,’nuE,’Kmu’,’muK’, ‘KG’, ‘GK’, ‘lambdamu’, ‘mulambda’, ‘lambdaG’, ‘Glambda’.
-arma::mat M_iso(const double &, const double &, std::string);
+arma::mat M_iso(const double &, const double &, const std::string& = "Enu");
 
 //Returns the elastic stiffness tensor for a cubic material.
-//Arguments are the stiffness coefficients C11, C12 and C44.
-arma::mat L_cubic(const double &, const double &, const double &);
+//Arguments are the stiffness coefficients C11, C12 and C44 or E, nu and G.
+//‘EnuG’,’Cii’.
+arma::mat L_cubic(const double &, const double &, const double &, const std::string& = "EnuG");
 
 //Returns the elastic compliance tensor for an isotropic material.
-//Arguments are the stiffness coefficients C11, C12 and C44.
-arma::mat M_cubic(const double &, const double &, const double &);
+//Arguments are the stiffness coefficients C11, C12 and C44, or E, nu and G.
+arma::mat M_cubic(const double &, const double &, const double &, const std::string& = "EnuG");
 
 //Returns the elastic stiffness tensor for an orthotropic material.
 //Arguments are the stiffness coefficients Cii or E and nu's
-arma::mat L_ortho(const double &, const double &, const double &, const double &, const double &, const double &, const double &, const double &, const double &, std::string);
+arma::mat L_ortho(const double &, const double &, const double &, const double &, const double &, const double &, const double &, const double &, const double &, const std::string& = "EnuG");
 
 //Returns the elastic compliance tensor for an orthotropic material.
 //Arguments are the stiffness coefficients Cii or E and nu's
-arma::mat M_ortho(const double &, const double &, const double &, const double &, const double &, const double &, const double &, const double &, const double &, std::string);
+arma::mat M_ortho(const double &, const double &, const double &, const double &, const double &, const double &, const double &, const double &, const double &, const std::string& = "EnuG");
 
 //Returns the elastic stiffness tensor for an isotropic transverse material.
 //Arguments are longitudinal Young modulus EL, transverse young modulus, Poisson’s ratio for loading along the longitudinal axis nuTL, Poisson’s ratio for loading along the transverse axis nuTT, shear modulus GLT and the axis of symmetry.
