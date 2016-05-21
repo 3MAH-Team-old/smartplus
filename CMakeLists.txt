@@ -43,8 +43,8 @@ find_package(Armadillo 5.2 REQUIRED)
 include_directories(SYSTEM ${ARMADILLO_INCLUDE_DIRS})
 
 # OpenMP
-include(FindOpenMP)
-find_package(OpenMP)
+#include(FindOpenMP)
+#find_package(OpenMP)
 
 # Build type
 if(NOT CMAKE_BUILD_TYPE)  # Debug by default
@@ -112,6 +112,13 @@ add_executable(identification software/identification.cpp)
 target_link_libraries(identification smartplus ${ARMADILLO_LIBRARIES})
 
 
+
+#Add the identification executable
+add_executable(L_eff software/Leff.cpp)
+
+#Link the identification executable with armadillo
+target_link_libraries(L_eff smartplus ${ARMADILLO_LIBRARIES})
+
 ##Testing
 #Test files are in a separate source directory called test
 file(GLOB_RECURSE TEST_SRCS test/*.cpp)
@@ -141,11 +148,11 @@ foreach(testSrc ${TEST_SRCS})
 endforeach(testSrc)
 
 
-add_library(umat OBJECT software/umat_single.cpp)
-set_property(TARGET umat PROPERTY COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -c -openm -larmadillo -std=c++11 -DARMA_DONT_USE_WRAPPER")
+#add_library(umat OBJECT software/umat_single.cpp)
+#set_property(TARGET umat PROPERTY COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -c -openm -larmadillo -std=c++11 -DARMA_DONT_USE_WRAPPER")
 
-add_library(umatT OBJECT software/umat_singleT.cpp)
-set_property(TARGET umatT PROPERTY COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -c -openm -larmadillo -std=c++11 -DARMA_DONT_USE_WRAPPER")
+#add_library(umatT OBJECT software/umat_singleT.cpp)
+#set_property(TARGET umatT PROPERTY COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -c -openm -larmadillo -std=c++11 -DARMA_DONT_USE_WRAPPER")
 
 
 ################################################################################
