@@ -44,9 +44,7 @@ using namespace arma;
 
 namespace smart{
 
-    void solver(const string &umat_name, const vec &props, const double &nstatev, const double &psi_rve, const double &theta_rve, const double &phi_rve,const double &rho, const double &c_p, const std::string &pathfile, const std::string &outputfile) {
-    
-//    ofstream output(outputfile);
+void solver(const string &umat_name, const vec &props, const double &nstatev, const double &psi_rve, const double &theta_rve, const double &phi_rve,const double &rho, const double &c_p, const std::string &pathfile, const std::string &outputfile) {
     
     std::string ext_filename = outputfile.substr(outputfile.length()-4,outputfile.length());
     std::string filename = outputfile.substr(0,outputfile.length()-4); //to remove the extension
@@ -64,21 +62,10 @@ namespace smart{
 	double Time = 0.;
 	double DTime = 0.;
     double T_init = 0.;
-//	double T = 0.;
-//	double DT = 0.;
     double tnew_dt = 1.;
-//    double Q = 0.;
-//    double rpl = 0.;            //The part of the heat linked with material's behavior (thermoelasticity, dissipation, phase change..)
-//    double sse = 0.;
-//    double spd = 0.;
     
-    //What follows constitutes the base variables to solve the mechanical/thermomechanical problem
-//    vec sigma = zeros(6);
-//    vec sigma_start = zeros(6);
-//    vec Etot = zeros(6);
-//    vec DEtot = zeros(6);
-    mat L = zeros(6,6);
-    mat Lt = zeros(6,6);
+//    mat L = zeros(6,6);
+//    mat Lt = zeros(6,6);
     mat DR = eye(3,3);
     
 //    mat dSdE = zeros(6,6);
@@ -94,10 +81,6 @@ namespace smart{
         cout << "blocks = " << b << "\n";
     }
     
-//    std::vector<shared_ptr<material_characteristics> > rve_save(1); //There is at least one material, the effective one
-//    shared_ptr<material_characteristics> eff_material = rve_save[0]; //There is at least one material, the effective one
-//    shared_ptr<material_characteristics> eff_material
-    
     ///Material properties reading, use "material.dat" to specify parameters values
     rve.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props, rho, c_p);
     
@@ -105,7 +88,6 @@ namespace smart{
     int o_ncount = 0;
     double o_tcount = 0.;
     solver_output so(blocks.size());
-//    std::vector<solver_output> rve_so;   //This is to output the response of the phases
     read_output(so, blocks.size(), nstatev);
     
     //Check output and step files
@@ -634,9 +616,7 @@ namespace smart{
         }
     //end of blocks loops
     }
-
-
-        
+    
 }
 
 } //namespace smart
