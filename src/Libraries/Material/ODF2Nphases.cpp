@@ -27,7 +27,9 @@
 #include <sstream>
 #include <armadillo>
 #include <smartplus/parameter.hpp>
+#include <smartplus/Libraries/Material/ODF.hpp>
 #include <smartplus/Libraries/Material/ODF2Nphases.hpp>
+#include <smartplus/Libraries/Phase/phase_characteristics.hpp>
 #include <smartplus/Libraries/Geometry/ellipsoid.hpp>
 #include <smartplus/Libraries/Maths/random.hpp>
 #include <smartplus/Libraries/Maths/stats.hpp>
@@ -36,8 +38,33 @@ using namespace std;
 using namespace arma;
 
 namespace smart{
+
+void discretize_ODF(phase_characteristics &rve, const phase_characteristics &rve_init, ODF &odf_rve) {
+
+    double alpha = 0.;
+    //Need to compute dalpha from bounds..
+//    int Nphases = odf_rve
     
-double ODF(const double& theta, const int& method, const vec& param, const bool& radian, const double& dec){
+    
+/*    for (int j=0; j<rve.sub_phases.size(); j++) {
+        if(alpha < iota)
+            rve.sub_phases[j].sptr_shape->concentration = dalpha/6. * (ODF(pi-dalpha/2, method(i), paramODF.row(i).t(), radian, dec)+4.*ODF(alpha, method(i), paramODF.row(i).t(), radian, dec)+ODF(alpha+dalpha/2, method(i), paramODF.row(i).t(), radian, dec));
+        else
+            rve.sub_phases[j].sptr_shape->concentration = dalpha/6. * (ODF(pi-dalpha/2, method(i), paramODF.row(i).t(), radian, dec)+4.*ODF(alpha, method(i), paramODF.row(i).t(), radian, dec)+ODF(alpha+dalpha/2, method(i), paramODF.row(i).t(), radian, dec));
+        
+        normODF += rvesvs[i][j].concentration;
+        alpha += dalpha;
+    }
+    
+    ///Normalization
+    for(auto r : rve.sub_phases) {
+        r.sptr_shape->concentration *= (rvesvs_init.sptr_shape->concentration / normODF);
+    }*/
+        
+}
+
+
+/*double ODF(const double& theta, const int& method, const vec& param, const bool& radian, const double& dec){
 	
 	double Theta = theta + dec;
   
@@ -221,7 +248,45 @@ double ODF(const double& theta, const int& method, const vec& param, const bool&
 	}
 }
 
-/*void ODF2Nphases(const Col<int> &Nphases, const Col<int> &Angle, const Col<int> &method, const vector<string> &filename, const mat &paramODF, const bool &radian, const double& dec) {
+
+//Nphases : Number of phases in the initial file
+//Angle : Parameter for each phase : 0 - 1st Euler angle, 1 : second Euler angle, 2 : third Euler angle
+    
+void ODF2Nphases(phase_characteristics rve_init, phase_characteristics rve_init, const Col<int> &Nphases, const Col<int> &Angle, const Col<int> &method, const vector<string> &filename, const mat &paramODF, const bool &radian, const double& dec) {
+    /// WARNING: The paramODF is not passed as a parameter to the function ODF for the moment!
+    
+    //Nphases : Number of phases to discretize the ODF
+    
+    ///Determination of the number of phases
+    int phases_init = Nphases.n_elem;
+    int Number_phase = 0.;
+
+    //Need to get the filenumber!
+    
+    //read the parameter file.. construction of subphases for the initial RVE
+    
+///@WARNING : Need to enter a proper filenumber
+    read_ellipsoid(rve_init, const int &filenumber);
+    
+    std::vector<ODF> ODFs_rve;
+        
+    phases_init = sub_phases.size();
+    
+	for(int i = 0; i < phases_init; i++) {    
+    
+        ODFs_rve[i].initialize();
+        
+        
+        if(Nphases(i) == 1){
+            rvesvs[i][0].resize(rvesvs_init[i].nprops,rvesvs_init[i].nstatev);
+            rvesvs[i][0] = rvesvs_init[i];
+            rvesvs[i][0].number = Number_phase;
+            Number_phase++;
+        }
+    }
+
+    
+void ODF2Nphases(const Col<int> &Nphases, const Col<int> &Angle, const Col<int> &method, const vector<string> &filename, const mat &paramODF, const bool &radian, const double& dec) {
 /// WARNING: The paramODF is not passed as a parameter to the function ODF for the moment!
 		
 	cout << "Initializing...\n";
