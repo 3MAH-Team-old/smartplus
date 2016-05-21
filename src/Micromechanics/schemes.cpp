@@ -125,6 +125,8 @@ void DE_Mori_Tanaka(phase_characteristics &phase) {
     //Compute the strain concentration tensor A
     for(auto r : phase.sub_phases) {
         elli_multi = std::dynamic_pointer_cast<ellipsoid_multi>(r.sptr_multi);
+        sv_r = std::dynamic_pointer_cast<state_variables_M>(r.sptr_sv_global);
+        
         elli_multi->A = elli_multi->T*inv_sumT;
         sv_r->DEtot = elli_multi->A*sv_eff->DEtot; //Recall that the global coordinates of subphases is the local coordinates of the generic phase
     }
