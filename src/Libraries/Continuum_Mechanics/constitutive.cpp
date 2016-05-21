@@ -109,7 +109,7 @@ vec Ir05(){
 //The two first arguments are a couple of Lamé coefficients. The third argument specify which couple has been provided and the order of coefficients.
 //Exhaustive list of possible third argument :
 // ‘Enu’,’nuE,’Kmu’,’muK’, ‘KG’, ‘GK’, ‘lambdamu’, ‘mulambda’, ‘lambdaG’, ‘Glambda’.
-mat L_iso(const double &C1, const double &C2, string conv) {
+mat L_iso(const double &C1, const double &C2, const std::string &conv) {
 	
 	double K = 0.;
 	double mu = 0.;	
@@ -161,7 +161,7 @@ mat L_iso(const double &C1, const double &C2, string conv) {
 //The two first arguments are a couple of Lamé coefficients. The third argument specify which couple has been provided and the order of coefficients.
 //Exhaustive list of possible third argument :
 //‘Enu’,’nuE,’Kmu’,’muK’, ‘KG’, ‘GK’, ‘lambdamu’, ‘mulambda’, ‘lambdaG’, ‘Glambda’.
-mat M_iso(const double &C1, const double &C2, string conv) {
+mat M_iso(const double &C1, const double &C2, const string &conv) {
 	
 	double K = 0.;
 	double mu = 0.;	
@@ -204,57 +204,110 @@ mat M_iso(const double &C1, const double &C2, string conv) {
 	}	
 	else {
 		cout << "ERROR : Please use a valid couple of elastic constants";
+        exit(0);
 	}
 	
 	return 1/(3.*K)*Ivol() + 1/(2.*mu)*Idev2();
 }
 
 //Returns the elastic stiffness tensor for a cubic material.
-//Arguments are the stiffness coefficients C11, C12 and C44.
-mat L_cubic(const double &C11, const double &C12, const double &C44){
+//Arguments are the stiffness coefficients C11, C12 and C44, or E, nu and G
+mat L_cubic(const double &C1, const double &C2, const double &C4, const string &conv){
 	
     mat L = zeros(6,6);
-    L(0,0) = C11;
-    L(0,1) = C12;
-    L(0,2) = C12;
-    L(1,0) = C12;
-    L(1,1) = C11;
-    L(1,2) = C12;
-    L(2,0) = C12;
-    L(2,1) = C12;
-    L(2,2) = C11;
-    L(3,3) = C44;
-    L(4,4) = C44;
-    L(5,5) = C44;
-	
+	if (conv == "Cii") {
+        L(0,0) = C1;
+        L(0,1) = C2;
+        L(0,2) = C2;
+        L(1,0) = C2;
+        L(1,1) = C1;
+        L(1,2) = C2;
+        L(2,0) = C2;
+        L(2,1) = C2;
+        L(2,2) = C1;
+        L(3,3) = C4;
+        L(4,4) = C4;
+        L(5,5) = C4;
+    }
+    else if(conv == "EnuG") {
+        double E = C1;
+        double nu = C2;
+        double G = C4;
+    
+        double C11 = E*( 1-pow(nu,2))/(1 - 3*pow(nu,2) - 2*pow(nu,3) );
+        double C12 = C11/(1./nu - 1.);
+        double C44 = G;
+
+        L(0,0) = C11;
+        L(0,1) = C12;
+        L(0,2) = C12;
+        L(1,0) = C12;
+        L(1,1) = C11;
+        L(1,2) = C12;
+        L(2,0) = C12;
+        L(2,1) = C12;
+        L(2,2) = C11;
+        L(3,3) = C44;
+        L(4,4) = C44;
+        L(5,5) = C44;
+    }
+    else {
+        cout << "ERROR : Please use a valid couple of elastic constants";
+        exit(0);
+    }
+    
 	return L;
 }
 
 //Returns the elastic compliance tensor for an isotropic material.
-//Arguments are the stiffness coefficients C11, C12 and C44.
-mat M_cubic(const double &C11, const double &C12, const double &C44){
+//Arguments are the stiffness coefficients C11, C12 and C44, or E, nu and G.
+mat M_cubic(const double &C1, const double &C2, const double &C4, const string &conv){
 	
     mat M = zeros(6,6);
-	double delta = (C11-C12)*(C11+2.*C12);
-    M(0,0) = (C11+C12)/delta;
-    M(0,1) = -C12/delta;
-    M(0,2) = -C12/delta;
-    M(1,0) = -C12/delta;
-    M(1,1) = (C11+C12)/delta;
-    M(1,2) = -C12/delta;
-    M(2,0) = -C12/delta;
-    M(2,1) = -C12/delta;
-    M(2,2) = (C11+C12)/delta;
-    M(3,3) = 1./C44;
-    M(4,4) = 1./C44;
-    M(5,5) = 1./C44;
+	if (conv == "Cii") {
+        double delta = (C1-C2)*(C1+2.*C2);
+        M(0,0) = (C1+C2)/delta;
+        M(0,1) = -C2/delta;
+        M(0,2) = -C2/delta;
+        M(1,0) = -C2/delta;
+        M(1,1) = (C1+C2)/delta;
+        M(1,2) = -C2/delta;
+        M(2,0) = -C2/delta;
+        M(2,1) = -C2/delta;
+        M(2,2) = (C1+C2)/delta;
+        M(3,3) = 1./C4;
+        M(4,4) = 1./C4;
+        M(5,5) = 1./C4;
+    }
+    else if (conv == "EnuG") {
+        double E = C1;
+        double nu = C2;
+        double G = C4;
+        
+        M(0,0) = 1./E;
+        M(0,1) = -nu/E;
+        M(0,2) = -nu/E;
+        M(1,0) = -nu/E;
+        M(1,1) = 1./E;
+        M(1,2) = -nu/E;
+        M(2,0) = -nu/E;
+        M(2,1) = -nu/E;
+        M(2,2) = 1./E;
+        M(3,3) = 1./G;
+        M(4,4) = 1./G;
+        M(5,5) = 1./G;
+    }
+    else {
+        cout << "ERROR : Please use a valid couple of elastic constants";
+        exit(0);
+    }
 	
 	return M;
 }
 
 //Returns the elastic stiffness tensor for an orthotropic material.
 //Arguments are the stiffness coefficients Cii or E and nu's
-mat L_ortho(const double &C11, const double &C12, const double &C13, const double &C22, const double &C23, const double &C33, const double &C44, const double &C55, const double &C66, string conv ){
+mat L_ortho(const double &C11, const double &C12, const double &C13, const double &C22, const double &C23, const double &C33, const double &C44, const double &C55, const double &C66, const string &conv){
 	mat L = zeros(6,6);
 	
 	if (conv == "Cii") {
@@ -302,16 +355,17 @@ mat L_ortho(const double &C11, const double &C12, const double &C13, const doubl
         L(4,4) = Gxz;
         L(5,5) = Gyz;
     }
-	else {
-        cout << "ERROR : Please use a valid set of arguments. Please refer to the documentation of Smart + for an exhaustive list of authorised argument" << endl;
-	}
+    else {
+        cout << "ERROR : Please use a valid couple of elastic constants";
+        exit(0);
+    }
 	
 	return L;
 }
 
 //Returns the elastic compliance tensor for an orthotropic material.
 //Arguments are the stiffness coefficients Cii or E and nu's
-mat M_ortho(const double &C11, const double &C12, const double &C13, const double &C22, const double &C23, const double &C33, const double &C44, const double &C55, const double &C66, string conv ){
+mat M_ortho(const double &C11, const double &C12, const double &C13, const double &C22, const double &C23, const double &C33, const double &C44, const double &C55, const double &C66, const string &conv){
 	
     mat M = zeros(6,6);
     mat L = zeros(6,6);
@@ -357,10 +411,10 @@ mat M_ortho(const double &C11, const double &C12, const double &C13, const doubl
 		M(4,4) = 1/Gxz;
 		M(5,5) = 1/Gyz;
 	}
-	
-	else {
-		cout << "ERROR : Please use a valid set of arguments. Please refer to the documentation of Smart + for an exhaustive list of authorised argument" << endl;
-	}
+    else {
+        cout << "ERROR : Please use a valid couple of elastic constants";
+        exit(0);
+    }
 	
 	return M;
 }
@@ -418,8 +472,14 @@ mat L_isotrans(const double &EL, const double &ET, const double &nuTL, const dou
 			L(5,5) = GLT;
 			break;	
 		}
+        default : {
+            cout << "ERROR : Please use a valid couple of elastic constants";
+            exit(0);
+        }
+            
 	}
-		
+
+    
 	return L;
 }
 
@@ -473,7 +533,11 @@ mat M_isotrans(const double &EL, const double &ET, const double &nuTL, const dou
 			M(4,4) = 1/GLT;
 			M(5,5) = 1/GLT;
 			break;
-		}	
+		}
+        default : {
+            cout << "ERROR : Please use a valid couple of elastic constants";
+            exit(0);
+        }
 	}			
 	return M;
 }
