@@ -86,6 +86,10 @@ BOOST_AUTO_TEST_CASE( L_cubic_M_cubic )
     double C12 = 400;
     double C44 = 500;
     
+    double nu = 1 / (1 + C11/C12);
+    double E = C11*( 1 - 3*pow(nu,2) - 2*pow(nu,3) )/( 1-pow(nu,2) );
+    double G = C44;
+    
     mat Lcub = zeros(6,6);
     Lcub(0,0) = C11;
     Lcub(0,1) = C12;
@@ -101,10 +105,17 @@ BOOST_AUTO_TEST_CASE( L_cubic_M_cubic )
     Lcub(5,5) = C44;
     
     //Test of L_cubic function
-    mat Ltest = L_cubic(C11,C12,C44);
+    mat Ltest = L_cubic(C11,C12,C44, "Cii");
     BOOST_CHECK( norm(Ltest - Lcub,2) < 1.E-9 );
+    
+    Ltest = L_cubic(E,nu,G, "EnuG");
+    BOOST_CHECK( norm(Ltest - Lcub,2) < 1.E-9 );
+    
     //Test of M_cubic function
-    mat Mtest = M_cubic(C11,C12,C44);
+    mat Mtest = M_cubic(C11,C12,C44, "Cii");
+    BOOST_CHECK( norm(Mtest - inv(Lcub),2) < 1.E-9 );
+
+    Mtest = M_cubic(E,nu,G, "EnuG");
     BOOST_CHECK( norm(Mtest - inv(Lcub),2) < 1.E-9 );
 }
 
