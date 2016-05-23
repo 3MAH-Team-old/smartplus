@@ -1,7 +1,7 @@
 Material
 Name	MIMTN
 Number_of_material_parameters	4
-Number_of_internal_variables	0
+Number_of_internal_variables	10000
 
 #Orientation
 psi	0
