@@ -27,10 +27,13 @@
 #include <string.h>
 #include <armadillo>
 #include <smartplus/parameter.hpp>
-#include <smartplus/Umat/umat_L_elastic.hpp>
+#include <smartplus/Umat/umat_smart.hpp>
+
 #include <smartplus/Libraries/Solver/read.hpp>
-#include <smartplus/Libraries/Phase/state_variables_M.hpp>
-#include <smartplus/Libraries/Phase/phase_characteristics.hpp>
+#include <smartplus/Libraries/Solver/block.hpp>
+#include <smartplus/Libraries/Solver/step.hpp>
+#include <smartplus/Libraries/Solver/step_meca.hpp>
+#include <smartplus/Libraries/Solver/step_thermomeca.hpp>
 
 using namespace std;
 using namespace arma;
@@ -41,32 +44,39 @@ ofstream output("L.txt");
 int main() {
     
 	///Material properties reading, use "material.dat" to specify parameters values
-    string umat_name;
-    int nprops = 0;
-    int nstatev = 0;
-    vec props;
+	string umat_name;
+	int nprops = 0;
+	int nstatev = 0;
+	vec props;
+	vec statev;
     
     double rho = 0.;
     double c_p = 0.;
     
-    double psi_rve = 0.;
-    double theta_rve = 0.;
-    double phi_rve = 0.;
+	bool start = true;
+	double Time = 0.;
+	double DTime = 0.;
+	double T = 0.;
+	double DT = 0.;
+    double tnew_dt = 1.;
+	vec sigma = zeros(6);
+	vec Etot = zeros(6);
+	vec DEtot = zeros(6);
+	mat Lt = zeros(6,6);
+	mat DR = eye(3,3);
     
-    double T_init = 273.15;
+    double sse = 0.;
+    double spd = 0.;
     
-    read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p);
-    phase_characteristics rve;
+    int ndi = 3;
+    int nshr = 3;
     
-    rve.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props, rho, c_p);
-    rve.construct(0,1);
-    rve.sptr_sv_global->update(zeros(6), zeros(6), zeros(6), zeros(6), T_init, 0., 0., 0., nstatev, zeros(nstatev), zeros(nstatev));
+    //read the material properties
+    read_matprops(umat_name, nprops, props, nstatev, statev, rho, c_p);
+        
+    select_umat(umat_name, Etot, DEtot, sigma, Lt, DR, nprops, props, nstatev, statev, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
     
-    auto sv_M = std::dynamic_pointer_cast<state_variables_M>(rve.sptr_sv_global);
-
-    //Second we call a recursive method that find all the elastic moduli iof the phases
-    get_L_elastic(rve);
-    output << sv_M->Lt << "\n";
+    output << Lt << "\n";
     
 	return 0;
 }
