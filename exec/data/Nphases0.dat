@@ -1,3 +1,0 @@
-Number	Coatingof	umat	c	phi_mat	theta_mat	psi_mat	a1	a2	a3 phi_geom	theta_geom	psi_geom	nprops	nstatev	props
-0       0       MIMTN       0.8	0       0           0       1	1	1  0.       0.          0.          4       1000    2   1   20  20
-1       0       ELISO       0.2	0.      0.          0.      50	1	1  45.       0.          0.          3       1       70000   0.3 0.
