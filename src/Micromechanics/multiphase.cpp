@@ -85,9 +85,9 @@ void umat_multi(phase_characteristics &phase, const mat &DR, const double &Time,
 	//Initialization
 	if (start) {
         
-        for (auto r: phase.sub_phases) {
+        for (int i=0; i<nphases; i++) {
             //Run the appropriate constitutive model
-            select_umat_M(r, DR, Time, DTime, ndi, nshr, start, tnew_dt);
+            select_umat_M(phase.sub_phases[i], DR, Time, DTime, ndi, nshr, start, tnew_dt);
         }
     }
 
