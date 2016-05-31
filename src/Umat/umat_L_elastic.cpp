@@ -111,7 +111,6 @@ void get_L_elastic(phase_characteristics &rve)
             break;
         }
         case 101: {
-            
             read_ellipsoid(rve, rve.sptr_matprops->props(1));
             for (auto r : rve.sub_phases) {
                 get_L_elastic(r);
@@ -121,8 +120,8 @@ void get_L_elastic(phase_characteristics &rve)
             break;
         }
         case 102: {
+            read_ellipsoid(rve, rve.sptr_matprops->props(1));
             for (auto r : rve.sub_phases) {
-                read_ellipsoid(rve, rve.sptr_matprops->props(1));
                 get_L_elastic(r);
                 
             }
@@ -130,8 +129,8 @@ void get_L_elastic(phase_characteristics &rve)
             break;
         }
         case 104: {
+            read_ellipsoid(rve, rve.sptr_matprops->props(1));
             for (auto r : rve.sub_phases) {
-                read_ellipsoid(rve, rve.sptr_matprops->props(1));
                 get_L_elastic(r);
             }
             Lt_Periodic_Layer(rve);
