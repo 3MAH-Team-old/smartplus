@@ -92,7 +92,7 @@ include_directories(include)
 include_directories("${PROJECT_BINARY_DIR}")
 
 #Command file to get all the files in the src/ and include/
-file(GLOB_RECURSE source_files src/* include/*)
+file(GLOB_RECURSE source_files src*/* include/*)
 
 #Add the files to the lib
 add_library(smartplus SHARED ${source_files})
