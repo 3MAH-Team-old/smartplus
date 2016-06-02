@@ -27,6 +27,7 @@
 #include <smartplus/Libraries/Geometry/geometry.hpp>
 #include <smartplus/Libraries/Geometry/layer.hpp>
 #include <smartplus/Libraries/Geometry/ellipsoid.hpp>
+#include <smartplus/Libraries/Geometry/cylinder.hpp>
 #include <smartplus/Libraries/Phase/material_characteristics.hpp>
 #include <smartplus/Libraries/Phase/phase_characteristics.hpp>
 
@@ -244,5 +245,80 @@ void read_ellipsoid(phase_characteristics &rve, const int &filenumber) {
     
     paramphases.close();
 }
+
+    
+void read_cylinder(phase_characteristics &rve, const int &filenumber) {
+    unsigned int nphases = 0;
+    std::string buffer;
+    std::string filename = "data/Ncylinder" + std::to_string(filenumber) + ".dat";
+    std::ifstream paramphases;
+    std::shared_ptr<cylinder> sptr_cylinder;
+    
+    paramphases.open(filename, ios::in);
+    if(paramphases) {
+        while (!paramphases.eof())
+        {
+            getline (paramphases,buffer);
+            if (buffer != "") {
+                nphases++;
+            }
+        }
+    }
+    else {
+        cout << "Error: cannot open the file " << filename << " that details the phase characteristics\n";
+        exit(0);
+    }
+    paramphases.close();
+    nphases--;
+    //Assert that the file has been filled correctly
+    assert(nphases == rve.sptr_matprops->props(0));
+    
+    //Generate the sub_phase vector and har-create the objects pointed buy the shared_ptrs
+    rve.sub_phases_construct(nphases,3,1);
+    
+    int nprops = 0;
+    int nstatev = 0;
+    
+    paramphases.open(filename, ios::in);
+    paramphases >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer  >> buffer >> buffer;
+    
+    for(auto r : rve.sub_phases) {
+        paramphases >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> nprops >> nstatev;
+        
+        r.sptr_matprops->resize(nprops);
+        r.sptr_sv_global->update(zeros(6), zeros(6), zeros(6), zeros(6), rve.sptr_sv_global->T, 0., 0., 0., nstatev, zeros(nstatev), zeros(nstatev));
+        
+        for(int j=0; j<r.sptr_matprops->nprops; j++) {
+            paramphases >> buffer;
+        }
+    }
+    paramphases.close();
+    
+    paramphases.open(filename, ios::in);
+    paramphases >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer;
+    
+    std::shared_ptr<material_characteristics> sptr_matprops1;
+    for(auto r : rve.sub_phases) {
+        
+        sptr_cylinder = std::dynamic_pointer_cast<cylinder>(r.sptr_shape);
+        
+        paramphases >> r.sptr_matprops->number >> sptr_cylinder->coatingof >> r.sptr_matprops->umat_name >> r.sptr_matprops->save >>  sptr_cylinder->concentration >> r.sptr_matprops->psi_mat >> r.sptr_matprops->theta_mat >> r.sptr_matprops->phi_mat >> sptr_cylinder->L >> sptr_cylinder->R >> sptr_cylinder->psi_geom >> sptr_cylinder->theta_geom >> sptr_cylinder->phi_geom >> buffer >> buffer;
+        
+        for(int j=0; j<r.sptr_matprops->nprops; j++) {
+            paramphases >> r.sptr_matprops->props(j);
+        }
+        
+        r.sptr_matprops->psi_mat*=(pi/180.);
+        r.sptr_matprops->theta_mat*=(pi/180.);
+        r.sptr_matprops->phi_mat*=(pi/180.);
+        
+        sptr_cylinder->psi_geom*=(pi/180.);
+        sptr_cylinder->theta_geom*=(pi/180.);
+        sptr_cylinder->phi_geom*=(pi/180.);
+    }
+    
+    paramphases.close();
+}
+
 
 } //namespace smart
