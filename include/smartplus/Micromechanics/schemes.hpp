@@ -23,7 +23,7 @@
 #pragma once
 
 #include <armadillo>
-#include "../Libraries/Phase/phase_characteristics.hpp"
+#include <smartplus/Libraries/Phase/phase_characteristics.hpp>
 
 namespace smart{
 
