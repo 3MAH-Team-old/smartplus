@@ -35,4 +35,7 @@ void read_layer(phase_characteristics &, const int &);
 /// Function that checks the coherency between the path and the step increments provided
 void read_ellipsoid(phase_characteristics &, const int &);
 
+/// Function that checks the coherency between the path and the step increments provided
+void read_cylinder(phase_characteristics &, const int &);
+
 } //namespace smart
