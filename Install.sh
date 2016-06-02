@@ -10,7 +10,7 @@ current_dir=$(pwd)
 if [ ! -d "build" ]
 then
 	mkdir ${current_dir}/build
-	echo "Folder created.\n"
+	echo "Build folder created.\n"
 else
 	echo "Build directory already exists."
 	
