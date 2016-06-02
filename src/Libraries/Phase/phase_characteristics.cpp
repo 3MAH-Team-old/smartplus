@@ -30,9 +30,11 @@
 #include <smartplus/Libraries/Geometry/geometry.hpp>
 #include <smartplus/Libraries/Geometry/layer.hpp>
 #include <smartplus/Libraries/Geometry/ellipsoid.hpp>
+#include <smartplus/Libraries/Geometry/cylinder.hpp>
 #include <smartplus/Libraries/Homogenization/phase_multi.hpp>
 #include <smartplus/Libraries/Homogenization/layer_multi.hpp>
 #include <smartplus/Libraries/Homogenization/ellipsoid_multi.hpp>
+#include <smartplus/Libraries/Homogenization/cylinder_multi.hpp>
 #include <smartplus/Libraries/Phase/material_characteristics.hpp>
 #include <smartplus/Libraries/Phase/state_variables.hpp>
 #include <smartplus/Libraries/Phase/state_variables_M.hpp>
@@ -149,6 +151,11 @@ void phase_characteristics::construct(const int &mshape_type, const int &msv_typ
         case 2: {
             sptr_shape = std::make_shared<ellipsoid>();
             sptr_multi = std::make_shared<ellipsoid_multi>();
+            break;
+        }
+        case 3: {
+            sptr_shape = std::make_shared<cylinder>();
+            sptr_multi = std::make_shared<cylinder_multi>();
             break;
         }
         default: {
