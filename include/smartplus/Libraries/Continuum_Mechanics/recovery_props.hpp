@@ -16,7 +16,7 @@
  */
 
 ///@file recovery_props.cpp
-///@brief A set of function that allow to get the  strain transformation (in Finite strains)
+///@brief A set of function that allow to get the Elastic properties from stiffness/compliance tensors
 ///@version 1.0
 
 #pragma once
