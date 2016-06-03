@@ -146,7 +146,7 @@ void opti_data::constructdata()
 }
 
 //-------------------------------------------------------------
-void opti_data::import(string folder, string exten, int nexp)
+void opti_data::import(string folder, int nexp)
 //-------------------------------------------------------------
 {
     assert(ninfo>0);
@@ -158,19 +158,11 @@ void opti_data::import(string folder, string exten, int nexp)
     ndata = 0;
     ifstream ifdata;
     string buffer;
-    stringstream sstm;
     
-    const char *car;
-    string sar;
     double temp = 0.;
+    string path = folder + "/" + name;
     
-    sstm << folder << "/" << name << "." << exten;
-    sar = sstm.str();
-    sstm.str(std::string());
-    
-    car = sar.c_str();
-    
-    ifdata.open(car, ios::in);
+    ifdata.open(path, ios::in);
     while (!ifdata.eof())
     {
         getline (ifdata,buffer);
@@ -181,7 +173,7 @@ void opti_data::import(string folder, string exten, int nexp)
     
     ifdata.close();
     
-    ifdata.open(car, ios::in);
+    ifdata.open(path, ios::in);
     temp = 0.;
     
     if ((nexp == 0)||(ndata < nexp)) {
