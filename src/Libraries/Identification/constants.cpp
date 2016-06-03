@@ -15,8 +15,8 @@
  
  */
 
-///@file parameters.cpp
-///@brief Handle of input parameters
+///@file constants.cpp
+///@brief Handle of input constants
 ///@version 0.9
 
 #include <iostream>
