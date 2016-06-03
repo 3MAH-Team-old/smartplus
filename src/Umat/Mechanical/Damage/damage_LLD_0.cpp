@@ -248,12 +248,44 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
         Eel = Etot + DEtot - alpha*(T+DT-Tinit) - EP;
     }
     
+    if(compteur == maxiter_umat)
+        tnew_dt = 0.2;
+    
     error = 1.;
     if (Y_t > Y_22_u) {
         d_12 = 0.99;
         d_22 = 0.99;
         error = 0.;
     }
+    
+    //Derivatives specific to damage:
+    double dPhi_d_22d_Yts = 1./Y_22_c;
+    double dPhi_d_12d_Yts = 1./Y_12_c;
+    
+    double dYts_d_Y22 = 0.;
+    double dYts_d_Y33 = 0.;
+    double dYts_d_Y12 = 0.;
+    double dYts_d_Y13 = 0.;
+    
+    double dY22_d_s22 = 0.;
+    double dY33_d_s33 = 0.;
+    double dY12_d_s12 = 0.;
+    double dY13_d_s13 = 0.;
+    
+    vec dPhi_d_22d_sigma = zeros(6);
+    vec dPhi_d_12d_sigma = zeros(6);
+    
+    double dPhi_d_12d_12 = 0.;
+    double dPhi_d_12d_22 = 0.;
+    double dPhi_d_22d_12 = 0.;
+    double dPhi_d_22d_22 = 0.;
+    
+    mat dStildedd22 = zeros(6,6);
+    mat dStildedd12 = zeros(6,6);
+    
+    vec Lambdad_22 = zeros(6);
+    vec Lambdad_12 = zeros(6);
+    
     
     //So it is forced to enter the damage loop once
     for (compteur = 0; ((compteur < maxiter_umat) && (error > precision_umat)); compteur++) {
@@ -349,15 +381,68 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
         dlambda_12 = dlagrange_pow_1(d_12, c_lambda, p0_lambda, n_lambda, alpha_lambda);
         dlambda_22 = dlagrange_pow_1(d_22, c_lambda, p0_lambda, n_lambda, alpha_lambda);
         
+        //Compute the derivatives of sigma
+        dPhi_d_22d_Yts = 1./Y_22_c;
+        dPhi_d_12d_Yts = 1./Y_12_c;
+        
+        dYts_d_Y22 = 0.;
+        dYts_d_Y33 = 0.;
+        dYts_d_Y12 = 0.;
+        dYts_d_Y13 = 0.;
+        
+        if (Y_ts > limit) {
+            dYts_d_Y22 = b/(2.*Y_ts);
+            dYts_d_Y33 = b/(2.*Y_ts);
+            dYts_d_Y12 = 1./(2.*Y_ts);
+            dYts_d_Y13 = 1./(2.*Y_ts);
+        }
+        
+        dY22_d_s22 = Macaulay_p(sigma(1))/(E2_0*(1.-d_22));
+        dY33_d_s33 = Macaulay_p(sigma(2))/(E2_0*(1.-d_22));
+        dY12_d_s12 = Macaulay_p(sigma(3))/(G12_0*(1.-d_12));
+        dY13_d_s13 = Macaulay_p(sigma(4))/(G12_0*(1.-d_12));
+        
+        dPhi_d_22d_sigma(0) = 0.;
+        dPhi_d_22d_sigma(1) = dPhi_d_22d_Yts*dYts_d_Y22*dY22_d_s22;
+        dPhi_d_22d_sigma(2) = dPhi_d_22d_Yts*dYts_d_Y33*dY33_d_s33;
+        dPhi_d_22d_sigma(3) = dPhi_d_22d_Yts*dYts_d_Y12*dY12_d_s12;
+        dPhi_d_22d_sigma(4) = dPhi_d_22d_Yts*dYts_d_Y13*dY13_d_s13;
+        dPhi_d_22d_sigma(5) = 0.;
+        
+        dPhi_d_12d_sigma(0) = 0.;
+        dPhi_d_12d_sigma(1) = dPhi_d_12d_Yts*dYts_d_Y22*dY22_d_s22;
+        dPhi_d_12d_sigma(2) = dPhi_d_12d_Yts*dYts_d_Y33*dY33_d_s33;
+        dPhi_d_12d_sigma(3) = dPhi_d_12d_Yts*dYts_d_Y12*dY12_d_s12;
+        dPhi_d_12d_sigma(4) = dPhi_d_12d_Yts*dYts_d_Y13*dY13_d_s13;
+        dPhi_d_12d_sigma(5) = 0.;
+        
+        //Compute the explicit "damage direction" and flow direction
+        dStildedd22 = { {0.,0.,0.,0.,0.,0.},
+            {0,E2_0/pow(E2,2.),-nu23*E2_0/pow(E2,2.),0,0,0},
+            {0,-nu23*E2_0/pow(E2,2.),E2_0/pow(E2,2.),0,0,0},
+            {0,0,0,0,0,0},
+            {0,0,0,0,0,0},
+            {0,0,0,0,0,0} };
+        
+        dStildedd12 = { {0,0,0,0,0,0},
+            {0,0,0,0,0,0},
+            {0,0,0,0,0,0},
+            {0,0,0,G12_0/pow(G12,2.),0,0},
+            {0,0,0,0,G12_0/pow(G12,2.),0},
+            {0,0,0,0,0,0} };
+
+        Lambdad_22 = dStildedd22*sigma;
+        Lambdad_12 = dStildedd12*sigma;
+        
         //compute Phi and the derivatives
         Phi_d(0) = Macaulay_p(Y_ts - Y_12_0)/Y_12_c - lambda_12 - d_12;
         Phi_d(1) = Macaulay_p(Y_ts - Y_22_0)/Y_22_c - lambda_22 - d_22;
         
-        denom_d(0, 0) = Macaulay_p(dY_tsdd_12)/Y_12_c - dlambda_12 - 1.;
-        denom_d(0, 1) = Macaulay_p(dY_tsdd_22)/Y_12_c;
+        denom_d(0, 0) = -1.*sum(dPhi_d_12d_sigma%Lambdad_12) + Macaulay_p(dY_tsdd_12)/Y_12_c - dlambda_12 - 1.;
+        denom_d(0, 1) = -1.*sum(dPhi_d_12d_sigma%Lambdad_22) + Macaulay_p(dY_tsdd_22)/Y_12_c;
         
-        denom_d(1, 0) = Macaulay_p(dY_tsdd_12)/Y_22_c;
-        denom_d(1, 1) = Macaulay_p(dY_tsdd_22)/Y_22_c - dlambda_22 - 1.;
+        denom_d(1, 0) = -1.*sum(dPhi_d_22d_sigma%Lambdad_12) + Macaulay_p(dY_tsdd_12)/Y_22_c;
+        denom_d(1, 1) = -1.*sum(dPhi_d_22d_sigma%Lambdad_22) + Macaulay_p(dY_tsdd_22)/Y_22_c - dlambda_22 - 1.;
         
         Fischer_Burmeister_m(Phi_d, Y_dcrit, denom_d, Dd, dd, error);
         
@@ -377,6 +462,9 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
         G12 = G12_0*(1.-d_12);
         G13 = G12_0*(1.-d_12);
     }
+    
+    if(compteur == maxiter_umat)
+        tnew_dt = 0.2;
     
     //Update constitutive parameters
     E2 = ET*(1.-d_22);
@@ -411,37 +499,126 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     }
     else
         sigma = L_tilde*Eel;
-    
-    //Compute the explicit flow direction
-    Lambdap_ts = Theta_ts*eta_stress(sigma_eff_ts);
-    
+
     mat B = L*inv(L_tilde);         //stress "localization factor" in damage
     
+    //Compute the derivatives
+    dPhi_d_22d_Yts = 1./Y_22_c;
+    dPhi_d_12d_Yts = 1./Y_12_c;
+
+    dYts_d_Y22 = 0.;
+    dYts_d_Y33 = 0.;
+    dYts_d_Y12 = 0.;
+    dYts_d_Y13 = 0.;
+    
+    if (Y_ts > limit) {
+        dYts_d_Y22 = b/(2.*Y_ts);
+        dYts_d_Y33 = b/(2.*Y_ts);
+        dYts_d_Y12 = 1./(2.*Y_ts);
+        dYts_d_Y13 = 1./(2.*Y_ts);
+    }
+    
+    dY22_d_s22 = Macaulay_p(sigma(1))/(E2_0*(1.-d_22));
+    dY33_d_s33 = Macaulay_p(sigma(2))/(E2_0*(1.-d_22));
+    dY12_d_s12 = Macaulay_p(sigma(3))/(G12_0*(1.-d_12));
+    dY13_d_s13 = Macaulay_p(sigma(4))/(G12_0*(1.-d_12));
+    
+    dPhi_d_22d_sigma(0) = 0.;
+    dPhi_d_22d_sigma(1) = dPhi_d_22d_Yts*dYts_d_Y22*dY22_d_s22;
+    dPhi_d_22d_sigma(2) = dPhi_d_22d_Yts*dYts_d_Y33*dY33_d_s33;
+    dPhi_d_22d_sigma(3) = dPhi_d_22d_Yts*dYts_d_Y12*dY12_d_s12;
+    dPhi_d_22d_sigma(4) = dPhi_d_22d_Yts*dYts_d_Y13*dY13_d_s13;
+    dPhi_d_22d_sigma(5) = 0.;
+    
+    dPhi_d_12d_sigma(0) = 0.;
+    dPhi_d_12d_sigma(1) = dPhi_d_12d_Yts*dYts_d_Y22*dY22_d_s22;
+    dPhi_d_12d_sigma(2) = dPhi_d_12d_Yts*dYts_d_Y33*dY33_d_s33;
+    dPhi_d_12d_sigma(3) = dPhi_d_12d_Yts*dYts_d_Y12*dY12_d_s12;
+    dPhi_d_12d_sigma(4) = dPhi_d_12d_Yts*dYts_d_Y13*dY13_d_s13;
+    dPhi_d_12d_sigma(5) = 0.;
+    
+    dPhi_d_12d_12 = Macaulay_p(dY_tsdd_12)/Y_12_c - dlambda_12 - 1.;
+    dPhi_d_12d_22 = Macaulay_p(dY_tsdd_22)/Y_12_c;
+    
+    dPhi_d_22d_12 = Macaulay_p(dY_tsdd_12)/Y_22_c;
+    dPhi_d_22d_22 = Macaulay_p(dY_tsdd_22)/Y_22_c - dlambda_22 - 1.;
+    
+    dPhi_p_tsd_sigma = (B*Theta_ts*eta_stress(sigma_eff_ts))%Ir05();
+    
+    //Compute the explicit "damage direction" and flow direction
+    dStildedd22 = { {0.,0.,0.,0.,0.,0.},
+                        {0,E2_0/pow(E2,2.),-nu23*E2_0/pow(E2,2.),0,0,0},
+                        {0,-nu23*E2_0/pow(E2,2.),E2_0/pow(E2,2.),0,0,0},
+                        {0,0,0,0,0,0},
+                        {0,0,0,0,0,0},
+                        {0,0,0,0,0,0} };
+    
+    dStildedd12 = { {0,0,0,0,0,0},
+                        {0,0,0,0,0,0},
+                        {0,0,0,0,0,0},
+                        {0,0,0,G12_0/pow(G12,2.),0,0},
+                        {0,0,0,0,G12_0/pow(G12,2.),0},
+                        {0,0,0,0,0,0} };
+    
+    Lambdap_ts = Theta_ts*eta_stress(sigma_eff_ts);
+
     vec kappamat0 = zeros(6);
-    kappamat0 = B*Lambdap_ts;
-    
-    dPhi_p_tsd_sigma = B*Theta_ts*eta_stress(sigma_eff_ts);
-    
-    double Bhat = -1.*sum((dPhi_p_tsd_sigma) % (L*kappamat0)) + dPhi_p_tsd_p;
+    kappamat0 = (dStildedd22*sigma)%Ir05();
 
-    double op = 0.;
-    double delta = 1.;
+    vec kappamat1 = zeros(6);
+    kappamat1 = (dStildedd12*sigma)%Ir05();
     
+    vec kappamat2 = zeros(6);
+    kappamat2 = (Lambdap_ts)%Ir05();
+    
+    mat Bhat = zeros(3, 3);
+    Bhat(0, 0) = -1.*sum(dPhi_d_22d_sigma % (L_tilde*kappamat0)) + dPhi_d_22d_22;
+    Bhat(0, 1) = -1.*sum(dPhi_d_22d_sigma % (L_tilde*kappamat1)) + dPhi_d_22d_12;
+    Bhat(0, 2) = -1.*sum(dPhi_d_22d_sigma % (L_tilde*kappamat2));
+
+    Bhat(1, 0) = -1.*sum(dPhi_d_12d_sigma % (L_tilde*kappamat0)) + dPhi_d_12d_22;
+    Bhat(1, 1) = -1.*sum(dPhi_d_12d_sigma % (L_tilde*kappamat1)) + dPhi_d_12d_12;
+    Bhat(1, 2) = -1.*sum(dPhi_d_12d_sigma % (L_tilde*kappamat2));
+    
+    Bhat(2, 0) = -1.*sum(dPhi_p_tsd_sigma % (L_tilde*kappamat0));
+    Bhat(2, 0) = -1.*sum(dPhi_p_tsd_sigma % (L_tilde*kappamat1));
+    Bhat(2, 1) = -1.*sum(dPhi_p_tsd_sigma % (L_tilde*kappamat2)) + dPhi_p_tsd_p;
+    
+    vec op = zeros(3);
+    mat delta = eye(3,3);
+
+    if(Dd(0) > iota)
+        op(0) = 1.;
+    if(Dd(1) > iota)
+        op(1) = 1.;
     if(Dp(0) > iota)
-        op = 1.;
+        op(0) = 1.;
     
-    double Bbar = op*op*Bhat + delta*(1-op*op);
-
-    double invBbar = 0.;
-    double invBhat = 0.;
-    invBbar = 1./Bbar;
-    invBhat = op*op*invBbar;
+    mat Bbar = zeros(3,3);
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            Bbar(i, j) = op(i)*op(j)*Bhat(i, j) + delta(i,j)*(1-op(i)*op(j));
+        }
+    }
+    
+    mat invBbar = zeros(3, 3);
+    mat invBhat = zeros(3, 3);
+    invBbar = inv(Bbar);
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            invBhat(i, j) = op(i)*op(j)*invBbar(i, j);
+        }
+    }
     
     vec Pjay0 = zeros(6);
-    Pjay0 = L*(invBhat*dPhi_p_tsd_sigma);
+    Pjay0 = L_tilde*(invBhat(0, 0)*dPhi_d_22d_sigma + invBhat(1, 0)*dPhi_d_12d_sigma + invBhat(2, 0)*dPhi_p_tsd_sigma);
+    vec Pjay1 = zeros(6);
+    Pjay1 = L_tilde*(invBhat(0, 1)*dPhi_d_22d_sigma + invBhat(1, 1)*dPhi_d_12d_sigma + invBhat(2, 1)*dPhi_p_tsd_sigma);
+    vec Pjay2 = zeros(6);
+    Pjay2 = L_tilde*(invBhat(0, 2)*dPhi_d_22d_sigma + invBhat(1, 2)*dPhi_d_12d_sigma + invBhat(2, 2)*dPhi_p_tsd_sigma);
     
-    Lt = L_tilde + L_tilde*(kappamat0*trans(Pjay0));
-    
+    Lt = L_tilde + L_tilde*(kappamat0*trans(Pjay0) + kappamat1*trans(Pjay1) + kappamat2*trans(Pjay2));
+
 /*    if (Y_t > Y_22_u) {
         Lt = L_iso(1, 0.3, "Enu");
         sigma = Lt*Eel;
