@@ -312,7 +312,7 @@ void phase_characteristics::define_output(const std::string &outputfile, const s
 //    else
 //        filename = filename + ext_filename;
     
-    std::ofstream of_file(filename);
+//    std::ofstream of_file(filename);
     if(coordsys == "global") {
         sptr_out_global = make_shared<ofstream>(filename);
     }
@@ -332,7 +332,6 @@ void phase_characteristics::output(const solver_output &so, const int &kblock, c
 {
 
     if(coordsys == "global") {
-        
         *sptr_out_global << kblock+1 << "\t";
         *sptr_out_global << kcycle+1 << "\t";
         *sptr_out_global << kstep+1 << "\t";
