@@ -138,7 +138,7 @@ Col<int> checkS(mat &S) {
 	}
 	return Cout;
 }*/
-   
+       
 double calcC(const vec &vexp, const vec &vnum, const vec &W) {
     double Cout = 0.;
     for(unsigned int z=0; z<vexp.n_elem; z++) {
