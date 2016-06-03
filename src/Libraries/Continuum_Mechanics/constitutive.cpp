@@ -326,34 +326,34 @@ mat L_ortho(const double &C11, const double &C12, const double &C13, const doubl
 		
 	}
 	else if (conv == "EnuG") {
-        double Ex = C11;
-        double Ey = C12;
-        double Ez = C13;
-        double nuxy = C22;
-        double nuxz = C23;
-        double nuyz = C33;
-        double Gxy = C44;
-        double Gxz = C55;
-        double Gyz = C66;
+        double E1 = C11;
+        double E2 = C12;
+        double E3 = C13;
+        double nu12 = C22;
+        double nu13 = C23;
+        double nu23 = C33;
+        double G12 = C44;
+        double G13 = C55;
+        double G23 = C66;
         
-        double nuyx=nuxy*(Ey/Ex);
-        double nuzy=nuyz*(Ez/Ey);
-        double nuzx=nuxz*(Ez/Ex);
+        double nu21=nu12*(E2/E1);
+        double nu32=nu23*(E3/E2);
+        double nu31=nu13*(E3/E1);
 
-        double delta =1./(1-nuxy*nuyx-nuyz*nuzy-nuzx*nuxz-2.*nuyx*nuzy*nuxz);
+        double invdelta =1./(1-nu12*nu21-nu23*nu32-nu31*nu13-2.*nu21*nu32*nu13);
          
-        L(0,0) = Ex*(1-nuyz*nuzy)*delta;
-        L(0,1) = Ex*(nuyx+nuzx*nuyz)*delta;
-        L(0,2) = Ex*(nuzx+nuyx*nuzy)*delta;
+        L(0,0) = E1*(1-nu23*nu32)*invdelta;
+        L(0,1) = E1*(nu21+nu31*nu23)*invdelta;
+        L(0,2) = E1*(nu31+nu21*nu32)*invdelta;
         L(1,0) = L(0,1);
-        L(1,1) = Ey*(1-nuxz*nuzx)*delta;
-        L(1,2) = Ey*(nuzy+nuxy*nuzx)*delta;
+        L(1,1) = E2*(1-nu13*nu31)*invdelta;
+        L(1,2) = E2*(nu32+nu12*nu31)*invdelta;
         L(2,0) = L(0,2);
         L(2,1) = L(1,2);
-        L(2,2) = Ez*(1-nuxy*nuyx)*delta;
-        L(3,3) = Gxy;
-        L(4,4) = Gxz;
-        L(5,5) = Gyz;
+        L(2,2) = E3*(1-nu12*nu21)*invdelta;
+        L(3,3) = G12;
+        L(4,4) = G13;
+        L(5,5) = G23;
     }
     else {
         cout << "ERROR : Please use a valid couple of elastic constants";
@@ -388,28 +388,28 @@ mat M_ortho(const double &C11, const double &C12, const double &C13, const doubl
 	}
     
     else if (conv == "EnuG") {
-		double Ex = C11;
-		double Ey = C12;
-		double Ez = C13;
-		double nuxy = C22;
-		double nuxz = C23;
-		double nuyz = C33;
-		double Gxy = C44;
-		double Gxz = C55;
-		double Gyz = C66;
+		double E1 = C11;
+		double E2 = C12;
+		double E3 = C13;
+		double nu12 = C22;
+		double nu13 = C23;
+		double nu23 = C33;
+		double G12 = C44;
+		double G13 = C55;
+		double G23 = C66;
         
-		M(0,0) = 1/Ex;
-		M(0,1) = -nuxy/Ex;
-		M(0,2) = -nuxz/Ex;
-		M(1,0) = -nuxy/Ex;
-		M(1,1) = 1/Ey;
-		M(1,2) = -nuyz/Ey;
-		M(2,0) = -nuxz/Ex;
-		M(2,1) = -nuyz/Ey;
-		M(2,2) = 1/Ez;
-		M(3,3) = 1/Gxy;
-		M(4,4) = 1/Gxz;
-		M(5,5) = 1/Gyz;
+		M(0,0) = 1/E1;
+		M(0,1) = -nu12/E1;
+		M(0,2) = -nu13/E1;
+		M(1,0) = -nu12/E1;
+		M(1,1) = 1/E2;
+		M(1,2) = -nu23/E2;
+		M(2,0) = -nu13/E1;
+		M(2,1) = -nu23/E2;
+		M(2,2) = 1/E3;
+		M(3,3) = 1/G12;
+		M(4,4) = 1/G13;
+		M(5,5) = 1/G23;
 	}
     else {
         cout << "ERROR : Please use a valid couple of elastic constants";
