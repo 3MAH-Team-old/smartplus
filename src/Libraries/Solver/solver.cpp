@@ -77,9 +77,9 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
     //Read the loading path
     read_path(blocks, T_init, pathfile);
     
-    for(auto b : blocks) {
+/*    for(auto b : blocks) {
         cout << "blocks = " << b << "\n";
-    }
+    }*/
     
     ///Material properties reading, use "material.dat" to specify parameters values
     rve.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props, rho, c_p);
