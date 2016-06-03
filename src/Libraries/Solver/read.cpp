@@ -201,7 +201,7 @@ void read_output(solver_output &so, const int &nblock, const int &nstatev) {
         cyclic_output.close();
     }
     else {
-        cout << "The file data/output.dat is not present, so default output is selected\n";
+//        cout << "The file data/output.dat is not present, so default output is selected\n";
         so.o_nb_meca = 6;
         so.o_meca.zeros(so.o_nb_meca);
         so.o_meca = {0,1,2,3,4,5};
