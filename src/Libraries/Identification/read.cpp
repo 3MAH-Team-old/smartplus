@@ -262,7 +262,7 @@ void read_data_num(const int &nfiles, const vector<opti_data> &data_exp, vector<
     paraminit.close();
 }
     
-void ident_control(int &n_param, int &n_consts, int &n_files, int &ngen, int &aleaspace, int &apop, int &spop, int &ngboys, int &maxpop, double &probaMut, double &pertu, double &c, double &p0, double &lambdaLM, double &phiEps) {
+void ident_control(int &n_param, int &n_consts, int &n_files, int &ngen, int &aleaspace, int &apop, int &spop, int &ngboys, int &maxpop, double &probaMut, double &pertu, double &c, double &p0, double &lambdaLM) {
     
     ifstream paraminit;
     string buffer;
@@ -316,7 +316,6 @@ void ident_control(int &n_param, int &n_consts, int &n_files, int &ngen, int &al
     
     paraminit >> buffer >> c >> p0;
     paraminit >> buffer >> lambdaLM;
-    paraminit >> buffer >> phiEps;
     
     paraminit.close();
 }
