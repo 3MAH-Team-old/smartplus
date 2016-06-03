@@ -42,7 +42,7 @@ using namespace arma;
 using namespace arma;
 
 namespace smart{
-
+    
 //This function will copy the parameters files
 void copy_parameters(const vector<parameters> &params, const string &src_path, const string &dst_path) {
 
@@ -141,17 +141,21 @@ void apply_constants(const vector<constants> &consts, const string &dst_path) {
     
 }
     
-void launch_solver(const generation &genrun, const int &nfiles, vector<parameters> &params, vector<constants> &consts, const string &folder, const string &name, const string &ext)
+void launch_solver(const generation &genrun, const int &nfiles, vector<parameters> &params, vector<constants> &consts, const string &folder, const string &name, const string &path_data, const string &path_keys)
 {
-	stringstream outputfile;
-	stringstream pathfile;
+	string outputfile;
+	string pathfile;
+    
+    string name_ext = name.substr(name.length()-4,name.length());
+    string name_root = name.substr(0,name.length()-4); //to remove the extension
     
 	//#pragma omp parallel for private(sstm, path)
 	for (int j = 0; j <genrun.nindividuals; j++) {
 		for (int i = 0; i<nfiles; i++) {
 			///Creating the right path & output filenames
-			outputfile << folder << "/" << name << i+1 << "_" << j+1 << "." << ext;
-			pathfile << "path_id_" << i+1 << ".txt";
+            
+			outputfile = folder + "/" + name_root + to_string(i+1) + "_" + to_string(j+1) + name_ext;
+			pathfile = "path_id_" + to_string(i+1) + ".txt";
             
             string umat_name;
             int nprops = 0;
@@ -169,30 +173,24 @@ void launch_solver(const generation &genrun, const int &nfiles, vector<parameter
             for (unsigned int k=0; k<consts.size(); k++) {
                 consts[k].value = consts[k].input_values(i);
             }
-                        //Replace the parameters
+            //Replace the parameters
             for (unsigned int k=0; k<params.size(); k++) {
                 params[k].value = genrun.pop[j].p(k);
             }
-            string data = "data/";
-            string key = "data/key/";
-
-            copy_constants(consts, key, data);
-            copy_parameters(params, key, data);
             
-            apply_constants(consts, data);
-            apply_parameters(params, data);
+            copy_constants(consts, path_keys, path_data);
+            copy_parameters(params, path_keys, path_data);
+            
+            apply_constants(consts, path_data);
+            apply_parameters(params, path_data);
             
             //Then read the material properties
             read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p);
             
 			///Launching the solver with relevant parameters
-            solver(umat_name, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p, pathfile.str(), outputfile.str());
-            
-            outputfile.str(std::string());
-            pathfile.str(std::string());
+            solver(umat_name, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p, pathfile, outputfile);            
 		}
 	}
 }
-
     
 } //namespace smart
