@@ -32,7 +32,7 @@ using namespace arma;
 
 namespace smart{
 
-void check_symetries(const mat &L, std::string &umat_type, int &axis, int &maj_sym) {
+void check_symetries(const mat &L, std::string &umat_type, int &axis, vec &props, int &maj_sym) {
  
     axis = 0; //Indicate no preferential axis
     //First thing to do is to check how symtric is the tensor:
@@ -79,11 +79,11 @@ void check_symetries(const mat &L, std::string &umat_type, int &axis, int &maj_s
 
     //Check equality between constants
     //All rotation around the z axis
-    check_sym(2,2) = sqrt(L_sym(3,3)*L_sym(3,3) - (0.5*(L_sym(0,0)-L_sym(0,1)))*(0.5*(L_sym(0,0)-L_sym(0,1))));
+    check_sym(2,2) = fabs(L_sym(3,3) - (0.5*(L_sym(0,0)-L_sym(0,1))));
     //All rotation around the y axis
-    check_sym(1,2) = sqrt(L_sym(4,4)*L_sym(4,4) - (0.5*(L_sym(0,0)-L_sym(0,2)))*(0.5*(L_sym(0,0)-L_sym(0,2))));
+    check_sym(1,2) = fabs(L_sym(4,4) - (0.5*(L_sym(0,0)-L_sym(0,2))));
     //All rotation around the x axis
-    check_sym(0,2) = sqrt(L_sym(5,5)*L_sym(5,5) - (0.5*(L_sym(1,1)-L_sym(1,2)))*(0.5*(L_sym(1,1)-L_sym(1,2))));
+    check_sym(0,2) = fabs(L_sym(5,5) - (0.5*(L_sym(1,1)-L_sym(1,2))));
     
     for (unsigned int i=0; i<check_sym.n_rows; i++) {
         for (unsigned int j=0; j<check_sym.n_cols; j++) {
@@ -93,6 +93,7 @@ void check_symetries(const mat &L, std::string &umat_type, int &axis, int &maj_s
                 type_sym(i,j) = 0;
         }
     }
+        
     if (check_L_sym_diff < limit)
         maj_sym = 1;
     else
@@ -175,6 +176,20 @@ void check_symetries(const mat &L, std::string &umat_type, int &axis, int &maj_s
     //Transversely isotropic z       - 5 independant parameters
     //Isotropic                      - 2 independant parameters
     
+    if (umat_type == "ELISO") {
+        props = L_iso_props(L_sym);
+    }
+    else if(umat_type == "ELIST") {
+        props = L_isotrans_props(L_sym, axis);
+    }
+    else if(umat_type == "ELCUB") {
+        props = L_cubic_props(L_sym);
+    }
+    else if(umat_type == "ELORT") {
+        props = L_ortho_props(L_sym);
+    }
+    else
+        props = zeros(1);
 }
  
 vec L_iso_props(const mat &Lt) {
@@ -192,7 +207,7 @@ vec L_iso_props(const mat &Lt) {
 
 vec M_iso_props(const mat &Mt) {
     
-    double E = (1./3.)*(1./Mt(0,0)+1./Mt(1,1)+1./Mt(2,2));
+    double E = (1./3.)*((1./Mt(0,0))+(1./Mt(1,1))+(1./Mt(2,2)));
     double nu = (-E/6.)*(Mt(0,1)+Mt(0,2)+Mt(1,2)+Mt(1,0)+Mt(2,0)+Mt(2,1));
 
     vec props = zeros(2);
