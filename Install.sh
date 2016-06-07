@@ -30,7 +30,10 @@ cd ${current_dir}/build
 cmake ..
 echo ""
 make 
-
+echo ""
+make test
+echo ""
+make install
 
 # Copy all important files
 if [ $? -eq 0 ]
