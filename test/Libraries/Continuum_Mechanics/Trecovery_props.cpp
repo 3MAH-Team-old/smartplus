@@ -40,34 +40,40 @@ BOOST_AUTO_TEST_CASE( test_check_symetries_iso )
     int axis = 0;
     int sym_check = 0;
     std::string umat_type;
+    vec props;
     
     //Test of check_symetries with L_iso
     mat Ltest = L_iso(E, nu, "Enu");
-    check_symetries(Ltest, umat_type, axis, sym_check);
+    check_symetries(Ltest, umat_type, axis, props, sym_check);
     
     BOOST_CHECK( umat_type == "ELISO" );
     BOOST_CHECK( axis == 0 );
     BOOST_CHECK( sym_check == 1 );
-    
+    BOOST_CHECK( fabs(E - props(0)) < 1.E-9 );
+    BOOST_CHECK( fabs(nu - props(1)) < 1.E-9 );
 }
 
 BOOST_AUTO_TEST_CASE( test_check_symetries_cubic )
 {
-    double C11 = 1000;
-    double C12 = 400;
-    double C44 = 500;
+    double E = 1000;
+    double nu = 0.2;
+    double G = 500;
     
     int axis = 0;
     int sym_check = 0;
     std::string umat_type;
+    vec props;
     
     //Test of check_symetries with L_cubic
-    mat Ltest = L_cubic(C11,C12,C44);
-    check_symetries(Ltest, umat_type, axis, sym_check);
+    mat Ltest = L_cubic(E,nu,G,"EnuG");
+    check_symetries(Ltest, umat_type, axis, props, sym_check);
     
     BOOST_CHECK( umat_type == "ELCUB" );
     BOOST_CHECK( axis == 0 );
     BOOST_CHECK( sym_check == 1 );
+    BOOST_CHECK( fabs(E - props(0)) < 1.E-9 );
+    BOOST_CHECK( fabs(nu - props(1)) < 1.E-9 );
+    BOOST_CHECK( fabs(G - props(2)) < 1.E-9 );
 }
 
 BOOST_AUTO_TEST_CASE( test_check_symetries_isotrans )
@@ -81,29 +87,50 @@ BOOST_AUTO_TEST_CASE( test_check_symetries_isotrans )
     int axis = 0;
     int sym_check = 0;
     std::string umat_type;
+    vec props;
     
     //Test of check_symetries with L_isotrans
     mat Ltest = L_isotrans(EL, ET, nuTL, nuTT, GLT, 1);
-    check_symetries(Ltest, umat_type, axis, sym_check);
+    check_symetries(Ltest, umat_type, axis, props, sym_check);
+    
+    cout << "props ELIST1 = " << props.t() << "\n";
     
     BOOST_CHECK( umat_type == "ELIST" );
     BOOST_CHECK( axis == 1 );
     BOOST_CHECK( sym_check == 1 );
+    BOOST_CHECK( fabs(EL - props(0)) < 1.E-9 );
+    BOOST_CHECK( fabs(ET - props(1)) < 1.E-9 );
+    BOOST_CHECK( fabs(nuTL - props(2)) < 1.E-9 );
+    BOOST_CHECK( fabs(nuTT - props(3)) < 1.E-9 );
+    BOOST_CHECK( fabs(GLT - props(4)) < 1.E-9 );
     
     Ltest = L_isotrans(EL, ET, nuTL, nuTT, GLT, 2);
-    check_symetries(Ltest, umat_type, axis, sym_check);
+    check_symetries(Ltest, umat_type, axis, props, sym_check);
+    
+    cout << "props ELIST2 = " << props.t() << "\n";
     
     BOOST_CHECK( umat_type == "ELIST" );
     BOOST_CHECK( axis == 2 );
     BOOST_CHECK( sym_check == 1 );
-
+    BOOST_CHECK( fabs(EL - props(0)) < 1.E-9 );
+    BOOST_CHECK( fabs(ET - props(1)) < 1.E-9 );
+    BOOST_CHECK( fabs(nuTL - props(2)) < 1.E-9 );
+    BOOST_CHECK( fabs(nuTT - props(3)) < 1.E-9 );
+    BOOST_CHECK( fabs(GLT - props(4)) < 1.E-9 );
+    
     Ltest = L_isotrans(EL, ET, nuTL, nuTT, GLT, 3);
-    check_symetries(Ltest, umat_type, axis, sym_check);
+    check_symetries(Ltest, umat_type, axis, props, sym_check);
+    
+    cout << "props ELIST3 = " << props.t() << "\n";
     
     BOOST_CHECK( umat_type == "ELIST" );
     BOOST_CHECK( axis == 3 );
     BOOST_CHECK( sym_check == 1 );
-    
+    BOOST_CHECK( fabs(EL - props(0)) < 1.E-9 );
+    BOOST_CHECK( fabs(ET - props(1)) < 1.E-9 );
+    BOOST_CHECK( fabs(nuTL - props(2)) < 1.E-9 );
+    BOOST_CHECK( fabs(nuTT - props(3)) < 1.E-9 );
+    BOOST_CHECK( fabs(GLT - props(4)) < 1.E-9 );
 }
 
 BOOST_AUTO_TEST_CASE( test_check_symetries_ortho )
@@ -121,14 +148,26 @@ BOOST_AUTO_TEST_CASE( test_check_symetries_ortho )
     int axis = 0;
     int sym_check = 0;
     std::string umat_type;
+    vec props;
     
     //Test of check_symetries with L_cubic
     mat Ltest = L_ortho(E1, E2, E3, nu12, nu13, nu23, G12, G13, G23, "EnuG");
-    check_symetries(Ltest, umat_type, axis, sym_check);
+    check_symetries(Ltest, umat_type, axis, props, sym_check);
+    
+    cout << "props ELORT = " << props.t() << "\n";
     
     BOOST_CHECK( umat_type == "ELORT" );
     BOOST_CHECK( axis == 0 );
     BOOST_CHECK( sym_check == 1 );
+    BOOST_CHECK( fabs(E1 - props(0)) < 1.E-9 );
+    BOOST_CHECK( fabs(E2 - props(1)) < 1.E-9 );
+    BOOST_CHECK( fabs(E3 - props(2)) < 1.E-9 );
+    BOOST_CHECK( fabs(nu12 - props(3)) < 1.E-9 );
+    BOOST_CHECK( fabs(nu13 - props(4)) < 1.E-9 );
+    BOOST_CHECK( fabs(nu23 - props(5)) < 1.E-9 );
+    BOOST_CHECK( fabs(G12 - props(6)) < 1.E-9 );
+    BOOST_CHECK( fabs(G13 - props(7)) < 1.E-9 );
+    BOOST_CHECK( fabs(G23 - props(8)) < 1.E-9 );
 }
 
 BOOST_AUTO_TEST_CASE( test_Liso_Miso_props )
