@@ -26,7 +26,7 @@
 namespace smart{
 
 //This function check the the properties of an unknown stiffness tensor
-void check_symetries(const arma::mat &, std::string &, int &, int &);
+void check_symetries(const arma::mat &, std::string &, int &, arma::vec &, int &);
 
 //This function recovers the properties of an isotropic stiffness tensor
 arma::vec L_iso_props(const arma::mat &);
