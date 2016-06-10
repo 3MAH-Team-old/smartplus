@@ -38,7 +38,7 @@ using namespace std;
 using namespace arma;
 
 namespace smart{
-
+    
 //Genetic method
 void genetic(generation &gen_g, generation &gensons, int &idnumber, const double &probaMut, const double &pertu, const vector<parameters> &params){
     
