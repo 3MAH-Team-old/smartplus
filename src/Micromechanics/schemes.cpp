@@ -33,9 +33,11 @@
 #include <smartplus/Libraries/Geometry/geometry.hpp>
 #include <smartplus/Libraries/Geometry/layer.hpp>
 #include <smartplus/Libraries/Geometry/ellipsoid.hpp>
+// #include <smartplus/Libraries/Geometry/cylinder.hpp>
 #include <smartplus/Libraries/Homogenization/phase_multi.hpp>
 #include <smartplus/Libraries/Homogenization/layer_multi.hpp>
 #include <smartplus/Libraries/Homogenization/ellipsoid_multi.hpp>
+// #include <smartplus/Libraries/Homogenization/cylinder_multi.hpp>
 #include <smartplus/Libraries/Homogenization/eshelby.hpp>
 
 using namespace std;
