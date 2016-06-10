@@ -25,7 +25,7 @@
 #include "generation.hpp"
 
 namespace smart{
-
+    
 //Genetic method
 void genetic(generation &, generation &, int &, const double &, const double &, const std::vector<parameters> &);
 
