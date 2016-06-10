@@ -41,7 +41,7 @@ void calcS(const individual &, arma::mat &, const arma::vec &, const std::vector
 arma::Col<int> checkS(arma::mat &);
 
 ///This function computes the Cost function (Square differnces) from the components of experimental values and numerically evaluated values 
-double calcC(const arma::vec &, const arma::vec &, const arma::vec &);
+double calcC(const arma::vec &, arma::vec &, const arma::vec &);
 
 //This function computes the approximation of Hessian for under quadratic form assumptions, according to a weight vector
 arma::mat Hessian(const int &, const arma::mat &, const arma::vec &);
