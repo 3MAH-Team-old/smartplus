@@ -151,8 +151,8 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                     rve.define_output(outputfile_global, "global");
                     rve.define_output(outputfile_local, "local");
                     //Write the initial results
-                    rve.output(so, -1, -1, -1, -1, Time, "global");
-                    rve.output(so, -1, -1, -1, -1, Time, "local");
+//                    rve.output(so, -1, -1, -1, -1, Time, "global");
+//                    rve.output(so, -1, -1, -1, -1, Time, "local");
                 }
                 //Set the start values of sigma_start=sigma and statev_start=statev for all phases
                 rve.set_start(); //DEtot = 0 and DT = 0 so we can use it safely here
@@ -253,27 +253,37 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                     
                                 }
                                 
-                                if((fabs(Dtinc_cur - sptr_meca->Dn_mini) < iota)&&(inforce_solver == 1)&&(tnew_dt < 1.)) {
-                                    cout << "The solver has been inforced to proceed (User subroutine issue) at step:" << sptr_meca->number << " inc: " << inc << " and fraction:" << tinc << "\n";
+                                if((fabs(Dtinc_cur - sptr_meca->Dn_mini) < iota)&&(tnew_dt < 1.)) {
+//                                    cout << "The subroutine has required a step reduction lower than the minimal indicated at" << sptr_meca->number << " inc: " << inc << " and fraction:" << tinc << "\n";
                                     //The solver has been inforced!
-                                    tnew_dt = 1.;
+                                    return;
+                                }
+                                
+                                if((error > 1000.*precision_solver)&&(Dtinc_cur == sptr_meca->Dn_mini)) {
+//                                    cout << "The error has exceeded 100 times the precision, the simulation has stopped at " << sptr_meca->number << " inc: " << inc << " and fraction:" << tinc << "\n";
+                                    //The solver has been inforced!
+                                    return;
                                 }
                                 
                                 if(error > precision_solver) {
-                                    if((Dtinc_cur == sptr_meca->Dn_mini)&&(inforce_solver == 1)) {
-                                        cout << "The solver has been inforced to proceed (Solver issue) at step:" << sptr_meca->number << " inc: " << inc << " and fraction:" << tinc << ", with the error: " << error << "\n";
-                                        cout << "The next increment has integrated the error to avoid propagation\n";
-                                        //The solver has been inforced!
-                                        tnew_dt = 1.;
-
-                                        if (inc+1<sptr_meca->ninc) {
-                                            for(int k = 0 ; k < 6 ; k++)
-                                            {
-                                                if(sptr_meca->cBC_meca(k)) {
-                                                    sptr_meca->mecas(inc+1,k) -= residual(k);
+                                    if(Dtinc_cur == sptr_meca->Dn_mini) {
+                                        if(inforce_solver == 1) {
+                                            
+//                                            cout << "The solver has been inforced to proceed (Solver issue) at step:" << sptr_meca->number << " inc: " << inc << " and fraction:" << tinc << ", with the error: " << error << "\n";
+//                                            cout << "The next increment has integrated the error to avoid propagation\n";
+                                            //The solver has been inforced!
+                                            tnew_dt = 1.;
+                                            
+                                            if (inc+1<sptr_meca->ninc) {
+                                                for(int k = 0 ; k < 6 ; k++)
+                                                {
+                                                    if(sptr_meca->cBC_meca(k)) {
+                                                        sptr_meca->mecas(inc+1,k) -= residual(k);
+                                                    }
                                                 }
                                             }
                                         }
+                                        else return;
                                         
                                     }
                                     else {
@@ -367,8 +377,8 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                     rve.define_output(outputfile_global, "global");
                     rve.define_output(outputfile_local, "local");
                     //Write the initial results
-                    rve.output(so, -1, -1, -1, -1, Time, "global");
-                    rve.output(so, -1, -1, -1, -1, Time, "local");
+//                    rve.output(so, -1, -1, -1, -1, Time, "global");
+//                    rve.output(so, -1, -1, -1, -1, Time, "local");
                 }
                 //Set the start values of sigma_start=sigma and statev_start=statev for all phases
                 rve.set_start(); //DEtot = 0 and DT = 0 so we can use it safely here
@@ -455,7 +465,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                     }
                                     else {
                                         cout << "error : The Thermal BC is not recognized\n";
-                                        exit(0);
+                                        return;
                                     }
                                     
                                     while((error > precision_solver)&&(compteur < maxiter_solver)) {
@@ -525,7 +535,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                         }
                                         else {
                                             cout << "error : The Thermal BC is not recognized\n";
-                                            exit(0);
+                                            return;
                                         }
                                         
                                         compteur++;
@@ -541,27 +551,41 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                     
                                 }
                                 
-                                if((fabs(Dtinc_cur - sptr_thermomeca->Dn_mini) < iota)&&(inforce_solver == 1)&&(tnew_dt < 1.)) {
-                                    cout << "The solver has been inforced to proceed (User subroutine issue) at step:" << sptr_thermomeca->number << " inc: " << inc << " and fraction:" << tinc << "\n";
+                                if((fabs(Dtinc_cur - sptr_thermomeca->Dn_mini) < iota)&&(tnew_dt < 1.)) {
+//                                    cout << "The subroutine has required a step reduction lower than the minimal indicated at" << sptr_thermomeca->number << " inc: " << inc << " and fraction:" << tinc << "\n";
                                     //The solver has been inforced!
-                                    tnew_dt = 1.;
+                                    return;
+                                }
+                                
+                                if((error > 1000.*precision_solver)&&(Dtinc_cur == sptr_thermomeca->Dn_mini)) {
+//                                    cout << "The error has exceeded 100 times the precision, the simulation has stopped at " << sptr_thermomeca->number << " inc: " << inc << " and fraction:" << tinc << "\n";
+                                    //The solver has been inforced!
+                                    return;
                                 }
                                 
                                 if(error > precision_solver) {
-                                    if((Dtinc_cur == sptr_thermomeca->Dn_mini)&&(inforce_solver == 1)) {
-                                        cout << "The solver has been inforced to proceed (Solver issue) at step:" << sptr_thermomeca->number << " inc: " << inc << " and fraction:" << tinc << ", with the error: " << error << "\n";
-                                        cout << "The next increment has integrated the error to avoid propagation\n";
-                                        //The solver has been inforced!
-                                        tnew_dt = 1.;
+                                    if(Dtinc_cur == sptr_thermomeca->Dn_mini) {
+                                        if(inforce_solver == 1) {
                                         
-                                        if (inc+1<sptr_thermomeca->ninc) {
-                                            for(int k = 0 ; k < 6 ; k++)
-                                            {
-                                                if(sptr_thermomeca->cBC_meca(k)) {
-                                                    sptr_thermomeca->mecas(inc+1,k) -= residual(k);
+//                                            cout << "The solver has been inforced to proceed (Solver issue) at step:" << sptr_thermomeca->number << " inc: " << inc << " and fraction:" << tinc << ", with the error: " << error << "\n";
+//                                            cout << "The next increment has integrated the error to avoid propagation\n";
+                                            //The solver has been inforced!
+                                            tnew_dt = 1.;
+                                        
+                                            if (inc+1<sptr_thermomeca->ninc) {
+                                                for(int k = 0 ; k < 6 ; k++)
+                                                {
+                                                    if(sptr_thermomeca->cBC_meca(k)) {
+                                                        sptr_thermomeca->mecas(inc+1,k) -= residual(k);
+                                                    }
+                                                    if (sptr_thermomeca->cBC_T) {
+                                                        sptr_thermomeca->Ts(inc+1) -= residual(6);
+                                                    }
+                                                    
                                                 }
                                             }
                                         }
+                                        else return;
                                         
                                     }
                                     else {
