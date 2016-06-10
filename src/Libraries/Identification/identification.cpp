@@ -44,7 +44,7 @@ using namespace arma;
 
 namespace smart{
     
-void run_identification_solver(const int &n_param, const int &n_consts, const int &nfiles, const int &ngen, const int &aleaspace, int &apop, int &spop, const int &ngboys, const int &maxpop, const std::string &path_data, const std::string &path_keys, const std::string &outputfile, const std::string &data_num_name, const double &probaMut, const double &pertu, const double &c, const double &p0, const double &lambdaLM) {
+void run_identification_solver(const int &n_param, const int &n_consts, const int &nfiles, const int &ngen, const int &aleaspace, int &apop, int &spop, const int &ngboys, const int &maxpop, const std::string &path_data, const std::string &path_keys, const std::string &path_results, const std::string &outputfile, const std::string &data_num_name, const double &probaMut, const double &pertu, const double &c, const double &p0, const double &lambdaLM) {
 
     std::string data_num_ext = data_num_name.substr(data_num_name.length()-4,data_num_name.length());
     std::string data_num_name_root = data_num_name.substr(0,data_num_name.length()-4); //to remove the extension
@@ -158,7 +158,7 @@ void run_identification_solver(const int &n_param, const int &n_consts, const in
              }	*/
         default: {
             cout << "\n\nCRITICAL ERROR : The specified optimization Tool (" << TOOL << ") does not exist.\n";
-            exit(0);
+            return;
         }
     }
     
@@ -168,7 +168,7 @@ void run_identification_solver(const int &n_param, const int &n_consts, const in
 
             data_num[i].name = data_num_name_root + to_string(i+1) + "_" + to_string(j+1) + "_global-0" + data_num_ext;
             data_num[i].import(data_num_folder);
-            assert(data_exp[i].ndata==data_num[i].ndata);
+//            assert(data_exp[i].ndata==data_num[i].ndata);
         }
         
         ///Computation of the cost function
@@ -219,7 +219,8 @@ void run_identification_solver(const int &n_param, const int &n_consts, const in
     double costnm1 = 0.;
     double stationnarity = 1.E-12;		/// Stationnary stopping criteria (no more evolution of the cost function)
         
-    while((g<ngen)&&(fabs(gen[g].pop[0].cout - costnm1) > stationnarity)) {
+//    while((g<ngen)&&(fabs(gen[g].pop[0].cout - costnm1) > stationnarity)) {
+    while(g<ngen) {
         cout << "Generation " << g+1 << " sur " << ngen << "...\t";
         
         costnm1 = gen[g].pop[0].cout;
@@ -242,7 +243,7 @@ void run_identification_solver(const int &n_param, const int &n_consts, const in
                  break;
                  }		*/
             default: {
-                exit(0);
+                return;
             }
         }
         
@@ -253,7 +254,7 @@ void run_identification_solver(const int &n_param, const int &n_consts, const in
                 for(int i=0; i<nfiles; i++) {
                     data_num[i].name = data_num_name_root + to_string(i+1) + "_" + to_string(z+1) + "_global-0" + data_num_ext;
                     data_num[i].import(data_num_folder);
-                    assert(data_exp[i].ndata == data_num[i].ndata);
+//                    assert(data_exp[i].ndata == data_num[i].ndata);
                 }
                 ///Computation of the cost function
                 vnum = calcV(data_num, nfiles, sizev);
@@ -271,19 +272,19 @@ void run_identification_solver(const int &n_param, const int &n_consts, const in
             for(int i=0; i<nfiles; i++) {
                 data_num[i].name = data_num_name_root + to_string(i+1) + "_" + to_string(z+1) + "_global-0" + data_num_ext;
                 data_num[i].import(data_num_folder);
-                assert(data_exp[i].ndata == data_num[i].ndata);
+//                assert(data_exp[i].ndata == data_num[i].ndata);
             }
             vnum = calcV(data_num, nfiles, sizev);
             gboys[g].pop[k].cout = calcC(vexp, vnum, W);
             z++;
             
             ///Get the result for +delta specimens
-            S.set_size(sizev,n_param);
+            S.zeros(sizev,n_param);
             for(int j=0; j<n_param; j++) {
                 for(int i=0; i<nfiles; i++) {
                     data_num[i].name = data_num_name_root + to_string(i+1) + "_" + to_string(z+1) + "_global-0" + data_num_ext;
                     data_num[i].import(data_num_folder);
-                    assert(data_exp[i].ndata == data_num[i].ndata);
+//                    assert(data_exp[i].ndata == data_num[i].ndata);
                 }
                 calcS(gboys[g].pop[k], S, vnum, data_num, nfiles, j, delta);
                 z++;
@@ -297,7 +298,6 @@ void run_identification_solver(const int &n_param, const int &n_consts, const in
             
             ///Compute the parameters increment
             Dp = calcDp(S, vexp, vnum, W, p, params, lambdaLMV(k), c, p0, n_param, pb_col);
-            
             p += Dp;
             
             for(int j=0; j < n_param; j++) {
@@ -315,12 +315,12 @@ void run_identification_solver(const int &n_param, const int &n_consts, const in
                 launch_solver(gboys_n, nfiles, params, consts, data_num_folder, data_num_name, path_data, path_keys);
                 break;
             }
-                /*			case 2: {
-                 launch_ODF(gboys_n, nfiles, p_umat, data_num_folder, data_num_name, data_num_ext, Angle, Nb_ligne);
-                 break;
-                 }		*/
+//                			case 2: {
+//                 launch_ODF(gboys_n, nfiles, p_umat, data_num_folder, data_num_name, data_num_ext, Angle, Nb_ligne);
+//                 break;
+//                 }
             default: {
-                exit(0);
+                return;
             }
         }
         
@@ -333,7 +333,7 @@ void run_identification_solver(const int &n_param, const int &n_consts, const in
             for(int i=0; i<nfiles; i++) {
                 data_num[i].name = data_num_name_root + to_string(i+1) + "_" + to_string(z+1) + "_global-0" + data_num_ext;
                 data_num[i].import(data_num_folder);
-                assert(data_exp[i].ndata == data_num[i].ndata);
+//                assert(data_exp[i].ndata == data_num[i].ndata);
             }
             vnum = calcV(data_num, nfiles, sizev);
             
@@ -402,7 +402,16 @@ void run_identification_solver(const int &n_param, const int &n_consts, const in
             }
         }
         result.close();
-        cout << "Cout[Meilleur Individu] = " << gen[g].pop[0].cout << "\n";		
+        cout << "Cout[Meilleur Individu] = " << gen[g].pop[0].cout << "\n";
+        
+        //Replace the parameters
+        for (unsigned int k=0; k<params.size(); k++) {
+            params[k].value = gen[g].pop[0].p(k);
+        }
+        
+        copy_parameters(params, path_keys, path_results);
+        apply_parameters(params, path_results);
+        
     }
 
 //    copy_parameters(params, path_keys, path_data);
