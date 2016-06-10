@@ -56,14 +56,19 @@ vec calcV(vector<opti_data> &exp_data, const int &nfiles, const int &sizev) {
 
 ///This function constructs the sensitivity matrix
 void calcS(const individual &ind, mat &S, const vec &vnum0, const vector<opti_data> &num_data, const int& nfiles, const int& j, const double &delta) {
-	double vnum_pertu=0.;
-	
-	int z=0;
+  
+    double vnum_pertu = 0.;
+    
+	unsigned int z=0;
 	for(int i=0; i<nfiles;i++) {
 		for(int l=0; l<num_data[i].ninfo;l++) {
 			for(int k=0; k<num_data[i].ndata;k++) {
 				vnum_pertu = num_data[i].data(k,l);
-				S(z,j) = (vnum_pertu-vnum0(z))*(1./(ind.p(j)*delta));
+                if(z >= vnum0.n_elem) {
+                    S(z,j) = 0.;
+                }
+                else
+                    S(z,j) = (vnum_pertu-vnum0(z))*(1./(ind.p(j)*delta));
 				z++;
 			}
 		}
@@ -139,8 +144,13 @@ Col<int> checkS(mat &S) {
 	return Cout;
 }*/
        
-double calcC(const vec &vexp, const vec &vnum, const vec &W) {
+double calcC(const vec &vexp, vec &vnum, const vec &W) {
     double Cout = 0.;
+    
+    if(vnum.n_elem < vexp.n_elem) {
+            vnum = zeros(vexp.n_elem);
+    }
+    
     for(unsigned int z=0; z<vexp.n_elem; z++) {
         if (W(z) > iota) {
             Cout += pow((vexp(z)-vnum(z)), 2.)*W(z);
@@ -329,7 +339,7 @@ vec calcDp(const mat &S, const vec &vexp, const vec &vnum, const vec &W, const v
 
     vec G = G_cost(sizepb, S, W, Dv, L_min, L_max);
     mat LM = LevMarq(H, lambdaLM, dL_min, dL_max);
-    
+        
     Dp = inv(LM)*G;
     
     int z = 0;
