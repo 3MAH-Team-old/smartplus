@@ -159,7 +159,7 @@ void phase_characteristics::construct(const int &mshape_type, const int &msv_typ
             break;
         }
         default: {
-            cout << "error: The geometry type does not correspond (0 for general, 1 for layer, 2 for ellipsoid)\n";
+            cout << "error: The geometry type does not correspond (0 for general, 1 for layer, 2 for ellipsoid, 3 for cylinder)\n";
             exit(0);
             break;
         }
