@@ -64,10 +64,11 @@ int main() {
     
     string path_data = "data/";
     string path_keys = "keys/";
+    string path_results = "results/";
     string outputfile = "id_params.txt";
     string simulfile = "simul.txt";
     
     ident_control(n_param, n_consts, nfiles, ngen, aleaspace, apop, spop, ngboys, maxpop, probaMut, pertu, c, p0, lambdaLM);
-    run_identification_solver(n_param, n_consts, nfiles, ngen, aleaspace, apop, spop, ngboys, maxpop, path_data, path_keys, outputfile, simulfile, probaMut, pertu, c, p0, lambdaLM);
+    run_identification_solver(n_param, n_consts, nfiles, ngen, aleaspace, apop, spop, ngboys, maxpop, path_data, path_keys, path_results,outputfile, simulfile, probaMut, pertu, c, p0, lambdaLM);
 
 }
