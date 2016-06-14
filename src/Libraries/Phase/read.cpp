@@ -246,7 +246,7 @@ void read_ellipsoid(phase_characteristics &rve, const int &filenumber) {
     
     //Fill the coatedby parameter
     std::shared_ptr<ellipsoid> sptr_ellipsoid_c;
-    for (int i=0; i<nphases; i++) {
+    for (unsigned int i=0; i<nphases; i++) {
     		sptr_ellipsoid = std::dynamic_pointer_cast<ellipsoid>(rve.sub_phases[i].sptr_shape);
     		if (sptr_ellipsoid->coatingof != 0) {
     			sptr_ellipsoid_c = std::dynamic_pointer_cast<ellipsoid>(rve.sub_phases[sptr_ellipsoid->coatingof].sptr_shape);
@@ -329,10 +329,10 @@ void read_cylinder(phase_characteristics &rve, const int &filenumber) {
     
     //Fill the coatedby parameter
     std::shared_ptr<cylinder> sptr_cylinder_c;
-    for (int i=0; i<nphases; i++) {
+    for (unsigned int i=0; i<nphases; i++) {
     		sptr_cylinder = std::dynamic_pointer_cast<cylinder>(rve.sub_phases[i].sptr_shape);
     		if (sptr_cylinder->coatingof != 0) {
-    			sptr_cylinderd_c = std::dynamic_pointer_cast<cylinder>(rve.sub_phases[sptr_cylinder->coatingof].sptr_shape);
+    			sptr_cylinder_c = std::dynamic_pointer_cast<cylinder>(rve.sub_phases[sptr_cylinder->coatingof].sptr_shape);
     			sptr_cylinder_c->coatedby = i;
     		}
     }
