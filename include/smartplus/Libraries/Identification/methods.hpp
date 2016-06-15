@@ -21,6 +21,7 @@
 ///@version 1.0
 
 #pragma once
+#include <fstream>
 #include <armadillo>
 #include "generation.hpp"
 
@@ -31,5 +32,12 @@ void genetic(generation &, generation &, int &, const double &, const double &, 
 
 ///Genrun creation
 void to_run(generation &, generation &, generation &, const double &, const std::vector<parameters> &);
+
+//Find the bests from the gensons and previous generation, considering the gboys
+//Define the new gen_cur and gboys_cur accordingly
+void find_best(generation &, generation &, const generation &, const generation &, const generation &, const int &, const int &, int &);
+
+//Write the results in an output file
+void write_results(std::ofstream &, const std::string &outputfile, const generation &, const int &, const int &, const int &);
 
 } //namespace smart
