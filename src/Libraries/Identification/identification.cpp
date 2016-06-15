@@ -26,6 +26,8 @@
 #include <armadillo>
 #include <algorithm>
 
+#include <boost/filesystem.hpp>
+
 #include <smartplus/parameter.hpp>
 #include <smartplus/Libraries/Maths/random.hpp>
 
@@ -44,14 +46,30 @@ using namespace arma;
 
 namespace smart{
     
-void run_identification_solver(const int &n_param, const int &n_consts, const int &nfiles, const int &ngen, const int &aleaspace, int &apop, int &spop, const int &ngboys, const int &maxpop, const std::string &path_data, const std::string &path_keys, const std::string &path_results, const std::string &outputfile, const std::string &data_num_name, const double &probaMut, const double &pertu, const double &c, const double &p0, const double &lambdaLM) {
+void run_identification_solver(const std::string &simul_type, const int &n_param, const int &n_consts, const int &nfiles, const int &ngen, const int &aleaspace, int &apop, int &spop, const int &ngboys, const int &maxpop, const std::string &path_data, const std::string &path_keys, const std::string &path_results, const std::string &outputfile, const std::string &data_num_name, const double &probaMut, const double &pertu, const double &c, const double &p0, const double &lambdaLM) {
 
     std::string data_num_ext = data_num_name.substr(data_num_name.length()-4,data_num_name.length());
     std::string data_num_name_root = data_num_name.substr(0,data_num_name.length()-4); //to remove the extension
     
+    cout << boost::filesystem::current_path().string() << endl;
+    
+    //Check if the required directories exist:
+    if(!boost::filesystem::is_directory(path_data)) {
+        cout << "error: the folder for the data, " << path_data << ", is not present" << endl;
+        return;
+    }
+    if(!boost::filesystem::is_directory(path_keys)) {
+        cout << "error: the folder for the keys, " << path_data << ", is not present" << endl;
+        return;
+    }
+    if(!boost::filesystem::is_directory(path_results)) {
+        cout << "The folder for the results, " << path_results << ", is not present and has been created" << endl;
+        boost::filesystem::create_directory(path_results);
+    }
+    
+    
     ///Allow non-repetitive pseudo-random number generation
     srand(time(0));
-    int TOOL = 1;   ///Which code is going to compute numerical files
     ofstream result;    ///Output stream, with parameters values and cost function
 
     //Define the parameters
@@ -64,51 +82,50 @@ void run_identification_solver(const int &n_param, const int &n_consts, const in
     read_parameters(n_param, params);
     read_constants(n_consts, consts, nfiles);
     
-    //string path_data = "data/";
-    //string path_keys = "data/key/";
-    //Copy of the parameters to the keys folder
-
-    //copy_parameters(params, path_data, path_keys);
-    //copy_constants(consts, path_data, path_keys);
-
     int idnumber=1;
     int id0=0;
 
-    //Define the necessary vectors to compute the cost functions and constrain optimization
-    vec GBcost = zeros(ngboys);
+    //Define the necessary vectors to compute the constrain optimization
     vec lambdaLMV = zeros(ngboys);
     for(int i=0; i<ngboys; i++) {
         lambdaLMV(i) = lambdaLM;
     }
-
-    //Get the data structures
+    
+    //Get the experimental data file
+    string data_exp_folder="exp_data";
+    if(!boost::filesystem::is_directory(data_exp_folder)) {
+        cout << "The folder for the experimental data, " << data_exp_folder << ", is not present" << endl;
+        return;
+    }
+    
+    //Get the experimental data and build the exp vector, and get the size of vectors
+    int sizev = 0;
     vector<opti_data> data_exp(nfiles);
+    read_data_exp(nfiles, data_exp);
+    for(int i=0; i<nfiles; i++) {
+        data_exp[i].import(data_exp_folder);
+        sizev += data_exp[i].ndata * data_exp[i].ninfo;
+    }
+    vec vexp = calcV(data_exp, data_exp, nfiles, sizev);
+    
+    
+    //Get the weight data and build the weight vector
     vector<opti_data> data_weight(nfiles);
-    vector<opti_data> data_num(nfiles);
-
     Col<int> weight_types(3);
     vec weight_files = zeros(nfiles);
     vector<vec> weight_cols(nfiles);
-
-    read_data_exp(nfiles, data_exp);
     read_data_weights(nfiles, weight_types, weight_files, weight_cols, data_weight, data_exp);
-    read_data_num(nfiles, data_exp, data_num);
-
-    /// Get the data vectors
-    ///Import of the experimental data
-    string data_exp_folder="exp_data";
-    int sizev = 0;
-    for(int i=0; i<nfiles;i++) {
-        data_exp[i].import(data_exp_folder);
+    for(int i=0; i<nfiles; i++) {
         data_weight[i].import(data_exp_folder);
-        sizev += data_exp[i].ndata * data_exp[i].ninfo;
     }
+    vec W = calcW(sizev, nfiles, weight_types, weight_files, weight_cols, data_weight, data_exp);
+    
+    //Get the data structures for the num data
+    vector<opti_data> data_num(nfiles);
+    read_data_num(nfiles, data_exp, data_num);
+    vec vnum = zeros(sizev);   //num vector
 
     //Data structure has been created. Next is the generation of structures to compute cost function and associated derivatives
-    vec vexp = calcV(data_exp, nfiles, sizev);
-    
-    vec W = calcW(sizev, nfiles, weight_types, weight_files, weight_cols, data_weight, data_exp);
-    vec vnum = zeros(sizev);   //weight vector
     mat S(sizev,n_param);
     Col<int> pb_col;
     pb_col.zeros(n_param);
@@ -131,52 +148,29 @@ void run_identification_solver(const int &n_param, const int &n_consts, const in
     generation geninit;
     int g=0;
 
-    gen[g].nindividuals = maxpop;
-    gen[g].construct(n_param, id0);
-
+    gen[g].construct(maxpop, n_param, id0);
     if(ngboys) {
-        gboys[g].nindividuals = ngboys;
-        gboys[g].construct(n_param, id0);
+        gboys[g].construct(ngboys, n_param, id0);
     }
-
     gen_initialize(geninit, spop, apop, idnumber, aleaspace, n_param, params);
 
+    
     string data_num_folder = "num_data";
-
-    /// Run the simulations corresponding to each individual
-    /// The simulation input files should be ready!
-    /// Tool defines the numerical algorithm that will compute num files.
-    switch (TOOL) {
-        case 1: { ///Use of the solver
-            
-            launch_solver(geninit, nfiles, params, consts, data_num_folder, data_num_name, path_data, path_keys);
-            break;
-        }
-            /*		case 2: {///Use of the specific ODF code
-             launch_ODF(geninit, nfiles, p_umat, data_num_folder, data_num_name, data_num_ext, Angle, Nb_ligne);
-             break;
-             }	*/
-        default: {
-            cout << "\n\nCRITICAL ERROR : The specified optimization Tool (" << TOOL << ") does not exist.\n";
-            return;
-        }
+    if(!boost::filesystem::is_directory(data_num_folder)) {
+        cout << "The folder for the numerical data, " << data_num_folder << ", is not present and has been created" << endl;
+        boost::filesystem::create_directory(data_num_folder);
     }
     
-    ///determination of the numerical data to use
-    for(int j=0; j<geninit.nindividuals; j++) {
-        for(int i=0; i<nfiles; i++) {
-
-            data_num[i].name = data_num_name_root + to_string(i+1) + "_" + to_string(j+1) + "_global-0" + data_num_ext;
-            data_num[i].import(data_num_folder);
-//            assert(data_exp[i].ndata==data_num[i].ndata);
-        }
+    /// Run the simulations corresponding to each individual
+    /// The simulation input files should be ready!
+    for(int i=0; i<geninit.size(); i++) {
+        run_simulation(simul_type, geninit.pop[i], nfiles, params, consts, data_num, data_num_folder, data_num_name, path_data, path_keys);
         
-        ///Computation of the cost function
-        vnum = calcV(data_num, nfiles, sizev);
-        geninit.pop[j].cout = calcC(vexp, vnum, W);
+        //Calculation of the cost function
+        geninit.pop[i].cout = calc_cost(vexp, vnum, W, data_num, data_exp, nfiles, sizev);
     }
-
-    //	lambdaLM = gen[g].pop[0].cout*lambdaLM;
+    
+    //Classification of bests
     for(int i=0; i<maxpop; i++) {
         gen[0].pop[i]=geninit.pop[i];
     }
@@ -195,232 +189,109 @@ void run_identification_solver(const int &n_param, const int &n_consts, const in
     }
     result.close();
 
-    cout << "Cout[Meilleur Individu] = " << gen[0].pop[0].cout << "\n";
+    cout << "\nCost function (Best set of parameters)  = " << gen[0].pop[0].cout << "\n";
 
     ///Next step : Classify the best one, and compute the next generation!
     // Here we can choose the type of optimizer we want
     ///Creation of the generation table
-
     generation gensons(maxpop, n_param, id0);
-    generation genall((maxpop > 1) ?  2*maxpop : maxpop, n_param, id0);
-    generation genrun((maxpop > 1) ?  (maxpop + ngboys*(n_param+1)) : (ngboys*(n_param+1)),n_param, id0);
-    generation gboys_n(ngboys, n_param, id0);
-
-    vec temp_p;
-    double temp_cout;
-
+    generation n_gboys(n_param, n_param, id0);
+    
+    //get the first gboys to be optimized via gradient_based
     for(int i=0; i<ngboys; i++) {
         gboys[0].pop[i] = gen[0].pop[i];
     }
-
-    double delta = 0.01;
-    bool mauvaise_descendance;
     
     double costnm1 = 0.;
     double stationnarity = 1.E-12;		/// Stationnary stopping criteria (no more evolution of the cost function)
-        
-//    while((g<ngen)&&(fabs(gen[g].pop[0].cout - costnm1) > stationnarity)) {
-    while(g<ngen) {
-        cout << "Generation " << g+1 << " sur " << ngen << "...\t";
+    
+    std::vector<double> cost_gb_cost_n(ngboys);
+    std::vector<vec> Dp_gb_n(ngboys);
+    
+    for(int i=0; i<ngboys; i++) {
+        Dp_gb_n[i] = zeros(n_param);
+    }
+    bool bad_des = false;
+    int compt_des = 0;
+    
+    while((g<ngen)&&(compt_des < 6)) {
+//    while(g<ngen) {
         
         costnm1 = gen[g].pop[0].cout;
         
+        /// Run the simulations corresponding to each individual
+        /// The simulation input files should be ready!
         if (maxpop > 1) {
+            
             genetic(gen[g], gensons, idnumber, probaMut, pertu, params);
+            ///prepare the individuals to run
+            
+            for(int i=0; i<gensons.size(); i++) {
+                run_simulation(simul_type, gensons.pop[i], nfiles, params, consts, data_num, data_num_folder, data_num_name, path_data, path_keys);
+                //Calculation of the cost function
+                gensons.pop[i].cout = calc_cost(vexp, vnum, W, data_num, data_exp, nfiles, sizev);
+            }
+            
         }
-        
-        ///prepare the individuals to run
-        to_run(gensons, gboys[g], genrun, delta, params);
-        
-        ///Run the simulations for the new individuals : Sons generation & gboys + delta
-        switch (TOOL) {
-            case 1: {
-                launch_solver(genrun, nfiles, params, consts, data_num_folder, data_num_name, path_data, path_keys);
-                break;
-            }
-                /*			case 2: {
-                 launch_ODF(genrun, nfiles, p_umat, data_num_folder, data_num_name, data_num_ext, Angle, Nb_ligne);
-                 break;
-                 }		*/
-            default: {
-                return;
-            }
-        }
-        
-        ///Import result for the sons generation and compute their cost
-        int z = 0;
-        if (maxpop > 1) {
-            for(int j=0; j<gensons.nindividuals; j++) {
-                for(int i=0; i<nfiles; i++) {
-                    data_num[i].name = data_num_name_root + to_string(i+1) + "_" + to_string(z+1) + "_global-0" + data_num_ext;
-                    data_num[i].import(data_num_folder);
-//                    assert(data_exp[i].ndata == data_num[i].ndata);
-                }
-                ///Computation of the cost function
-                vnum = calcV(data_num, nfiles, sizev);
-                gensons.pop[j].cout = calcC(vexp, vnum, W);
-                z++;
-            }
-        }
-        
-        ///Import result for the gboys + delta and compute their cost
-        ///temp gboys generation
-        gboys_n = gboys[g];
-        ///set up the S and V for the gradient based
-        for(int k=0; k<ngboys; k++) {
-            ///Get the result for the unmodified Gboys
-            for(int i=0; i<nfiles; i++) {
-                data_num[i].name = data_num_name_root + to_string(i+1) + "_" + to_string(z+1) + "_global-0" + data_num_ext;
-                data_num[i].import(data_num_folder);
-//                assert(data_exp[i].ndata == data_num[i].ndata);
-            }
-            vnum = calcV(data_num, nfiles, sizev);
-            gboys[g].pop[k].cout = calcC(vexp, vnum, W);
-            z++;
+        for (int i=0; i<ngboys; i++) {
             
-            ///Get the result for +delta specimens
-            S.zeros(sizev,n_param);
-            for(int j=0; j<n_param; j++) {
-                for(int i=0; i<nfiles; i++) {
-                    data_num[i].name = data_num_name_root + to_string(i+1) + "_" + to_string(z+1) + "_global-0" + data_num_ext;
-                    data_num[i].import(data_num_folder);
-//                    assert(data_exp[i].ndata == data_num[i].ndata);
-                }
-                calcS(gboys[g].pop[k], S, vnum, data_num, nfiles, j, delta);
-                z++;
-            }
+            cost_gb_cost_n[i] = gen[g].pop[i].cout;
             
-            ///Check the consistency of the sensitivity matrix
-            pb_col.zeros(n_param);
-            pb_col = checkS(S);
-            
-            p = gboys[g].pop[k].p;
-            
+            S = calc_sensi(gboys[g].pop[i], n_gboys, simul_type, nfiles, n_param, params, consts, vnum, data_num, data_exp, data_num_folder, data_num_name, path_data, path_keys, pb_col, sizev, Dp_gb_n[i]);
+            gboys[g].pop[i].cout = calcC(vexp, vnum, W);
+            p = gboys[g].pop[i].p;
             ///Compute the parameters increment
-            Dp = calcDp(S, vexp, vnum, W, p, params, lambdaLMV(k), c, p0, n_param, pb_col);
+            Dp = calcDp(S, vexp, vnum, W, p, params, lambdaLMV(i), c, p0, n_param, pb_col);
             p += Dp;
             
+            Dp_gb_n[i] = Dp;
+
             for(int j=0; j < n_param; j++) {
                 if(p(j) > params[j].max_value)
                     p(j) = params[j].max_value;
                 if(p(j) < params[j].min_value)
                     p(j) = params[j].min_value;
             }
+            gboys[g].pop[i].p = p;
             
-            gboys_n.pop[k].p = p;
-        }
-        
-        switch (TOOL) {
-            case 1: {
-                launch_solver(gboys_n, nfiles, params, consts, data_num_folder, data_num_name, path_data, path_keys);
-                break;
+            if(gboys[g].pop[i].cout > cost_gb_cost_n[i]) {
+                bad_des = true;
+                lambdaLMV(i) *= 0.2;
+                gboys[g].pop[i].p = gen[g].pop[i].p;
+                gboys[g].pop[i].cout = cost_gb_cost_n[i];
             }
-//                			case 2: {
-//                 launch_ODF(gboys_n, nfiles, p_umat, data_num_folder, data_num_name, data_num_ext, Angle, Nb_ligne);
-//                 break;
-//                 }
-            default: {
-                return;
-            }
-        }
-        
-        z=0;
-        mauvaise_descendance = true;
-        temp_p = gen[g].pop[0].p;
-        temp_cout = gen[g].pop[0].cout;
-        
-        for(int k=0; k<ngboys; k++) {
-            for(int i=0; i<nfiles; i++) {
-                data_num[i].name = data_num_name_root + to_string(i+1) + "_" + to_string(z+1) + "_global-0" + data_num_ext;
-                data_num[i].import(data_num_folder);
-//                assert(data_exp[i].ndata == data_num[i].ndata);
-            }
-            vnum = calcV(data_num, nfiles, sizev);
-            
-            gboys_n.pop[k].cout = calcC(vexp, vnum, W);
-            z++;
-            if (gboys_n.pop[k].cout < gen[g].pop[0].cout) {
-                mauvaise_descendance = false;
-            }
-            gboys[g].pop[k].p = gboys_n.pop[k].p;
-            gboys[g].pop[k].cout = gboys_n.pop[k].cout;
-        }
-        if (mauvaise_descendance) {
-            gboys[g].pop[0].p = temp_p;
-            gboys[g].pop[0].cout = temp_cout;
-            delta = delta/2.;
-        }
-        else {
-            delta = 0.01;
-        }
-        if (delta < 0.002) {
-            delta = alead(0.03, 0.005);
         }
         
         ///Find the bests
-        for(int i=0; i<ngboys; i++) {
-            genall.pop[i] = gboys[g].pop[i];
-        }
-        for(int i=ngboys; i<maxpop; i++) {
-            genall.pop[i]=gen[g].pop[i];
-        }
-        
-        if (maxpop > 1) {
-            for(int i=0; i<gensons.nindividuals; i++) {
-                genall.pop[i+maxpop]=gensons.pop[i];	  
-            }			
-            genall.classify();
-        }
-        
         g++;
-        gen[g].nindividuals=maxpop;
-        gen[g].construct(n_param, id0);		  
-        gboys[g].nindividuals = ngboys;
+        find_best(gen[g], gboys[g], gen[g-1], gboys[g-1], gensons, maxpop, n_param, id0);
+        write_results(result, outputfile, gen[g], g, maxpop, n_param);
         
-        if(ngboys) {
-            gboys[g].construct(n_param, id0);
+        if(fabs(costnm1 - gen[g].pop[0].cout) < stationnarity) {
+            compt_des++;
         }
+        else
+            compt_des = 0;
         
-        for(int i=0; i<maxpop; i++) {
-            gen[g].pop[i] = genall.pop[i];
-        }
-        
-        for(int i=0; i<ngboys; i++) {
-            gboys[g].pop[i] = genall.pop[i];
-        }
-        
-        result.open(outputfile,  ios::out | ios::app);	
-        for(int i=0; i<maxpop; i++) {
-            
-            result << g << "\t" << gen[g].pop[i].id << "\t" << gen[g].pop[i].cout << "\t";
-            for(int j=0; j<n_param;j++) {		
-                result << gen[g].pop[i].p(j);
-                if(j==n_param-1)
-                    result << "\n";
-                else
-                    result << "\t";
-            }
-        }
-        result.close();
-        cout << "Cout[Meilleur Individu] = " << gen[g].pop[0].cout << "\n";
+        cout << "Cost function (Best set of parameters) = " << gen[g].pop[0].cout << "\n";
         
         //Replace the parameters
         for (unsigned int k=0; k<params.size(); k++) {
             params[k].value = gen[g].pop[0].p(k);
         }
         
+        //In the simulation run, make sure that we remove all the temporary files
+        boost::filesystem::path path_to_remove(data_num_folder);
+        for (boost::filesystem::directory_iterator end_dir_it, it(path_to_remove); it!=end_dir_it; ++it) {
+            boost::filesystem::remove_all(it->path());
+        }
+        
+        //Run the identified simulation and store results in the results folder
+        run_simulation(simul_type, gen[g].pop[0], nfiles, params, consts, data_num, path_results, data_num_name, path_data, path_keys);
+        
         copy_parameters(params, path_keys, path_results);
         apply_parameters(params, path_results);
-        
     }
-
-//    copy_parameters(params, path_keys, path_data);
-//    copy_constants(consts, path_keys, path_data);
-
-    gensons.destruct();
-    genall.destruct();
-    genrun.destruct();
-    gboys_n.destruct();
     
 }
 
