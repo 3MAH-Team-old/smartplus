@@ -121,7 +121,7 @@ ostream& operator << (ostream& s, const individual& gp)
 	
 	s << "Parameters of individual\n";
 	s << "id = " << gp.id << "\n" ;
-	s << "rank = " << gp.id << "\n" ;	
+	s << "rank = " << gp.rank << "\n" ;
 	s << "cost = " << gp.cout << "\n" ;
 	s << "p = " << gp.p << "\n" ;
 
