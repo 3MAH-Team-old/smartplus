@@ -31,10 +31,10 @@
 namespace smart{
 
 ///This function constructs the vector of exp/num
-arma::vec calcV(std::vector<opti_data> &, const int &, const int &);
+arma::vec calcV(const std::vector<opti_data> &, const std::vector<opti_data> &, const int &, const int &);
 
 ///This function constructs the sensitivity matrix
-void calcS(const individual &, arma::mat &, const arma::vec &, const std::vector<opti_data> &, const int &, const int &, const double &);
+    void calcS(arma::mat &, const arma::vec &, const arma::vec &, const int &, const arma::vec &);
 
 ///This function checks the sensitivity matrix.
 ///This ensures that if a parameter didn't modify at all the result, the sensibility matrix doesn't have a column of "0" (inversion) issues
