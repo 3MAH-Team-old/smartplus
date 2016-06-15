@@ -43,7 +43,7 @@ namespace smart{
 void genetic(generation &gen_g, generation &gensons, int &idnumber, const double &probaMut, const double &pertu, const vector<parameters> &params){
     
     int n_param = params.size();
-    int maxpop = gensons.nindividuals;
+    int maxpop = gensons.size();
     
     //Generate two genitoers
 	individual dad(n_param, 0);
@@ -53,7 +53,7 @@ void genetic(generation &gen_g, generation &gensons, int &idnumber, const double
     //Very small pertubation
     
     gensons.newid(idnumber);
-    for(int i=0; i<gensons.nindividuals; i++) {
+    for(int i=0; i<maxpop; i++) {
         /// Random determination of "father" and "mother"
         dad = gen_g.pop[alea(maxpop-1)];
         mom = gen_g.pop[alea(maxpop-1)];
@@ -81,34 +81,54 @@ void genetic(generation &gen_g, generation &gensons, int &idnumber, const double
     
 }
 
-
-///Genrun creation
-void to_run(generation &gensons, generation &gboys, generation &genrun, const double &delta, const vector<parameters> &params) {
-
-    int z = 0;
-    int maxpop = gensons.nindividuals;
-    int n_param = params.size();
+void find_best(generation &gen_cur, generation &gboys_cur, const generation &gen_old, const generation &gboys_old, const generation &gensons, const int &maxpop, const int &n_param, int& id0) {
     
-    //genrun part of the genetic
+    generation genall((maxpop > 1) ?  2*maxpop : maxpop, n_param, id0);
+    
+    for(int i=0; i<gboys_old.size(); i++) {
+        genall.pop[i] = gboys_old.pop[i];
+    }
+    for(int i=gboys_old.size(); i<maxpop; i++) {
+        genall.pop[i]=gen_old.pop[i];
+    }
+    
     if (maxpop > 1) {
-        for(int i=0; i<gensons.nindividuals; i++) {
-            genrun.pop[z] = gensons.pop[i];
-            z++;
+        for(int i=0; i<gensons.size(); i++) {
+            genall.pop[i+maxpop]=gensons.pop[i];
         }
+        genall.classify();
     }
 
-    //genrun part of the gradient
-    for(int k=0; k<gboys.nindividuals ;k++) {
-        genrun.pop[z].p = gboys.pop[k].p;
-        z++;
-        for(int j=0; j<n_param; j++) {
-            ///set up the new set of parameters
-            genrun.pop[z].p = gboys.pop[k].p;
-            genrun.pop[z].p(j) = gboys.pop[k].p(j)*(1. + delta);
-            z++;
+    gen_cur.construct(maxpop, n_param, id0);
+    
+    if(gboys_old.size()) {
+        gboys_cur.construct(gboys_old.size(), n_param, id0);
+    }
+    
+    for(int i=0; i<maxpop; i++) {
+        gen_cur.pop[i] = genall.pop[i];
+    }
+    
+    for(int i=0; i<gboys_cur.size(); i++) {
+        gboys_cur.pop[i] = genall.pop[i];
+    }    
+}
+    
+void write_results(ofstream &result, const string &outputfile, const generation &gen_cur, const int &g, const int &maxpop, const int &n_param) {
+    
+    result.open(outputfile,  ios::out | ios::app);
+    for(int i=0; i<maxpop; i++) {
+        
+        result << g << "\t" << gen_cur.pop[i].id << "\t" << gen_cur.pop[i].cout << "\t";
+        for(int j=0; j<n_param;j++) {
+            result << gen_cur.pop[i].p(j);
+            if(j==n_param-1)
+                result << "\n";
+            else
+                result << "\t";
         }
     }
-
+    result.close();
 }
 
 } //namespace smart
