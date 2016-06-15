@@ -40,7 +40,6 @@ using namespace smart;
 
 int main() {
     
-	int TOOL = 1;   ///Which code is going to compute numerical files
     ofstream result;    ///Output stream, with parameters values and cost function
     
     int n_param;
@@ -59,7 +58,6 @@ int main() {
     double c;	///Lagrange penalty parameters
     double p0;
 	double lambdaLM;
-	double phiEps;
     //Read the identification control
     
     string path_data = "data/";
@@ -67,8 +65,10 @@ int main() {
     string path_results = "results/";
     string outputfile = "id_params.txt";
     string simulfile = "simul.txt";
+
+    string simul_type = "SOLVE";
     
     ident_control(n_param, n_consts, nfiles, ngen, aleaspace, apop, spop, ngboys, maxpop, probaMut, pertu, c, p0, lambdaLM);
-    run_identification_solver(n_param, n_consts, nfiles, ngen, aleaspace, apop, spop, ngboys, maxpop, path_data, path_keys, path_results,outputfile, simulfile, probaMut, pertu, c, p0, lambdaLM);
+    run_identification_solver(simul_type,n_param, n_consts, nfiles, ngen, aleaspace, apop, spop, ngboys, maxpop, path_data, path_keys, path_results,outputfile, simulfile, probaMut, pertu, c, p0, lambdaLM);
 
 }
