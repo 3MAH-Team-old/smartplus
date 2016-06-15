@@ -41,21 +41,19 @@ namespace smart{
 generation::generation()
 //----------------------------------------------------------------------
 {
-	nindividuals=0;
+
 }
 
 ///@brief Constructor
 ///@param n : number of individuals
 ///@param init boolean that indicates if the constructor has to initialize  (default value is true)
 //----------------------------------------------------------------------
-generation::generation(int n, int m, int &idnumber)
+generation::generation(const int &n, const int &m, int &idnumber)
 //----------------------------------------------------------------------
 {
 	assert(n>0);
 	
-	nindividuals=n;
-	
-    for (int i=0; i<nindividuals; i++) {
+    for (int i=0; i<n; i++) {
         pop.push_back(individual(m, idnumber));
         idnumber++;
     }
@@ -67,7 +65,6 @@ generation::generation(int n, int m, int &idnumber)
 generation::generation(const generation& gp)
 //----------------------------------------------------------------------
 {
-	nindividuals=gp.nindividuals;
     pop = gp.pop;
 }
 
@@ -78,12 +75,12 @@ generation::~generation() {}
 
 ///@brief Construct : A method to construct the generation after its initial construction
 //----------------------------------------------------------------------
-void generation::construct(const int &m, int &idnumber)
+void generation::construct(const int &n, const int &m, int &idnumber)
 //----------------------------------------------------------------------
 {
-	assert(nindividuals>0);
+	assert(n>0);
 
-    for (int i=0; i<nindividuals; i++) {
+    for (int i=0; i<n; i++) {
         pop.push_back(individual(m, idnumber));
         idnumber++;
     }
@@ -95,17 +92,17 @@ void generation::classify()
 //----------------------------------------------------------------------
 {
     
-	assert(nindividuals>0);
+	assert(pop.size()>0);
 
 	double mini = -1.;
 	int posmini = 0;
 	individual temp;
 	
-	for(int i=0; i < nindividuals-1; i++) {
+	for(unsigned int i=0; i < pop.size()-1; i++) {
 		mini=pop[i].cout;
 		posmini=i;
 		
-		for(int j=i; j < nindividuals; j++) {
+		for(unsigned int j=i; j < pop.size(); j++) {
 			if(pop[j].cout < mini) {
 				mini=pop[j].cout;
 				posmini=j;
@@ -116,7 +113,7 @@ void generation::classify()
 		pop[i]=temp;
 	} 	
 
-	for(int i=0; i < nindividuals; i++) {
+	for(unsigned int i=0; i < pop.size(); i++) {
 		pop[i].rank=i+1;
 	}
 
@@ -128,9 +125,9 @@ void generation::newid(int &idnumber)
 //----------------------------------------------------------------------
 {
     
-    assert(nindividuals>0);
+    assert(pop.size()>0);
 
-    for (int i=0; i<nindividuals; i++) {
+    for (unsigned int i=0; i<pop.size(); i++) {
 		pop[i].id = idnumber;
         idnumber++;
     }
@@ -145,11 +142,7 @@ void generation::destruct() {}
 //----------------------------------------------------------------------
 generation& generation::operator = (const generation& gp)
 //----------------------------------------------------------------------
-{  
-  
-	assert(gp.nindividuals>0);
-	
-	nindividuals=gp.nindividuals;
+{
     pop = gp.pop;    
 
 	return *this;
@@ -160,15 +153,12 @@ generation& generation::operator = (const generation& gp)
 ostream& operator << (ostream& s, const generation& gp)
 //--------------------------------------------------------------------------
 {
-	assert(gp.nindividuals>0);
-
 	s << "Display info on the generation\n";
-	s << "Number of individuals: " << gp.nindividuals << "\n";
-	
+	s << "Number of individuals: " << gp.pop.size() << "\n";
 	
 	s << "Characteristics of each individual: \n";
-	for(int i=0;i<gp.nindividuals;i++) {
-		s << gp.pop[i];
+    for(auto ind : gp.pop) {
+		s << ind;
 	}
 	s << "\n\n";
 
