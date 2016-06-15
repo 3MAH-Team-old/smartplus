@@ -72,7 +72,7 @@ void calcS(mat &S, const vec &vnum, const vec &vnum0, const int& j, const vec &d
 
 ///This function checks the sensitivity matrix.
 ///This ensures that if a parameter didn't modify at all the result, the sensibility matrix doesn't have a column of "0" (inversion) issues
-Col<int> checkS(mat &S) {
+Col<int> checkS(const mat &S) {
 	double somme;
 	int problem = 0;
 	Col<int> pb_col;
@@ -89,27 +89,20 @@ Col<int> checkS(mat &S) {
 			pb_col(S.n_cols)++;
 		}
 	}
-	if (problem > 0) {
-		/*if (problem == fabs(S.n_cols)){
-			cout << "\nERROR -- PLEASE HANDLE THIS SPECIFIC CASE IN FUNCTION checkS FROM optimize.hpp\n";
-		}*/
-		mat newS = zeros(S.n_rows,S.n_cols - problem);
-		int k = 0;
-		
-		for (int j = 0; j < (fabs(S.n_cols)); j++) {
-			if (pb_col(j) == 0) {
-				for(int i=0; i<fabs(S.n_rows);i++) {
-					newS(i,k) = S(i,j);
-				}
-				k++;
-			}
-		}
-		S.set_size(S.n_rows,S.n_cols - problem);
-		S = newS;
-	}
 	return pb_col;
 }
-       
+
+mat reduce_S(const mat &S, const Col<int> &pb_col) {
+    
+    mat S_reduced = S;
+    for (int j = 0; j < (fabs(S.n_cols)); j++) {
+        if (pb_col(j) == 1) {
+            S_reduced.shed_col(j);
+        }
+    }
+    return S_reduced;
+}
+    
 double calcC(const vec &vexp, vec &vnum, const vec &W) {
     double Cout = 0.;
     
@@ -241,16 +234,16 @@ vec calcW(const int &sizev, const int &nfiles, const Col<int> &weight_types, con
     return W;
 }
     
-vec G_cost(const int &size, const mat &S, const vec &W, const vec &Dv, const vec &L_min, const vec &L_max) {
-    vec G = zeros(size);
-    for(int i=0; i<(size); i++) {
-        for(unsigned int j=0; j<W.n_elem; j++) {
+vec G_cost(const mat &S, const vec &W, const vec &Dv, const vec &L_min, const vec &L_max) {
+    vec G = zeros(S.n_cols);
+    for(unsigned int i=0; i<S.n_cols; i++) {
+        for(unsigned int j=0; j<S.n_rows; j++) {
             G(i) += S(j,i)*W(j)*Dv(j);
         }
     }
     
     //Integrate the limits
-    for(int k=0; k<(size); k++) {
+    for(unsigned int k=0; k<S.n_cols; k++) {
         G(k) += -1.*fabs(G(k))*(L_min(k) + L_max(k));
     }
     return G;
@@ -269,12 +262,12 @@ mat LevMarq(const mat &H, const double &lambdaLM, const vec &dL_min, const vec &
 }
 
 //Hessian matrix
-mat Hessian(const int &size, const mat &S, const vec &W) {
+mat Hessian(const mat &S, const vec &W) {
     ///Hessian matrix
-    mat H = zeros(size, size);
-    for(int i=0; i<(size); i++) {
-        for(unsigned int j=0; j<W.n_elem; j++) {
-            for(int l=0; l<(size); l++) {
+    mat H = zeros(S.n_cols, S.n_cols);
+    for(int unsigned i=0; i<S.n_cols; i++) {
+        for(unsigned int j=0; j<S.n_rows; j++) {
+            for(unsigned int l=0; l<S.n_cols; l++) {
                 H(i,l) += S(j,i)*W(j)*S(j,l);
             }
         }
@@ -287,14 +280,18 @@ mat diagJtJ(const mat &H){
     return diagmat(H);
 }
     
-vec calcDp(const mat &S, const vec &vexp, const vec &vnum, const vec &W, const vec &p, const vector<parameters> &params, const double &lambdaLM, const double &c, const double &p0, const int &nprops, const Col<int>& pb_col) {
+vec calcDp(const mat &S, const vec &vexp, const vec &vnum, const vec &W, const vec &p, const vector<parameters> &params, const double &lambdaLM, const double &c, const double &p0, const int &n_param, Col<int>& pb_col) {
     
-    vec FullDp = zeros(nprops);
-    int problem = pb_col(nprops);
-    int sizepb = nprops-problem;
-    vec Dp = zeros(nprops-problem);
+    //In case calc Sensi:
+    pb_col.zeros(n_param + 1);
+    pb_col = checkS(S);
+    
+    vec FullDp = zeros(n_param);
+    int problem = pb_col(n_param);
+    
+    int sizepb = n_param-problem;
+    vec Dp = zeros(n_param-problem);
     vec Dv = (vexp-vnum);
-    mat H = Hessian(sizepb, S, W);
     
     ///Constrain optimization
     vec L_min = bound_min(sizepb, p, params, c, p0);
@@ -302,13 +299,25 @@ vec calcDp(const mat &S, const vec &vexp, const vec &vnum, const vec &W, const v
     vec dL_min = bound_min(sizepb, p, params, c, p0);
     vec dL_max = dbound_max(sizepb, p, params, c, p0);
 
-    vec G = G_cost(sizepb, S, W, Dv, L_min, L_max);
+    mat S_reduced;
+    mat H;
+    vec G;
+    if (problem > 0) {
+        S_reduced = reduce_S(S, pb_col);
+        H = Hessian(S_reduced, W);
+        G = G_cost(S_reduced, W, Dv, L_min, L_max);
+    }
+    else {
+        H = Hessian(S, W);
+        G = G_cost(S, W, Dv, L_min, L_max);
+    }
+
     mat LM = LevMarq(H, lambdaLM, dL_min, dL_max);
         
     Dp = inv(LM)*G;
     
     int z = 0;
-    for(int i=0; i<nprops; i++) {
+    for(int i=0; i<n_param; i++) {
         if (pb_col(i)==0) {
             FullDp(i) = Dp(z);
             z++;
@@ -319,7 +328,7 @@ vec calcDp(const mat &S, const vec &vexp, const vec &vnum, const vec &W, const v
     }
     
     ///Safety to avoid any big change in the values of p(i) due to over-sensibility
-    for(int i=0; i<nprops; i++) {
+    for(int i=0; i<n_param; i++) {
         if(fabs(FullDp(i)) > 0.1*p(i)) {
             if(FullDp(i) > 0) {
                 FullDp(i) = 0.1*fabs(p(i));
