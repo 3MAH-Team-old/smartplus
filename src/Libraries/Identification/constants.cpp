@@ -32,9 +32,9 @@ using namespace arma;
 
 namespace smart{
     
-//=====Private methods for parameters===================================
+//=====Private methods for constants===================================
 
-//=====Public methods for parameters============================================
+//=====Public methods for constants============================================
 
 //@brief default constructor
 //-------------------------------------------------------------
@@ -49,9 +49,8 @@ constants::constants()
 
 /*!
  \brief Constructor
- \param mnumber : number of the parameter
- \param mmin_value : Minimal value of the parameter
- \param mmax_value : Maximal value of the parameter
+ \param mnumber : number of the constant
+ \param nfiles : Number of files where the constant is present
  */
 
 //-------------------------------------------------------------
