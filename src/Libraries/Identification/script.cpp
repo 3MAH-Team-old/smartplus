@@ -25,6 +25,7 @@
 #include <math.h>
 #include <armadillo>
 #include <algorithm>
+#include <map>
 
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/replace.hpp>
@@ -33,6 +34,7 @@
 #include <smartplus/Libraries/Identification/constants.hpp>
 #include <smartplus/Libraries/Identification/generation.hpp>
 #include <smartplus/Libraries/Identification/read.hpp>
+#include <smartplus/Libraries/Identification/optimize.hpp>
 #include <smartplus/Libraries/Identification/script.hpp>
 #include <smartplus/Libraries/Solver/read.hpp>
 #include <smartplus/Libraries/Solver/solver.hpp>
@@ -141,56 +143,146 @@ void apply_constants(const vector<constants> &consts, const string &dst_path) {
     
 }
     
-void launch_solver(const generation &genrun, const int &nfiles, vector<parameters> &params, vector<constants> &consts, const string &folder, const string &name, const string &path_data, const string &path_keys)
+void launch_solver(const individual &ind, const int &nfiles, vector<parameters> &params, vector<constants> &consts, const string &folder, const string &name, const string &path_data, const string &path_keys)
 {
 	string outputfile;
+    string simulfile;
 	string pathfile;
     
     string name_ext = name.substr(name.length()-4,name.length());
     string name_root = name.substr(0,name.length()-4); //to remove the extension
     
 	//#pragma omp parallel for private(sstm, path)
-	for (int j = 0; j <genrun.nindividuals; j++) {
-		for (int i = 0; i<nfiles; i++) {
-			///Creating the right path & output filenames
-            
-			outputfile = folder + "/" + name_root + to_string(i+1) + "_" + to_string(j+1) + name_ext;
-			pathfile = "path_id_" + to_string(i+1) + ".txt";
-            
-            string umat_name;
-            int nprops = 0;
-            int nstatev = 0;
-            vec props;
-            
-            double psi_rve = 0.;
-            double theta_rve = 0.;
-            double phi_rve = 0.;
-            
-            double rho = 0.;
-            double c_p = 0.;
-            
-            //Replace the constants
-            for (unsigned int k=0; k<consts.size(); k++) {
-                consts[k].value = consts[k].input_values(i);
-            }
-            //Replace the parameters
-            for (unsigned int k=0; k<params.size(); k++) {
-                params[k].value = genrun.pop[j].p(k);
-            }
-            
-            copy_constants(consts, path_keys, path_data);
-            copy_parameters(params, path_keys, path_data);
-            
-            apply_constants(consts, path_data);
-            apply_parameters(params, path_data);
-            
-            //Then read the material properties
-            read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p);
-            
-			///Launching the solver with relevant parameters
-            solver(umat_name, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p, pathfile, outputfile);            
-		}
-	}
+    for (int i = 0; i<nfiles; i++) {
+        ///Creating the right path & output filenames
+        
+        outputfile = folder + "/" + name_root + "_" + to_string(ind.id) + "_" + to_string(i+1) + name_ext;
+        pathfile = "path_id_" + to_string(i+1) + ".txt";
+        
+        string umat_name;
+        int nprops = 0;
+        int nstatev = 0;
+        vec props;
+        
+        double psi_rve = 0.;
+        double theta_rve = 0.;
+        double phi_rve = 0.;
+        
+        double rho = 0.;
+        double c_p = 0.;
+        
+        //Replace the constants
+        for (unsigned int k=0; k<consts.size(); k++) {
+            consts[k].value = consts[k].input_values(i);
+        }
+        //Replace the parameters
+        for (unsigned int k=0; k<params.size(); k++) {
+            params[k].value = ind.p(k);
+        }
+        
+        copy_constants(consts, path_keys, path_data);
+        copy_parameters(params, path_keys, path_data);
+        
+        apply_constants(consts, path_data);
+        apply_parameters(params, path_data);
+        
+        //Then read the material properties
+        read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p);
+        
+        ///Launching the solver with relevant parameters
+        solver(umat_name, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p, pathfile, outputfile);
+        
+        //Get the simulation files according to the proper name
+        outputfile = folder + "/" + name_root + + "_" + to_string(ind.id) + "_" + to_string(i+1) + "_global-0" + name_ext;
+        simulfile = folder + "/" + name_root + + "_" + to_string(ind.id)  +"_" + to_string(i+1) + name_ext;
+        
+        boost::filesystem::copy_file(outputfile,simulfile,boost::filesystem::copy_option::overwrite_if_exists);
+    }
 }
+    
+void run_simulation(const string &simul_type, const individual &ind, const int &nfiles, vector<parameters> &params, vector<constants> &consts, vector<opti_data> &data_num, const string &folder, const string &name, const string &path_data, const string &path_keys) {
+    
+    //In the simulation run, make sure that we remove all the temporary files
+    boost::filesystem::path path_to_remove(folder);
+    for (boost::filesystem::directory_iterator end_dir_it, it(path_to_remove); it!=end_dir_it; ++it) {
+        boost::filesystem::remove_all(it->path());
+    }
+    
+    std::map<std::string, int> list_simul;
+    list_simul = {{"SOLVE",1}};
+    
+    switch (list_simul[simul_type]) {
+            
+        case 1: {
+            launch_solver(ind, nfiles, params, consts, folder, name, path_data, path_keys);
+            break;
+        }
+        default: {
+            cout << "\n\nError in run_simulation : The specified solver (" << simul_type << ") does not exist.\n";
+            return;
+        }
+    }
+    
+    for (int i = 0; i<nfiles; i++) {
+        
+        string simulfile;
+        
+        string name_ext = name.substr(name.length()-4,name.length());
+        string name_root = name.substr(0,name.length()-4); //to remove the extension
+        simulfile = name_root + + "_" + to_string(ind.id)  +"_" + to_string(i+1) + name_ext;
+        
+        data_num[i].name = simulfile;
+        data_num[i].import(folder);
+    }
+    
+}
+    
+double calc_cost(const vec &vexp, vec &vnum, const vec &W, const vector<opti_data> &data_num, const vector<opti_data> &data_exp, const int &nfiles, const int &sizev) {
+
+    vnum = calcV(data_num, data_exp, nfiles, sizev);    
+    return calcC(vexp, vnum, W);
+}
+     
+mat calc_sensi(const individual &gboy, generation &n_gboy, const string &simul_type, const int &nfiles, const int &n_param, vector<parameters> &params, vector<constants> &consts, vec &vnum0, vector<opti_data> &data_num, vector<opti_data> &data_exp, const string &folder, const string &name, const string &path_data, const string &path_keys, Col<int> &pb_col, const int &sizev, const vec &Dp_n) {
+    
+    //delta
+    vec delta = 0.01*ones(n_param);
+    
+    mat S = zeros(sizev,n_param);
+    //genrun part of the gradient
+    
+    run_simulation(simul_type, gboy, nfiles, params, consts, data_num, folder, name, path_data, path_keys);
+    vnum0 = calcV(data_num, data_exp, nfiles, sizev);
+    
+    for(int j=0; j<n_param; j++) {
+        n_gboy.pop[j].p = gboy.p;
+        if (fabs(Dp_n(j)) > 0.) {
+//            delta(j) *= Dp_n(j);
+            delta(j) *= (0.1*gboy.p(j));            
+            n_gboy.pop[j].p(j) += delta(j);
+        }
+        else {
+            delta(j) *= (0.1*gboy.p(j));
+            n_gboy.pop[j].p(j) += delta(j);
+        }
+    }
+    
+    for(int j=0; j<n_param; j++) {
+        //run the simulation
+        run_simulation(simul_type, n_gboy.pop[j], nfiles, params, consts, data_num, folder, name, path_data, path_keys);
+        vec vnum = calcV(data_num, data_exp, nfiles, sizev);
+        
+        calcS(S, vnum, vnum0, j, delta);
+    }
+    
+    //In case calc Sensi:
+    pb_col.zeros(n_param + 1);
+    pb_col = checkS(S);
+    
+    return S;
+}
+    
+    
+    
     
 } //namespace smart
