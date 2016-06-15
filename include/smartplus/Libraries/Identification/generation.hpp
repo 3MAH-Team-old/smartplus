@@ -36,18 +36,17 @@ class generation
 	protected:
 
 	public :
-		int nindividuals;
-		
+    
         std::vector<individual> pop;
 		
 		generation(); 	//default constructor
-		generation(int, int, int&);	//constructor - allocates memory for statev
+		generation(const int&, const int&, int&);	//constructor - allocates memory for statev
 		generation(const generation&);	//Copy constructor
 		~generation();
 		
-		int dimindividuals() const {return nindividuals;}       // returns the number of individuals
+		int size() const {return pop.size();}       // returns the number of individuals
 
-		void construct(const int&, int&);
+		void construct(const int&, const int&, int&);
 		void classify();
 		void newid(int &);
 		void destruct();
