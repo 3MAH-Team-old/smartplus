@@ -39,40 +39,35 @@ using namespace arma;
 namespace smart{
 
 ///This function constructs the vector of exp/num
-vec calcV(vector<opti_data> &exp_data, const int &nfiles, const int &sizev) {
+vec calcV(const vector<opti_data> &data, const vector<opti_data> &exp_data, const int &nfiles, const int &sizev) {
+    
     vec v = zeros(sizev);
     int z=0;
     
 	for(int i=0; i<nfiles; i++) {
 		for(int l=0; l<exp_data[i].ninfo; l++) {
-			for(int k=0; k<exp_data[i].ndata; k++) {
-				v(z) = exp_data[i].data(k,l);
-				z++;
-			}
+                
+            //In case the file concerned is not complete
+            for(int a=0; a<data[i].ndata; a++) {
+                v(z) = data[i].data(a,l);
+                z++;
+            }
+            for(int a=data[i].ndata; a<exp_data[i].ndata; a++) {
+                v(z) = 0.;
+                z++;
+            }
 		}
 	}
     return v;
 }
 
 ///This function constructs the sensitivity matrix
-void calcS(const individual &ind, mat &S, const vec &vnum0, const vector<opti_data> &num_data, const int& nfiles, const int& j, const double &delta) {
-  
-    double vnum_pertu = 0.;
+void calcS(mat &S, const vec &vnum, const vec &vnum0, const int& j, const vec &delta) {
     
-	unsigned int z=0;
-	for(int i=0; i<nfiles;i++) {
-		for(int l=0; l<num_data[i].ninfo;l++) {
-			for(int k=0; k<num_data[i].ndata;k++) {
-				vnum_pertu = num_data[i].data(k,l);
-                if(z >= vnum0.n_elem) {
-                    S(z,j) = 0.;
-                }
-                else
-                    S(z,j) = (vnum_pertu-vnum0(z))*(1./(ind.p(j)*delta));
-				z++;
-			}
-		}
-	}
+    for (unsigned int i=0; i<vnum0.n_elem; i++) {
+        S(i,j) = (vnum(i)-vnum0(i))*(1./(delta(j)));
+    }
+    
 }
 
 ///This function checks the sensitivity matrix.
@@ -114,35 +109,6 @@ Col<int> checkS(mat &S) {
 	}
 	return pb_col;
 }
-
-///This function computes the Cost function (Square differnces) from the components of experimental values and numerically evaluated values 
-/*double calcC(vec vector<opti_data> &data_exp, vector<opti_data> &data_num, const int &nfiles) {
-	double Cout = 0.;
-	vector<mat> mdiff(nfiles);
-	    
-	for(int z=0; z<nfiles; z++) {
-		assert(data_exp[z].data.n_elem == data_num[z].data.n_elem);
-        mdiff[z] = zeros(data_exp[z].ndata, data_exp[z].ninfo);
-	}
-    
-	double denom = 0.;
-	double CoutCol = 0.;	
-	
-	for(int z=0; z<nfiles; z++) {
-		mdiff[z] = data_num[z].data - data_exp[z].data;	
-		
-		for(int j=0; j<data_exp[z].ninfo; j++) {
-			for(int i=0; i<data_exp[z].ndata; i++) {
-				CoutCol += pow(mdiff[z](i,j), 2.);
-				denom += pow(data_exp[z].data(i,j), 2.);				
-			}
-			Cout += CoutCol/denom;
-			CoutCol = 0.;
-			denom = 0.;
-		}
-	}
-	return Cout;
-}*/
        
 double calcC(const vec &vexp, vec &vnum, const vec &W) {
     double Cout = 0.;
@@ -157,25 +123,6 @@ double calcC(const vec &vexp, vec &vnum, const vec &W) {
         }
     }
 	return Cout;    
-}
-    
-//Hessian matrix
-mat Hessian(const int &size, const mat &S, const vec &W) {
-    ///Hessian matrix
-    mat H = zeros(size, size);
-    for(int i=0; i<(size); i++) {
-        for(unsigned int j=0; j<W.n_elem; j++) {
-            for(int l=0; l<(size); l++) {
-                H(i,l) += S(j,i)*W(j)*S(j,l);
-            }
-        }
-    }
-    return H;
-}
-    
-///Gradient matrix
-mat diagJtJ(const mat &H){
-    return diagmat(H);
 }
     
 //Minimal bound Lagrange multiplier vector
@@ -320,7 +267,25 @@ mat LevMarq(const mat &H, const double &lambdaLM, const vec &dL_min, const vec &
     }
     return LM;
 }
-    
+
+//Hessian matrix
+mat Hessian(const int &size, const mat &S, const vec &W) {
+    ///Hessian matrix
+    mat H = zeros(size, size);
+    for(int i=0; i<(size); i++) {
+        for(unsigned int j=0; j<W.n_elem; j++) {
+            for(int l=0; l<(size); l++) {
+                H(i,l) += S(j,i)*W(j)*S(j,l);
+            }
+        }
+    }
+    return H;
+}
+
+///Gradient matrix
+mat diagJtJ(const mat &H){
+    return diagmat(H);
+}
     
 vec calcDp(const mat &S, const vec &vexp, const vec &vnum, const vec &W, const vec &p, const vector<parameters> &params, const double &lambdaLM, const double &c, const double &p0, const int &nprops, const Col<int>& pb_col) {
     
