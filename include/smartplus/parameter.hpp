@@ -74,7 +74,7 @@ namespace smart {
 #endif
 
 #ifndef inforce_solver
-#define inforce_solver 0
+#define inforce_solver 1
 #endif
 
 #ifndef div_tnew_dt_solver
