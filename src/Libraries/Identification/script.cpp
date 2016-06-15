@@ -274,11 +274,6 @@ mat calc_sensi(const individual &gboy, generation &n_gboy, const string &simul_t
         
         calcS(S, vnum, vnum0, j, delta);
     }
-    
-    //In case calc Sensi:
-    pb_col.zeros(n_param + 1);
-    pb_col = checkS(S);
-    
     return S;
 }
     
