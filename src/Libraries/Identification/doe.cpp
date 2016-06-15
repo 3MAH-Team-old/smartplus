@@ -127,14 +127,14 @@ void gen_initialize(generation &geninit, int &spop, int &apop, int &idnumber, co
     if(aleaspace==0) {
         
         ///Populate the space with equidistant values. First generation
-        geninit.nindividuals = (int)pow(spop,n_param);
-        geninit.construct(n_param, idnumber);
+        int geninit_nindividuals = (int)pow(spop,n_param);
+        geninit.construct(geninit_nindividuals, n_param, idnumber);
         
         ///Determination of parameters_equally_spaced
         mat samples = doe_uniform(spop, n_param, params);
         
         for(int j=0; j<n_param; j++) {
-            for(int i=0; i<geninit.nindividuals; i++) {
+            for(int i=0; i<geninit.size(); i++) {
                 geninit.pop[i].p(j) = samples(i,j);
             }
         }
@@ -143,29 +143,29 @@ void gen_initialize(generation &geninit, int &spop, int &apop, int &idnumber, co
     if(aleaspace==1) {
         
         ///Populate the space with equidistant values. First generation
-        geninit.nindividuals = (int)pow(spop,n_param);
-        geninit.construct(n_param, idnumber);
+        int geninit_nindividuals = (int)pow(spop,n_param);
+        geninit.construct(geninit_nindividuals, n_param, idnumber);
         
         ///Determination of parameters_equally_spaced
         mat samples = doe_uniform_limit(spop, n_param, params);
         
         for(int j=0; j<n_param; j++) {
-            for(int i=0; i<geninit.nindividuals; i++) {
+            for(int i=0; i<geninit.size(); i++) {
                 geninit.pop[i].p(j) = samples(i,j);
             }
         }
     }
     else if(aleaspace==2) {
         
-        geninit.nindividuals=apop;
-        geninit.construct(n_param, idnumber);
-        
+        int geninit_nindividuals=apop;
+        geninit.construct(geninit_nindividuals, n_param, idnumber);
+                
         ///Determination of random values
         ///Determination of parameters_equally_spaced
-        mat samples = doe_random(geninit.nindividuals, n_param, params);
+        mat samples = doe_random(geninit_nindividuals, n_param, params);
         
         for(int j=0; j<n_param; j++) {
-            for(int i=0; i<geninit.nindividuals; i++) {
+            for(int i=0; i<geninit.size(); i++) {
                 geninit.pop[i].p(j) = samples(i,j);
             }
         }
@@ -174,11 +174,11 @@ void gen_initialize(generation &geninit, int &spop, int &apop, int &idnumber, co
         
         mat samples;
         read_gen(apop, samples, n_param);
-        geninit.nindividuals=apop;
-        geninit.construct(n_param, idnumber);
+        int geninit_nindividuals=apop;
+        geninit.construct(geninit_nindividuals, n_param, idnumber);
         
         for(int j=0; j<n_param; j++) {
-            for(int i=0; i<geninit.nindividuals; i++) {
+            for(int i=0; i<geninit.size(); i++) {
                 geninit.pop[i].p(j) = samples(i,j);
             }
         }
