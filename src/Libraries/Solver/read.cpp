@@ -82,19 +82,19 @@ void Lth_2_K(const mat &dSdE, mat &dSdT, mat &dQdE, mat &dQdT, mat &K, const Col
     }
 }
 
-void read_matprops(string &umat_name, int &nprops, vec &props, int &nstatev, double &psi_rve, double &theta_rve, double &phi_rve, double &rho, double &c_p) {
+void read_matprops(string &umat_name, int &nprops, vec &props, int &nstatev, double &psi_rve, double &theta_rve, double &phi_rve, double &rho, double &c_p, const string &materialfile) {
 
     ///Material properties reading, use "material.dat" to specify parameters values
 	string buffer;
 	ifstream propsmat;
-	propsmat.open("data/material.dat", ios::in);
+	propsmat.open(materialfile, ios::in);
 	if(propsmat) {
         
 		string buffer;
 		propsmat >> buffer >> buffer >> umat_name >> buffer >> nprops >> buffer >> nstatev;
 	}
 	else {
-		cout << "Error: cannot open material.dat file \n";
+		cout << "Error: cannot open " << materialfile << " file \n";
 	}
 	
 	char *cmname = new char [umat_name.length()];
@@ -104,7 +104,7 @@ void read_matprops(string &umat_name, int &nprops, vec &props, int &nstatev, dou
     	
 	props = zeros(nprops);
     
-	propsmat.open("data/material.dat", ios::in);
+	propsmat.open(materialfile, ios::in);
 	if(propsmat) {
 		string buffer;
 		propsmat >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> psi_rve >> buffer >> theta_rve >> buffer >> phi_rve >> buffer >> buffer >> rho >> buffer >> c_p >> buffer;
@@ -113,7 +113,7 @@ void read_matprops(string &umat_name, int &nprops, vec &props, int &nstatev, dou
 			propsmat >> buffer >> props(i);
 	}
 	else {
-		cout << "Error: cannot open the file material.dat \n";
+		cout << "Error: cannot open the file " << materialfile << " \n";
         exit(0);
 	}
     
