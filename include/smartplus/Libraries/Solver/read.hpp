@@ -36,7 +36,7 @@ void Lt_2_K(const arma::mat &, arma::mat &, const arma::Col<int> &, const double
 void Lth_2_K(const arma::mat &, arma::mat &, arma::mat &, arma::mat &, arma::mat &, const arma::Col<int> &, const int &, const double &);
 
 /// Function that reads the material properties
-void read_matprops(std::string &, int &, arma::vec &, int &, double &, double &, double &, double &, double &);
+void read_matprops(std::string &, int &, arma::vec &, int &, double &, double &, double &, double &, double &, const string &);
     
 /// Function that reads the output parameters
 void read_output(solver_output &, const int &, const int &);
