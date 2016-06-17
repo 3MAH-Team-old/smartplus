@@ -43,6 +43,7 @@ int main() {
 
     string outputfile = "results_job.txt";
     string pathfile = "path.txt";
+	string materialfile = "data/material.dat";
 	string umat_name;
 	int nprops = 0;
 	int nstatev = 0;
@@ -55,7 +56,7 @@ int main() {
 	double theta_rve = 0.;
 	double phi_rve = 0.;
     
-    read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p);
+    read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p, materialfile);
     solver(umat_name, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p, pathfile, outputfile);
 
 	return 0;
