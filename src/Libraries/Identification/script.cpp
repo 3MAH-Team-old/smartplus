@@ -148,6 +148,7 @@ void launch_solver(const individual &ind, const int &nfiles, vector<parameters> 
 	string outputfile;
     string simulfile;
 	string pathfile;
+	string materialfile = "data/material.dat";
     
     string name_ext = name.substr(name.length()-4,name.length());
     string name_root = name.substr(0,name.length()-4); //to remove the extension
@@ -187,7 +188,7 @@ void launch_solver(const individual &ind, const int &nfiles, vector<parameters> 
         apply_parameters(params, path_data);
         
         //Then read the material properties
-        read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p);
+        read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p, materialfile);
         
         ///Launching the solver with relevant parameters
         solver(umat_name, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p, pathfile, outputfile);
