@@ -258,7 +258,7 @@ void dE_Periodic_Layer(phase_characteristics &phase, const int &nbiter) {
         lay_multi->Dnn(2,1) = Lt_loc(4,3);
         lay_multi->Dnn(2,2) = Lt_loc(4,4);
         
-        mat sigma_local = rotate_g2l_strain(sv_r->sigma, lay->psi_geom, lay->theta_geom, lay->phi_geom);;
+        mat sigma_local = rotate_g2l_stress(sv_r->sigma, lay->psi_geom, lay->theta_geom, lay->phi_geom);
         lay_multi->sigma_hat(0) = sigma_local(0);
         lay_multi->sigma_hat(1) = sigma_local(3);
         lay_multi->sigma_hat(2) = sigma_local(4);
@@ -368,7 +368,7 @@ void Lt_Periodic_Layer(phase_characteristics &phase) {
         A_loc(4,4) += lay_multi->dXn(2,2);
         A_loc(4,5) += lay_multi->dXt(2,2);
 
-        lay_multi->A = rotate_l2g_L(A_loc, lay->psi_geom, lay->theta_geom, lay->phi_geom);
+        lay_multi->A = rotate_l2g_A(A_loc, lay->psi_geom, lay->theta_geom, lay->phi_geom);
     }
     
 }
