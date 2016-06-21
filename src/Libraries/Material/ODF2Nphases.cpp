@@ -27,6 +27,7 @@
 #include <sstream>
 #include <armadillo>
 #include <smartplus/parameter.hpp>
+#include <smartplus/Libraries/Phase/phase_characteristics.hpp>
 #include <smartplus/Libraries/Material/ODF.hpp>
 #include <smartplus/Libraries/Material/ODF2Nphases.hpp>
 #include <smartplus/Libraries/Phase/phase_characteristics.hpp>
@@ -38,29 +39,53 @@ using namespace std;
 using namespace arma;
 
 namespace smart{
-
+    
 void discretize_ODF(phase_characteristics &rve, const phase_characteristics &rve_init, ODF &odf_rve) {
 
-    double alpha = 0.;
-    //Need to compute dalpha from bounds..
-//    int Nphases = odf_rve
+    double alpha = odf_rve.limits(0);
+    odf_rve.norm = 0.;
     
+    double angle_range = odf_rve.limits(1) - odf_rve.limits(0);
+    assert(angle_range > 0.);
+    int Nphases = rve.sub_phases.size();
     
-/*    for (int j=0; j<rve.sub_phases.size(); j++) {
-        if(alpha < iota)
-            rve.sub_phases[j].sptr_shape->concentration = dalpha/6. * (ODF(pi-dalpha/2, method(i), paramODF.row(i).t(), radian, dec)+4.*ODF(alpha, method(i), paramODF.row(i).t(), radian, dec)+ODF(alpha+dalpha/2, method(i), paramODF.row(i).t(), radian, dec));
+    double dalpha = double(Nphases)/angle_range;
+    
+    for (auto r: rve.sub_phases) {
+        if(alpha < dalpha)
+            r.sptr_shape->concentration = dalpha/6. * odf_rve.density(pi+alpha-dalpha/2) + 4.*odf_rve.density(alpha) + odf_rve.density(alpha+dalpha/2);
         else
-            rve.sub_phases[j].sptr_shape->concentration = dalpha/6. * (ODF(pi-dalpha/2, method(i), paramODF.row(i).t(), radian, dec)+4.*ODF(alpha, method(i), paramODF.row(i).t(), radian, dec)+ODF(alpha+dalpha/2, method(i), paramODF.row(i).t(), radian, dec));
+            r.sptr_shape->concentration = dalpha/6. * odf_rve.density(alpha-dalpha/2) + 4.*odf_rve.density(alpha) + odf_rve.density(alpha+dalpha/2);
         
-        normODF += rvesvs[i][j].concentration;
+        //Fill the correct angles
+/*        if (odf_rve.Angle == 0)
+            r.sptr_shape->psi_geom = alpha;
+        else if(odf_rve.Angle == 1)
+            r.sptr_shape->theta_geom = alpha;
+        else if(odf_rve.Angle == 2)
+            r.sptr_shape->phi_geom = alpha;*/
+        
+        r.sptr_shape->concentration = dalpha/6. * odf_rve.density(pi+alpha-dalpha/2) + 4.*odf_rve.density(alpha) + odf_rve.density(alpha+dalpha/2);
+        
+        odf_rve.norm += r.sptr_shape->concentration;
         alpha += dalpha;
     }
     
+    
+/*    for (auto r: rve.sub_phases) {
+        if(alpha < iota)
+            rve.sub_phases[j].sptr_shape->concentration = dalpha/6. * (ODF(pi-dalpha/2, method(i), paramODF.row(i).t(), radian, dec)+4.*ODF(alpha, method(i), paramODF.row(i).t(), radian, dec)+ODF(alpha+dalpha/2, method(i), paramODF.row(i).t(), radian, dec));
+        else
+            rve.sub_phases[j].sptr_shape->concentration = dalpha/6. * (ODF(alpha-dalpha/2, method(i), paramODF.row(i).t(), radian, dec)+4.*ODF(alpha, method(i), paramODF.row(i).t(), radian, dec)+ODF(alpha+dalpha/2, method(i), paramODF.row(i).t(), radian, dec));
+        
+        normODF += rvesvs[i][j].concentration;
+        alpha += dalpha;
+    }*/
+    
     ///Normalization
     for(auto r : rve.sub_phases) {
-        r.sptr_shape->concentration *= (rvesvs_init.sptr_shape->concentration / normODF);
-    }*/
-        
+        r.sptr_shape->concentration *= (rve_init.sptr_shape->concentration / odf_rve.norm);
+    }
 }
 
 
