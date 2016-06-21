@@ -48,13 +48,13 @@ generation::generation()
 ///@param n : number of individuals
 ///@param init boolean that indicates if the constructor has to initialize  (default value is true)
 //----------------------------------------------------------------------
-generation::generation(const int &n, const int &m, int &idnumber)
+generation::generation(const int &n, const int &m, int &idnumber, const double &mlambda)
 //----------------------------------------------------------------------
 {
 	assert(n>0);
 	
     for (int i=0; i<n; i++) {
-        pop.push_back(individual(m, idnumber));
+        pop.push_back(individual(m, idnumber, mlambda));
         idnumber++;
     }
 }
@@ -75,13 +75,13 @@ generation::~generation() {}
 
 ///@brief Construct : A method to construct the generation after its initial construction
 //----------------------------------------------------------------------
-void generation::construct(const int &n, const int &m, int &idnumber)
+void generation::construct(const int &n, const int &m, int &idnumber, const double &mlambda)
 //----------------------------------------------------------------------
 {
 	assert(n>0);
 
     for (int i=0; i<n; i++) {
-        pop.push_back(individual(m, idnumber));
+        pop.push_back(individual(m, idnumber, mlambda));
         idnumber++;
     }
 }
