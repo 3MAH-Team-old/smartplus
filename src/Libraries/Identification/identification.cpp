@@ -74,22 +74,16 @@ void run_identification_solver(const std::string &simul_type, const int &n_param
 
     //Define the parameters
     vector<parameters> params(n_param);  //vector of parameters
-    vector<constants> consts(n_consts);  //vector of parameters
+    vector<constants> consts(n_consts);  //vector of constants
     vec Dp = zeros(n_param);
     vec p = zeros(n_param);
-    //Read the parameters
-
+    
+    //Read the parameters and constants
     read_parameters(n_param, params);
     read_constants(n_consts, consts, nfiles);
     
     int idnumber=1;
     int id0=0;
-
-    //Define the necessary vectors to compute the constrain optimization
-    vec lambdaLMV = zeros(ngboys);
-    for(int i=0; i<ngboys; i++) {
-        lambdaLMV(i) = lambdaLM;
-    }
     
     //Get the experimental data file
     string data_exp_folder="exp_data";
@@ -148,11 +142,11 @@ void run_identification_solver(const std::string &simul_type, const int &n_param
     generation geninit;
     int g=0;
 
-    gen[g].construct(maxpop, n_param, id0);
+    gen[g].construct(maxpop, n_param, id0, lambdaLM);
     if(ngboys) {
-        gboys[g].construct(ngboys, n_param, id0);
+        gboys[g].construct(ngboys, n_param, id0, lambdaLM);
     }
-    gen_initialize(geninit, spop, apop, idnumber, aleaspace, n_param, params);
+    gen_initialize(geninit, spop, apop, idnumber, aleaspace, n_param, params, lambdaLM);
 
     
     string data_num_folder = "num_data";
@@ -237,11 +231,11 @@ void run_identification_solver(const std::string &simul_type, const int &n_param
             
             cost_gb_cost_n[i] = gen[g].pop[i].cout;
             
-            S = calc_sensi(gboys[g].pop[i], n_gboys, simul_type, nfiles, n_param, params, consts, vnum, data_num, data_exp, data_num_folder, data_num_name, path_data, path_keys, pb_col, sizev, Dp_gb_n[i]);
+            S = calc_sensi(gboys[g].pop[i], n_gboys, simul_type, nfiles, n_param, params, consts, vnum, data_num, data_exp, data_num_folder, data_num_name, path_data, path_keys, sizev, Dp_gb_n[i]);
             gboys[g].pop[i].cout = calcC(vexp, vnum, W);
             p = gboys[g].pop[i].p;
             ///Compute the parameters increment
-            Dp = calcDp(S, vexp, vnum, W, p, params, lambdaLMV(i), c, p0, n_param, pb_col);
+            Dp = calcDp(S, vexp, vnum, W, p, params, gboys[g].pop[i].lambda, c, p0, n_param, pb_col);
             p += Dp;
             
             Dp_gb_n[i] = Dp;
@@ -256,10 +250,14 @@ void run_identification_solver(const std::string &simul_type, const int &n_param
             
             if(gboys[g].pop[i].cout > cost_gb_cost_n[i]) {
                 bad_des = true;
-                lambdaLMV(i) *= 0.2;
+                gboys[g].pop[i].lambda *= 3;
                 gboys[g].pop[i].p = gen[g].pop[i].p;
                 gboys[g].pop[i].cout = cost_gb_cost_n[i];
             }
+            else if(gboys[g].pop[i].cout < cost_gb_cost_n[i]) {
+                gboys[g].pop[i].lambda *= 0.5;
+            }
+                
         }
         
         ///Find the bests
