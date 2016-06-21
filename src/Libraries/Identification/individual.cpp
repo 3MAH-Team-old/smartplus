@@ -37,10 +37,11 @@ namespace smart{
 individual::individual()
 //----------------------------------------------------------------------
 {
-	np=0;
+    np = 0;
 	cout = 0.;
 	id = 0;
 	rank=0;
+	lambda=0.;
 }
 
 /*!
@@ -51,10 +52,10 @@ individual::individual()
   \f$ \textbf{Examples :} \f$ \n
 */
 //-------------------------------------------------------------
-individual::individual(const int &n, const int &idnumber)
+individual::individual(const int &n, const int &idnumber, const double &nlambda)
 //-------------------------------------------------------------
 {
-	np=n;
+    np = n;
 	cout = 0.;
 	id = idnumber;
 	rank = 0;
@@ -62,7 +63,7 @@ individual::individual(const int &n, const int &idnumber)
     if (n>0) {
         p = zeros(n);
     }
-
+	lambda=nlambda;
 }
 
 /*!
@@ -73,11 +74,12 @@ individual::individual(const int &n, const int &idnumber)
 individual::individual(const individual& gp)
 //------------------------------------------------------
 {
-	np=gp.np;
+    np = gp.np;
 	cout=gp.cout;
 	id=gp.id;
 	rank=gp.rank;
 	p=gp.p;
+	lambda=gp.lambda;
 }
 
 /*!
@@ -106,6 +108,7 @@ individual& individual::operator = (const individual& gp)
     id=gp.id;
     rank=gp.rank;
     p=gp.p;
+	lambda=gp.lambda;
     
     return *this;
 }
@@ -123,7 +126,8 @@ ostream& operator << (ostream& s, const individual& gp)
 	s << "id = " << gp.id << "\n" ;
 	s << "rank = " << gp.rank << "\n" ;
 	s << "cost = " << gp.cout << "\n" ;
-	s << "p = " << gp.p << "\n" ;
+	s << "p = " << gp.p.t() << "\n" ;
+	s << "lambda = " << gp.lambda << "\n" ;
 
 	return s;
 }
