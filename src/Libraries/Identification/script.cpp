@@ -148,7 +148,7 @@ void launch_solver(const individual &ind, const int &nfiles, vector<parameters> 
 	string outputfile;
     string simulfile;
 	string pathfile;
-	string materialfile = "data/material.dat";
+    string materialfile = "data/material.dat";
     
     string name_ext = name.substr(name.length()-4,name.length());
     string name_root = name.substr(0,name.length()-4); //to remove the extension
@@ -244,7 +244,7 @@ double calc_cost(const vec &vexp, vec &vnum, const vec &W, const vector<opti_dat
     return calcC(vexp, vnum, W);
 }
      
-mat calc_sensi(const individual &gboy, generation &n_gboy, const string &simul_type, const int &nfiles, const int &n_param, vector<parameters> &params, vector<constants> &consts, vec &vnum0, vector<opti_data> &data_num, vector<opti_data> &data_exp, const string &folder, const string &name, const string &path_data, const string &path_keys, Col<int> &pb_col, const int &sizev, const vec &Dp_n) {
+mat calc_sensi(const individual &gboy, generation &n_gboy, const string &simul_type, const int &nfiles, const int &n_param, vector<parameters> &params, vector<constants> &consts, vec &vnum0, vector<opti_data> &data_num, vector<opti_data> &data_exp, const string &folder, const string &name, const string &path_data, const string &path_keys, const int &sizev, const vec &Dp_n) {
     
     //delta
     vec delta = 0.01*ones(n_param);
@@ -258,8 +258,8 @@ mat calc_sensi(const individual &gboy, generation &n_gboy, const string &simul_t
     for(int j=0; j<n_param; j++) {
         n_gboy.pop[j].p = gboy.p;
         if (fabs(Dp_n(j)) > 0.) {
-//            delta(j) *= Dp_n(j);
-            delta(j) *= (0.1*gboy.p(j));            
+            delta(j) *= Dp_n(j);
+//            delta(j) *= (0.1*gboy.p(j));
             n_gboy.pop[j].p(j) += delta(j);
         }
         else {
