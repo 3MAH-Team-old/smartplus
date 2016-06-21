@@ -52,10 +52,24 @@ ODF::ODF() : limits(2)
     Angle = 0;
     radian = false;
     n_densities = 0;
-    
     norm = 0.;
-    limits = zeros(2);
 }
+
+//-------------------------------------------------------------
+ODF::ODF(const int &npeaks, const int &nAngle, const bool &nradian) : limits(2)
+//-------------------------------------------------------------
+{
+    
+    Nphases = 0;
+    Angle = nAngle; //0 : Psi, 1: Theta, 2: Phi
+    radian = nradian;
+    for(int i=0; i<npeaks; i++) {
+        peaks.push_back(peak());
+    }
+    n_densities = 0;
+    norm = 0.;
+}
+    
     
 /*!
  \brief Constructor with parameters
@@ -112,6 +126,29 @@ ODF::~ODF() {}
 /*!
  \brief Standard operator = for ODF
  */
+
+//----------------------------------------------------------------------
+void ODF::construct(const int &npeaks)
+//----------------------------------------------------------------------
+{
+    for(int i=0; i<npeaks; i++) {
+        peaks.push_back(peak());
+    }
+
+}
+    
+//----------------------------------------------------------------------
+double ODF::density(const double &alpha)
+//----------------------------------------------------------------------
+{
+    double density = 0.;
+    
+    for(auto p : peaks) {
+        density += p.get_density(alpha);
+    }
+    return density;
+}
+    
     
 //----------------------------------------------------------------------
 ODF& ODF::operator = (const ODF& pc)
@@ -139,7 +176,12 @@ ostream& operator << (ostream& s, const ODF& pc)
     s << "Number of phases Nphases:\t" << pc.Nphases << "\n";
     s << "Angle:\t" << pc.Angle << "\n";
     s << "radian:\t" << pc.radian << "\n";
-    s << "n_densities:\t" << pc.n_densities << "\n";
+    
+    s << "peaks:\n";
+    for(auto p: pc.peaks) {
+        s << p << "\n";
+    }
+//    s << "n_densities:\t" << pc.n_densities << "\n";
     s << "norm:\t" << pc.norm << "\n";
     
     s << "\n\n";
