@@ -261,6 +261,25 @@ void read_data_num(const int &nfiles, const vector<opti_data> &data_exp, vector<
     }
     paraminit.close();
 }
+
+void ident_essentials(int &n_param, int &n_consts, int &n_files, const string &path, const string &filename) {
+
+    string pathfile = path + "/" + filename;
+    
+    ifstream paraminit;
+    string buffer;
+
+    paraminit.open(pathfile, ios::in);
+    if(!paraminit) {
+        cout << "Error: cannot open : " << filename << " in :" << path << endl;
+        return;
+    }
+        
+    ///Get the control values for the genetic algorithm
+    paraminit >> buffer >> n_param;
+    paraminit >> buffer >> n_consts;
+    paraminit >> buffer >> n_files;
+}
     
 void ident_control(int &n_param, int &n_consts, int &n_files, int &ngen, int &aleaspace, int &apop, int &spop, int &ngboys, int &maxpop, double &probaMut, double &pertu, double &c, double &p0, double &lambdaLM) {
     
@@ -270,7 +289,7 @@ void ident_control(int &n_param, int &n_consts, int &n_files, int &ngen, int &al
     paraminit.open("data/ident_control.inp", ios::in);
     if(!paraminit) {
         cout << "Error: cannot open ident_control.inp file\n";
-        exit(0);
+        return;
     }
     
     ///Get the control values for the genetic algorithm
