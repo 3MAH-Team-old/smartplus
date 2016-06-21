@@ -37,23 +37,23 @@ class peak
 
 	public :
 
+        int number;
         int method;
 		double mean;
 		double s_dev;
 		double width;
         double ampl;
-        arma::vec param; //Potential additional parameters
+        arma::vec params; //Potential additional parameters
         arma::vec densities; //density
     
 		peak(); 	//default constructor
     
-        peak(const int &, const double &, const double &, const double &, const double &, const arma::vec &, const arma::vec &);
+        peak(const int &, const int &, const double &, const double &, const double &, const double &, const arma::vec &, const arma::vec &);
 
 		peak(const peak&);	//Copy constructor
         virtual ~peak();
 
-        virtual void construct(const double &, const double &, const double &, const double &, const double &, const bool &);
-        virtual double get_density(const double &, const double &);
+        virtual double get_density(const double &);
     
 		virtual peak& operator = (const peak&);
     
