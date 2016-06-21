@@ -52,99 +52,70 @@ int tri_sum(const int &a, const int &b) {
     return b*(2*a+(b-1))/2;
 }
 
-///1. Classic ODF: a1 * cos(Theta)^(2*p1) + a2 * cos(Theta)^(2*p2 + 1) * sin(Theta)^(2*p2) 
-double ODF_sd(const double& Theta, const double& m, const double& alpha1, const double& alpha2, const double& pow1, const double& pow2){
+///1. Classic ODF: a1 * cos(Theta)^(2*p1) + a2 * cos(Theta)^(2*p2 + 1) * sin(Theta)^(2*p2)
+    
+double ODF_sd(const double &Theta, const double &mean, const vec &params) {
 	  
-	if (fabs(Theta - m) < 1.E-6)
+    double alpha1 = params(0);
+    double alpha2 = params(1);
+    double pow1 = params(2);
+    double pow2 = params(3);
+    
+	if (fabs(Theta - mean) < 1.E-6)
 		return alpha1;  
-	else if (fabs((Theta - m)-0.5*pi) < 1.E-6)
+	else if (fabs((Theta - mean)-0.5*pi) < 1.E-6)
 		return 0.;
 	else
-		return fabs((alpha1*pow(cos(Theta - m),2.*pow1) + alpha2*pow(cos(Theta - m),2.*pow2)*pow(sin(Theta - m),2.*pow2))*cos(Theta - m));
+		return fabs((alpha1*pow(cos(Theta - mean),2.*pow1) + alpha2*pow(cos(Theta - mean),2.*pow2)*pow(sin(Theta - mean),2.*pow2))*cos(Theta - mean));
 }
 
 ///2. Classic ODF - hardening-like
-double ODF_hard(const double& Theta, const double& m, const double& k, const double& stdev) {
-    assert(k>0);
-    assert(stdev>0);
+double ODF_hard(const double &Theta, const double &mean, const double &std_dev, const double &ampl) {
+
+    assert(ampl>0);
+    assert(std_dev>0);
 	  
-	return k*exp(-0.5*pow(fabs(Theta - m)/stdev,2.));
+	return ampl*exp(-0.5*pow(fabs(Theta - mean)/std_dev,2.));
 }
 
 ///3. Gaussian
-double Gaussian(const double& X, const double& mean, const double& sd, const double& ampl){
-    assert(sd>0);
-	
-	return ampl/(sd * sqrt(2.*pi)) * exp(-1./2. * pow((X - mean)/sd, 2.));
-}
+double Gaussian(const double &X, const double &mean, const double &std_dev, const double &ampl){
 
-///30. Several Gaussian
-double Mult_Gaussian(const double& X, const int& Nb_peak, const vec& Mean, const vec& SD, const vec& Ampl){
-	double result = 0.;
+    assert(std_dev>0);
 	
-	for (int i = 0; i < Nb_peak; i++) {
-		assert(SD(i)>0);
-		result += Gaussian(X, Mean(i), SD(i), Ampl(i));
-	}
-	
-	return result;
+	return ampl/(std_dev * sqrt(2.*pi)) * exp(-1./2. * pow((X - mean)/std_dev, 2.));
 }
 
 ///4. Lorentzian
-double Lorentzian(const double& X, const double& mean, const double& width, const double& ampl){
+double Lorentzian(const double &X, const double &mean, const double &width, const double &ampl){
+
     assert(width>0);
-	
+    
 	return ampl * width/(2.*pi*(pow(X - mean, 2.)+ pow(width / 2., 2.)));
 }
 
-
-///40. Several Lorentzian
-double Mult_Lorentzian(const double& X, const int& Nb_peak, const vec& Mean, const vec& Width, const vec& Ampl){
-	double result = 0.;
-	
-	for (int i = 0; i < Nb_peak; i++) {
-		assert(Width(i)>0);
-		result += Lorentzian(X, Mean(i), Width(i), Ampl(i));
-	}
-	return result;
-}
-
 ///5. Pseudo-Voigt
-double PseudoVoigt(const double& X, const double& eta, const double& mean, const double &width_Lor, const double& sd_Gau, const double& ampl){
-    assert(width_Lor>0);
-    assert(sd_Gau>0);
+double PseudoVoigt(const double &X, const double &mean, const double &std_dev, const double &width_lor, const double &ampl, const vec &params){
+    
+    double eta = params(0);
+    
+    assert(width_lor>0);
+    assert(std_dev>0);
 	  
-	return eta * Lorentzian(X, mean, width_Lor, ampl) + (1.-eta) * Gaussian(X, mean, sd_Gau, ampl);
-}
-
-///50. Several Pseudo-Voigt
-double Mult_PseudoVoigt(const double& X, const int& Nb_peak, const vec& Eta, const vec& Mean, const vec &Width_Lor, const vec& SD_Gau, const vec& Ampl){
-	double result = 0.;
-	  
-	for (int i = 0; i < Nb_peak; i++) {
-		assert(Width_Lor(i)>0);
-		assert(SD_Gau(i)>0);
-		result += PseudoVoigt(X, Eta(i), Mean(i), Width_Lor(i), SD_Gau(i), Ampl(i));
-	}
-	return result;
+	return eta * Lorentzian(X, mean, width_lor, ampl) + (1.-eta) * Gaussian(X, mean, std_dev, ampl);
 }
 
 ///6. Pearson VII
-double Pearson7(const double& X, const double& mean, const double &inv_width, const double& shape, const double& max){
-	assert(shape>0);
-	      	
+double Pearson7(const double& X, const double& mean, const double &inv_width, vec &params){
+	
+    double shape = params(0);
+    double max = params(1);
+    assert(shape>0);
+    if (fabs(max) < limit) {
+        max = 1.;
+    }
+    
 	return max * pow(1. + pow(inv_width*(X - mean), 2.)/shape, -1.*shape);
-}
-
-///60. Several Pearson VII
-double Mult_Pearson7(const double& X, const int& Nb_peak, const vec& Mean, const vec &Inv_Width, const vec& Shape, const vec& Max){
-	double result = 0.;
-	  	
-	for (int i = 0; i < Nb_peak; i++) {
-		assert(Shape(i)>0);
-		result += Pearson7(X, Mean(i), Inv_Width(i), Shape(i), Max(i));
-	}
-	return result;
 }
 
 } //namespace smart
