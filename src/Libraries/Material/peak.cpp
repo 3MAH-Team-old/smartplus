@@ -46,6 +46,7 @@ namespace smart{
 peak::peak()
 //-------------------------------------------------------------
 {
+    number = 0;
     method = 0;
     mean = 0.;
     s_dev = 0.;
@@ -53,21 +54,22 @@ peak::peak()
     ampl = 0.;
 }
     
-    /*!
-     \brief Constructor with parameters
-     \f$ \textbf{Examples :} \f$ \n
-     */
+/*!
+ \brief Constructor with parameters
+ \f$ \textbf{Examples :} \f$ \n
+ */
     
 //-------------------------------------------------------------
-peak::peak(const int &mmethod, const double &mmean, const double &ms_dev, const double &mwidth, const double &mampl, const vec &mparam, const vec &mdensities)
+peak::peak(const int &mnumber, const int &mmethod, const double &mmean, const double &ms_dev, const double &mwidth, const double &mampl, const vec &mparams, const vec &mdensities)
 //-------------------------------------------------------------
 {
+    number = mnumber;
     method = mmethod;
     mean = mmean;
     s_dev = ms_dev;
     width = mwidth;
     ampl = mampl;
-    param = mparam;
+    params = mparams;
     densities = mdensities;
 }
     
@@ -80,12 +82,13 @@ peak::peak(const int &mmethod, const double &mmean, const double &ms_dev, const 
 peak::peak(const peak &pc)
 //------------------------------------------------------
 {
+    number = pc.number;
     method = pc.method;
     mean = pc.mean;
     s_dev = pc.s_dev;
     width = pc.width;
     ampl = pc.ampl;
-    param = pc.param;
+    params = pc.params;
     densities = pc.densities;
 }
 
@@ -102,74 +105,62 @@ peak::~peak() {}
 /*!
  \brief Standard operator = for peak
  */
-
-//-------------------------------------------------------------
-void peak::construct(const double &mmean, const double &ms_dev, const double &mwidth, const double &mampl, const double &ampl_limit, const bool &radian)
-//-------------------------------------------------------------
-{
-
-    if (radian) {
-        mean = mmean;
-        s_dev = ms_dev;
-        width = mwidth;
-    }
-    else {
-        mean = mmean*pi/180.;
-        s_dev = ms_dev*pi/180.;
-        width = mwidth*pi/180.;
-    }
-    ampl = mampl;
-    if (fabs(ampl) < ampl_limit) {
-        ampl = 1.;
-    }
-}
     
 //-------------------------------------------------------------
-double peak::get_density(const double &theta, const double &ampl_limit)
+double peak::get_density(const double &theta)
 //-------------------------------------------------------------
 {
     
-/*    switch (method) {
+    switch (method) {
         case 1: {
-            return ODF_sd(theta, mean, param);
+            return ODF_sd(theta, mean, params);
+            break;
         }
         case 2: {
-            return ODF_hard(theta, mean, s_dev, param) + ODF_hard(theta - pi, mean, s_dev, param) + ODF_hard(theta + pi, mean, s_dev, param);
+            return ODF_hard(theta, mean, s_dev, ampl) + ODF_hard(theta - pi, mean, s_dev, ampl) + ODF_hard(theta + pi, mean, s_dev, ampl);
+            break;
         }
         case 3: {
             return Gaussian(theta, mean, s_dev, ampl) + Gaussian(theta - pi, mean, s_dev, ampl) + Gaussian(theta + pi, mean, s_dev, ampl);
+            break;
         }
         case 4: {
             return Lorentzian(theta, mean, width, ampl) + Lorentzian(theta - pi, mean, width, ampl) + Lorentzian(theta + pi, mean, width, ampl);
+            break;
         }
         case 5: {
-            return PseudoVoigt(theta, param(0), mean, width, s_dev, ampl) + PseudoVoigt(theta - pi, param(0), mean, width, s_dev, ampl) + PseudoVoigt(theta + pi, param(0), mean, width, s_dev, ampl);
+            return PseudoVoigt(theta, mean, s_dev, width, ampl, params) + PseudoVoigt(theta - pi, mean, s_dev, width, ampl, params) + PseudoVoigt(theta + pi, mean, s_dev, width, ampl, params);
+            break;
         }
         case 6: {
-            assert(Width > 0.);
+            assert(width > 0.);
             double inv_width = 1./width;
-            double max = param(1);
-            if (fabs(max) < ampl_limit) {
-                max = 1.;
-            }
-            return Pearson7(theta, mean, inv_width, param(0), max) + Pearson7(theta - pi, mean, inv_width, param(0), max) + Pearson7(theta + pi, mean, inv_width, param(0), max);
+            return Pearson7(theta, mean, inv_width, params) + Pearson7(theta - pi, mean, inv_width, params) + Pearson7(theta + pi, mean, inv_width, params);
+            break;
         }
         case 7: {
             return 1.;
+            break;
         }
-    }*/
+        default : {
+            cout << "Error: The peak type specified is not recognized" << endl;
+            return 0;
+            break;            
+        }
+    }
 }
     
 //----------------------------------------------------------------------
 peak& peak::operator = (const peak& pc)
 //----------------------------------------------------------------------
 {
+    number = pc.number;
     method = pc.method;
     mean = pc.mean;
     s_dev = pc.s_dev;
     width = pc.width;
     ampl = pc.ampl;
-    param = pc.param;
+    params = pc.params;
     densities = pc.densities;
     
     return *this;
@@ -181,10 +172,12 @@ ostream& operator << (ostream& s, const peak& pc)
 //--------------------------------------------------------------------------
 {
     s << "Display peak characteristics:\n";
+    s << "number: \t" << pc.number << "\n";
     s << "method: \t" << pc.method << "\n";
     s << "mean = \t" << pc.mean << "\n";
     s << "standard deviation = \t" << pc.s_dev << "\n";
     s << "width = \t" << pc.width << "\n";
+    s << "params = \t" << pc.params.t() << "\n";
     
     s << "\n\n";
     
