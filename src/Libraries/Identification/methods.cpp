@@ -46,8 +46,8 @@ void genetic(generation &gen_g, generation &gensons, int &idnumber, const double
     int maxpop = gensons.size();
     
     //Generate two genitoers
-	individual dad(n_param, 0);
-	individual mom(n_param, 0);
+	individual dad(n_param, 0, 0.);
+	individual mom(n_param, 0, 0.);
 
     int chromosome = 0;
     //Very small pertubation
@@ -99,10 +99,10 @@ void find_best(generation &gen_cur, generation &gboys_cur, const generation &gen
         genall.classify();
     }
 
-    gen_cur.construct(maxpop, n_param, id0);
+    gen_cur.construct(maxpop, n_param, id0, 0.);
     
     if(gboys_old.size()) {
-        gboys_cur.construct(gboys_old.size(), n_param, id0);
+        gboys_cur.construct(gboys_old.size(), n_param, id0, 0.);
     }
     
     for(int i=0; i<maxpop; i++) {
