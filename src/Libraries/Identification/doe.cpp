@@ -122,13 +122,13 @@ mat doe_random(const int &n_samples, const int &n_param, const vector<parameters
     return doe;
 }
     
-void gen_initialize(generation &geninit, int &spop, int &apop, int &idnumber, const int &aleaspace, const int &n_param, const vector<parameters> &params) {
+void gen_initialize(generation &geninit, int &spop, int &apop, int &idnumber, const int &aleaspace, const int &n_param, const vector<parameters> &params, const double &lambda) {
     
     if(aleaspace==0) {
         
         ///Populate the space with equidistant values. First generation
         int geninit_nindividuals = (int)pow(spop,n_param);
-        geninit.construct(geninit_nindividuals, n_param, idnumber);
+        geninit.construct(geninit_nindividuals, n_param, idnumber, lambda);
         
         ///Determination of parameters_equally_spaced
         mat samples = doe_uniform(spop, n_param, params);
@@ -144,7 +144,7 @@ void gen_initialize(generation &geninit, int &spop, int &apop, int &idnumber, co
         
         ///Populate the space with equidistant values. First generation
         int geninit_nindividuals = (int)pow(spop,n_param);
-        geninit.construct(geninit_nindividuals, n_param, idnumber);
+        geninit.construct(geninit_nindividuals, n_param, idnumber, lambda);
         
         ///Determination of parameters_equally_spaced
         mat samples = doe_uniform_limit(spop, n_param, params);
@@ -158,7 +158,7 @@ void gen_initialize(generation &geninit, int &spop, int &apop, int &idnumber, co
     else if(aleaspace==2) {
         
         int geninit_nindividuals=apop;
-        geninit.construct(geninit_nindividuals, n_param, idnumber);
+        geninit.construct(geninit_nindividuals, n_param, idnumber, lambda);
                 
         ///Determination of random values
         ///Determination of parameters_equally_spaced
@@ -175,7 +175,7 @@ void gen_initialize(generation &geninit, int &spop, int &apop, int &idnumber, co
         mat samples;
         read_gen(apop, samples, n_param);
         int geninit_nindividuals=apop;
-        geninit.construct(geninit_nindividuals, n_param, idnumber);
+        geninit.construct(geninit_nindividuals, n_param, idnumber, lambda);
         
         for(int j=0; j<n_param; j++) {
             for(int i=0; i<geninit.size(); i++) {
