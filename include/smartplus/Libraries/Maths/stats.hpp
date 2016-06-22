@@ -32,7 +32,7 @@ double normal_distrib(const double &, const double &, const double &);
 int tri_sum(const int &, const int &);
 
 ///1. Classic ODF: a1 * cos(Theta)^(2*p1) + a2 * cos(Theta)^(2*p2 + 1) * sin(Theta)^(2*p2) 
-double ODF_sd(const double &, const double &, const double &, const double &, const double &, const double &);
+double ODF_sd(const double &, const double &, const arma::vec &);
 
 ///2. Classic ODF - hardening-like
 double ODF_hard(const double &, const double &, const double &, const double &);
@@ -40,25 +40,13 @@ double ODF_hard(const double &, const double &, const double &, const double &);
 ///3. Gaussian
 double Gaussian(const double &, const double &, const double &, const double & = 1.);
 
-///30. Several Gaussian
-double Mult_Gaussian(const double &, const int &, const arma::vec &, const arma::vec &, const arma::vec &);
-
 ///4. Lorentzian
 double Lorentzian(const double &, const double &, const double &, const double & = 1.);
 
-///40. Several Lorentzian
-double Mult_Lorentzian(const double &, const int &, const arma::vec &, const arma::vec &, const arma::vec &);
-
 ///5. Pseudo-Voigt
-double PseudoVoigt(const double &, const double &, const double &, const double &, const double &, const double & = 1.);
-
-///50. Several Pseudo-Voigt
-double Mult_PseudoVoigt(const double &, const int &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &);
+double PseudoVoigt(const double &, const double &, const double &, const double &, const double &, const arma::vec & = arma::ones(1));
 
 ///6. Pearson VII
-double Pearson7(const double &, const double &, const double &, const double &, const double & = 1.);
-
-///60. Several Pearson VII
-double Mult_Pearson7(const double &, const int &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &);
+double Pearson7(const double &, const double &, const double &, arma::vec &);
 
 } //namespace smart
