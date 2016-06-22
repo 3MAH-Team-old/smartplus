@@ -259,7 +259,7 @@ void read_ellipsoid(phase_characteristics &rve, const int &filenumber) {
 void read_cylinder(phase_characteristics &rve, const int &filenumber) {
     unsigned int nphases = 0;
     std::string buffer;
-    std::string filename = "data/Ncylinder" + std::to_string(filenumber) + ".dat";
+    std::string filename = "data/Ncylinders" + std::to_string(filenumber) + ".dat";
     std::ifstream paramphases;
     std::shared_ptr<cylinder> sptr_cylinder;
     
