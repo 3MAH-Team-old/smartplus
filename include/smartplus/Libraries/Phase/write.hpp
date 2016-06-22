@@ -27,15 +27,15 @@
 namespace smart{
     
 /// Function that reads the output parameters
-void write_phase(phase_characteristics &, const int &);
+void write_phase(phase_characteristics &, const std::string & = "data", const std::string & = "Nphases1.dat");
 
 /// Function that reads the output parameters
-void write_layer(phase_characteristics &, const int &);
+void write_layer(phase_characteristics &, const std::string & = "data", const std::string & = "Nlayers1.dat");
     
 /// Function that checks the coherency between the path and the step increments provided
-void write_ellipsoid(phase_characteristics &, const int &);
+void write_ellipsoid(phase_characteristics &, const std::string & = "data", const std::string & = "Nellipsoids1.dat");
 
 /// Function that checks the coherency between the path and the step increments provided
-void write_cylinder(phase_characteristics &, const int &);
+void write_cylinder(phase_characteristics &, const std::string & = "data", const std::string & = "Ncylinders1.dat");
 
 } //namespace smart
