@@ -53,7 +53,8 @@ void umat_multi(phase_characteristics &phase, const mat &DR, const double &Time,
 {
 
     int nphases = phase.sptr_matprops->props(0); // Number of phases
-    int filenumber = phase.sptr_matprops->props(1); //file # that stores the microstructure properties
+    string path_data = "data";
+    string inputfile; //file # that stores the microstructure properties
     
     shared_ptr<state_variables_M> umat_phase_M = std::dynamic_pointer_cast<state_variables_M>(phase.sptr_sv_local); //shared_ptr on state variables of the rve
     shared_ptr<state_variables_M> umat_sub_phases_M; //shared_ptr on state variables
@@ -72,11 +73,13 @@ void umat_multi(phase_characteristics &phase, const mat &DR, const double &Time,
                 ellipsoid_multi::wy.set_size(ellipsoid_multi::np);
                 points(ellipsoid_multi::x, ellipsoid_multi::wx, ellipsoid_multi::y, ellipsoid_multi::wy,ellipsoid_multi::mp, ellipsoid_multi::np);
                 
-                read_ellipsoid(phase, filenumber);
+                inputfile = "Nellipsoids" + to_string(int(phase.sptr_matprops->props(1))) + ".dat";
+                read_ellipsoid(phase, path_data, inputfile);
                 break;
             }
             case 104: {
-                read_layer(phase, filenumber);
+                inputfile = "Nlayers" + to_string(int(phase.sptr_matprops->props(1))) + ".dat";
+                read_layer(phase, path_data, inputfile);
                 break;
             }
         }
@@ -87,6 +90,7 @@ void umat_multi(phase_characteristics &phase, const mat &DR, const double &Time,
         
         for (int i=0; i<nphases; i++) {
             //Run the appropriate constitutive model
+            
             select_umat_M(phase.sub_phases[i], DR, Time, DTime, ndi, nshr, start, tnew_dt);
         }
     }
