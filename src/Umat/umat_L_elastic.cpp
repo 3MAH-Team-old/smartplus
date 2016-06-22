@@ -43,6 +43,9 @@ namespace smart{
     
 void get_L_elastic(phase_characteristics &rve)
 {
+    string path_data = "data";
+    string inputfile; //file # that stores the microstructure properties
+    
     std::map<string, int> list_umat;
     list_umat = {{"ELISO",1},{"ELIST",2},{"ELORT",3},{"MIHEN",100},{"MIMTN",101},{"MISCN",102},{"MIPCW",103},{"MIPLN",104}};
     
@@ -60,6 +63,15 @@ void get_L_elastic(phase_characteristics &rve)
             ellipsoid_multi::y.set_size(ellipsoid_multi::np);
             ellipsoid_multi::wy.set_size(ellipsoid_multi::np);
             points(ellipsoid_multi::x, ellipsoid_multi::wx, ellipsoid_multi::y, ellipsoid_multi::wy,ellipsoid_multi::mp, ellipsoid_multi::np);
+            
+            inputfile = "Nellipsoids" + to_string(int(rve.sptr_matprops->props(1))) + ".dat";
+            read_ellipsoid(rve, path_data, inputfile);
+            break;
+        }
+        case 104: {
+            inputfile = "Nlayers" + to_string(int(rve.sptr_matprops->props(1))) + ".dat";
+            read_layer(rve, path_data, inputfile);
+            break;
         }
     }
     
@@ -102,8 +114,8 @@ void get_L_elastic(phase_characteristics &rve)
             break;
         }
         case 100: {
-            read_ellipsoid(rve, rve.sptr_matprops->props(1));
-            for (auto r : rve.sub_phases) {
+            
+             for (auto r : rve.sub_phases) {
 
                 get_L_elastic(r);
             }
@@ -111,7 +123,6 @@ void get_L_elastic(phase_characteristics &rve)
             break;
         }
         case 101: {
-            read_ellipsoid(rve, rve.sptr_matprops->props(1));
             for (auto r : rve.sub_phases) {
                 get_L_elastic(r);
                 
@@ -120,7 +131,6 @@ void get_L_elastic(phase_characteristics &rve)
             break;
         }
         case 102: {
-            read_ellipsoid(rve, rve.sptr_matprops->props(1));
             for (auto r : rve.sub_phases) {
                 get_L_elastic(r);
                 
@@ -129,7 +139,6 @@ void get_L_elastic(phase_characteristics &rve)
             break;
         }
         case 104: {
-            read_ellipsoid(rve, rve.sptr_matprops->props(1));
             for (auto r : rve.sub_phases) {
                 get_L_elastic(r);
             }
