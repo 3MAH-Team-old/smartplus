@@ -47,10 +47,10 @@ int main() {
     phase_characteristics rve_init;
     phase_characteristics rve;
     
-    string umat_name;
-    int nprops = 0;
-    int nstatev = 0;
-    vec props;
+    string umat_name = "MIPLN";
+//    int nprops = 0;
+//    int nstatev = 0;
+    vec props = {2,0};
     
     double rho = 0.;
     double c_p = 0.;
@@ -62,8 +62,9 @@ int main() {
     rve_init.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props, rho, c_p);
     rve.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props, rho, c_p);
     
-//    int nphases_rve_init = rve_init.sptr_matprops->props(0); // Number of phases
-    int filenumber = rve_init.sptr_matprops->props(1); //file # that stores the microstructure properties
+    string path_data = "data";
+    string inputfile;
+    string outputfile;
     
     std::map<string, int> list_umat;
     list_umat = {{"MIHEN",100},{"MIMTN",101},{"MISCN",102},{"MIPCW",103},{"MIPLN",104}};
@@ -73,7 +74,9 @@ int main() {
             
         case 100: case 101: case 102: case 103: {
             rve_init.construct(2,1); //The rve is supposed to be mechanical only here
-            read_ellipsoid(rve_init, filenumber);
+            
+            inputfile = "Nellipsoids" + to_string(rve_init.sptr_matprops->props(1)) + ".dat";
+            read_ellipsoid(rve_init, path_data, inputfile);
             
             rve.construct(2,1); //The rve is supposed to be mechanical only here
             rve.sub_phases_construct(nphases_rve,2,1);
@@ -81,7 +84,9 @@ int main() {
         }
         case 104: {
             rve_init.construct(1,1); //The rve is supposed to be mechanical only here
-            read_layer(rve_init, filenumber);
+
+            inputfile = "Nlayers" + to_string(rve_init.sptr_matprops->props(1)) + ".dat";
+            read_ellipsoid(rve_init, path_data, inputfile);
             
             rve.construct(1,1); //The rve is supposed to be mechanical only here
             rve.sub_phases_construct(nphases_rve,1,1);
@@ -97,12 +102,20 @@ int main() {
     read_peak(odf_rve, 0);
     
     cout << odf_rve;
+
+    cout << "rve.shape_type" << rve.shape_type << endl;
     
-    if(rve.shape_type == 1)
-        write_layer(rve_init, 1);
-    
-    else if(rve.shape_type == 2)
-        write_ellipsoid(rve_init, 1);
+    if(rve.shape_type == 1) {
+        outputfile = "Nlayers1.dat";
+        write_layer(rve, path_data, outputfile);
+        cout << "Nlayers1" << endl;
+    }
+    else if(rve.shape_type == 2) {
+        outputfile = "Nellipsopids1.dat";
+        write_layer(rve, path_data, outputfile);
+        cout << "Nlayers1" << endl;
+    }
+
     
     
 	return 0;
