@@ -31,19 +31,20 @@
 #include <smartplus/Libraries/Phase/material_characteristics.hpp>
 #include <smartplus/Libraries/Phase/phase_characteristics.hpp>
 
+using namespace std;
 using namespace arma;
 
 namespace smart{
 
-void read_phase(phase_characteristics &rve, const int &filenumber) {
+void read_phase(phase_characteristics &rve, const string &path_data, const string &inputfile) {
     
     unsigned int nphases = 0;
     std::string buffer;
-    std::string filename = "data/Nphases" + std::to_string(filenumber) + ".dat";
+    std::string path_inputfile = path_data + "/" + inputfile;
     std::ifstream paramphases;
 //    std::shared_ptr<phase> sptr_phase;
     
-    paramphases.open(filename, ios::in);
+    paramphases.open(path_inputfile, ios::in);
     if(paramphases) {
         while (!paramphases.eof())
         {
@@ -54,8 +55,8 @@ void read_phase(phase_characteristics &rve, const int &filenumber) {
         }
     }
     else {
-        cout << "Error: cannot open the file " << filename << " that details the phase characteristics\n";
-        exit(0);
+        cout << "Error: cannot open the file " << inputfile << " that details the phase characteristics in the folder :" << path_data << endl;
+        return;
     }
     paramphases.close();
     nphases--;
@@ -68,7 +69,7 @@ void read_phase(phase_characteristics &rve, const int &filenumber) {
     int nprops = 0;
     int nstatev = 0;
     
-    paramphases.open(filename, ios::in);
+    paramphases.open(path_inputfile, ios::in);
     paramphases >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer;
     
     for(auto r : rve.sub_phases) {
@@ -83,7 +84,7 @@ void read_phase(phase_characteristics &rve, const int &filenumber) {
     }
     paramphases.close();
     
-    paramphases.open(filename, ios::in);
+    paramphases.open(path_inputfile, ios::in);
     paramphases >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer;
     
     for(auto r : rve.sub_phases) {
@@ -102,15 +103,15 @@ void read_phase(phase_characteristics &rve, const int &filenumber) {
     paramphases.close();
 }
 
-void read_layer(phase_characteristics &rve, const int &filenumber) {
+void read_layer(phase_characteristics &rve, const string &path_data, const string &inputfile) {
     
     unsigned int nphases = 0;
     std::string buffer;
-    std::string filename = "data/Nlayers" + std::to_string(filenumber) + ".dat";
+    std::string path_inputfile = path_data + "/" + inputfile;
     std::ifstream paramphases;
     std::shared_ptr<layer> sptr_layer;
     
-    paramphases.open(filename, ios::in);
+    paramphases.open(path_inputfile, ios::in);
     if(paramphases) {
         while (!paramphases.eof())
         {
@@ -121,8 +122,8 @@ void read_layer(phase_characteristics &rve, const int &filenumber) {
         }
     }
     else {
-        cout << "Error: cannot open the file " << filename << " that details the phase characteristics\n";
-        exit(0);
+        cout << "Error: cannot open the file " << inputfile << " that details the layer characteristics in the folder :" << path_data << endl;
+        return;
     }
     paramphases.close();
     nphases--;
@@ -135,7 +136,7 @@ void read_layer(phase_characteristics &rve, const int &filenumber) {
     int nprops = 0;
     int nstatev = 0;
     
-    paramphases.open(filename, ios::in);
+    paramphases.open(path_inputfile, ios::in);
     paramphases >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer;
     
     for(auto r : rve.sub_phases) {
@@ -150,7 +151,7 @@ void read_layer(phase_characteristics &rve, const int &filenumber) {
     }
     paramphases.close();
     
-    paramphases.open(filename, ios::in);
+    paramphases.open(path_inputfile, ios::in);
     paramphases >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer;
     
     for(auto r : rve.sub_phases) {
@@ -174,15 +175,15 @@ void read_layer(phase_characteristics &rve, const int &filenumber) {
     paramphases.close();
 }
     
-void read_ellipsoid(phase_characteristics &rve, const int &filenumber) {
+void read_ellipsoid(phase_characteristics &rve, const string &path_data, const string &inputfile) {
     
     unsigned int nphases = 0;
     std::string buffer;
-    std::string filename = "data/Nellipsoids" + std::to_string(filenumber) + ".dat";
+    std::string path_inputfile = path_data + "/" + inputfile;
     std::ifstream paramphases;
     std::shared_ptr<ellipsoid> sptr_ellipsoid;
     
-    paramphases.open(filename, ios::in);
+    paramphases.open(path_inputfile, ios::in);
     if(paramphases) {
         while (!paramphases.eof())
         {
@@ -193,8 +194,8 @@ void read_ellipsoid(phase_characteristics &rve, const int &filenumber) {
         }
     }
     else {
-        cout << "Error: cannot open the file " << filename << " that details the phase characteristics\n";
-        exit(0);
+        cout << "Error: cannot open the file " << inputfile << " that details the elipsoid characteristics in the folder :" << path_data << endl;
+        return;
     }
     paramphases.close();
     nphases--;
@@ -207,7 +208,7 @@ void read_ellipsoid(phase_characteristics &rve, const int &filenumber) {
     int nprops = 0;
     int nstatev = 0;
     
-    paramphases.open(filename, ios::in);
+    paramphases.open(path_inputfile, ios::in);
     paramphases >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer;
     
     for(auto r : rve.sub_phases) {
@@ -222,7 +223,7 @@ void read_ellipsoid(phase_characteristics &rve, const int &filenumber) {
     }
     paramphases.close();
     
-    paramphases.open(filename, ios::in);
+    paramphases.open(path_inputfile, ios::in);
     paramphases >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer;
     
     for(auto r : rve.sub_phases) {
@@ -256,14 +257,14 @@ void read_ellipsoid(phase_characteristics &rve, const int &filenumber) {
 }
 
     
-void read_cylinder(phase_characteristics &rve, const int &filenumber) {
+void read_cylinder(phase_characteristics &rve, const string &path_data, const string &inputfile) {
     unsigned int nphases = 0;
     std::string buffer;
-    std::string filename = "data/Ncylinders" + std::to_string(filenumber) + ".dat";
+    std::string path_inputfile = path_data + "/" + inputfile;
     std::ifstream paramphases;
     std::shared_ptr<cylinder> sptr_cylinder;
     
-    paramphases.open(filename, ios::in);
+    paramphases.open(path_inputfile, ios::in);
     if(paramphases) {
         while (!paramphases.eof())
         {
@@ -274,8 +275,8 @@ void read_cylinder(phase_characteristics &rve, const int &filenumber) {
         }
     }
     else {
-        cout << "Error: cannot open the file " << filename << " that details the phase characteristics\n";
-        exit(0);
+        cout << "Error: cannot open the file " << inputfile << " that details the cylinder characteristics in the folder :" << path_data << endl;
+        return;
     }
     paramphases.close();
     nphases--;
@@ -288,7 +289,7 @@ void read_cylinder(phase_characteristics &rve, const int &filenumber) {
     int nprops = 0;
     int nstatev = 0;
     
-    paramphases.open(filename, ios::in);
+    paramphases.open(path_inputfile, ios::in);
     paramphases >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer  >> buffer >> buffer;
     
     for(auto r : rve.sub_phases) {
@@ -303,7 +304,7 @@ void read_cylinder(phase_characteristics &rve, const int &filenumber) {
     }
     paramphases.close();
     
-    paramphases.open(filename, ios::in);
+    paramphases.open(path_inputfile, ios::in);
     paramphases >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer;
     
     std::shared_ptr<material_characteristics> sptr_matprops1;
