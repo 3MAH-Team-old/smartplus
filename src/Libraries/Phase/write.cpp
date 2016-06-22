@@ -31,14 +31,15 @@
 #include <smartplus/Libraries/Phase/material_characteristics.hpp>
 #include <smartplus/Libraries/Phase/phase_characteristics.hpp>
 
+using namespace std;
 using namespace arma;
 
 namespace smart{
 
-void write_phase(phase_characteristics &rve, const int &filenumber) {
+void write_phase(phase_characteristics &rve, const string &path_data, const string &inputfile) {
     
     std::string buffer;
-    std::string filename = "data/Nphases" + std::to_string(filenumber) + ".dat";
+    std::string filename = path_data + "/" + inputfile;
     std::ofstream paramphases;
     
     paramphases.open(filename, ios::out);
@@ -61,10 +62,10 @@ void write_phase(phase_characteristics &rve, const int &filenumber) {
     paramphases.close();
 }
     
-void write_layer(phase_characteristics &rve, const int &filenumber) {
+void write_layer(phase_characteristics &rve, const string &path_data, const string &inputfile) {
     
     std::string buffer;
-    std::string filename = "data/Nlayers" + std::to_string(filenumber) + ".dat";
+    std::string filename = path_data + "/" + inputfile;
     std::ofstream paramphases;
     
     paramphases.open(filename, ios::out);
@@ -93,10 +94,10 @@ void write_layer(phase_characteristics &rve, const int &filenumber) {
     paramphases.close();
 }
 
-void write_ellipsoid(phase_characteristics &rve, const int &filenumber) {
+void write_ellipsoid(phase_characteristics &rve, const string &path_data, const string &inputfile) {
     
     std::string buffer;
-    std::string filename = "data/Nellipsoids" + std::to_string(filenumber) + ".dat";
+    std::string filename = path_data + "/" + inputfile;
     std::ofstream paramphases;
     
     paramphases.open(filename, ios::out);
@@ -124,10 +125,10 @@ void write_ellipsoid(phase_characteristics &rve, const int &filenumber) {
     paramphases.close();
 }
 
-void write_cylinder(phase_characteristics &rve, const int &filenumber) {
+void write_cylinder(phase_characteristics &rve, const string &path_data, const string &inputfile) {
     
     std::string buffer;
-    std::string filename = "data/Ncylinders" + std::to_string(filenumber) + ".dat";
+    std::string filename = path_data + "/" + inputfile;
     std::ofstream paramphases;
     
     paramphases.open(filename, ios::out);
