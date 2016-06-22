@@ -127,12 +127,12 @@ void write_ellipsoid(phase_characteristics &rve, const int &filenumber) {
 void write_cylinder(phase_characteristics &rve, const int &filenumber) {
     
     std::string buffer;
-    std::string filename = "data/Ncylinder" + std::to_string(filenumber) + ".dat";
+    std::string filename = "data/Ncylinders" + std::to_string(filenumber) + ".dat";
     std::ofstream paramphases;
     
     paramphases.open(filename, ios::out);
     
-    paramphases << "Number\t" << "Coatingof\t" << "umat\t" << "save\t" << "c\t" << "psi_mat\t" << "theta_mat\t" << "phi_mat\t" << "a1\t" << "a2\t" << "a3\t" << "psi_geom\t" << "theta_geom\t"	<< "phi_geom\t" << "nprops\t" << "nstatev\t" << "props\n";
+    paramphases << "Number\t" << "Coatingof\t" << "umat\t" << "save\t" << "c\t" << "psi_mat\t" << "theta_mat\t" << "phi_mat\t" << "L\t" << "R\t" << "psi_geom\t" << "theta_geom\t"	<< "phi_geom\t" << "nprops\t" << "nstatev\t" << "props\n";
     
     for(auto r : rve.sub_phases) {
         
