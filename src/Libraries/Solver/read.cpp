@@ -82,19 +82,20 @@ void Lth_2_K(const mat &dSdE, mat &dSdT, mat &dQdE, mat &dQdT, mat &K, const Col
     }
 }
 
-void read_matprops(string &umat_name, int &nprops, vec &props, int &nstatev, double &psi_rve, double &theta_rve, double &phi_rve, double &rho, double &c_p, const string &materialfile) {
+void read_matprops(string &umat_name, int &nprops, vec &props, int &nstatev, double &psi_rve, double &theta_rve, double &phi_rve, double &rho, double &c_p, const string &path_data, const string &materialfile) {
 
     ///Material properties reading, use "material.dat" to specify parameters values
 	string buffer;
 	ifstream propsmat;
-	propsmat.open(materialfile, ios::in);
+    string path_materialfile = path_data + "/" + materialfile;
+	propsmat.open(path_materialfile, ios::in);
 	if(propsmat) {
         
 		string buffer;
 		propsmat >> buffer >> buffer >> umat_name >> buffer >> nprops >> buffer >> nstatev;
 	}
 	else {
-		cout << "Error: cannot open " << materialfile << " file \n";
+		cout << "Error: cannot open the file " << materialfile << " in the folder :" << path_data << "\n";
 	}
 	
 	char *cmname = new char [umat_name.length()];
@@ -104,7 +105,7 @@ void read_matprops(string &umat_name, int &nprops, vec &props, int &nstatev, dou
     	
 	props = zeros(nprops);
     
-	propsmat.open(materialfile, ios::in);
+	propsmat.open(path_materialfile, ios::in);
 	if(propsmat) {
 		string buffer;
 		propsmat >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> psi_rve >> buffer >> theta_rve >> buffer >> phi_rve >> buffer >> buffer >> rho >> buffer >> c_p >> buffer;
@@ -113,8 +114,8 @@ void read_matprops(string &umat_name, int &nprops, vec &props, int &nstatev, dou
 			propsmat >> buffer >> props(i);
 	}
 	else {
-		cout << "Error: cannot open the file " << materialfile << " \n";
-        exit(0);
+		cout << "Error: cannot open the file " << materialfile << " in the folder :" << path_data << "\n";
+        return;
 	}
     
     psi_rve*=(pi/180.);
@@ -125,27 +126,14 @@ void read_matprops(string &umat_name, int &nprops, vec &props, int &nstatev, dou
     
 }
 
-/*void read_path_init(int &type, int &nblock) {
-
-    string buffer;
-    ifstream path;
-    path.open("path.txt", ios::in);
-    if(!path) {
-        cout << "Error: cannot open the file path.txt \n";
-	}
-    
-	///temperature is initialized
-	path >> buffer >> type >> buffer >> buffer >> buffer >> nblock;
-    path.close();
-}*/
-
-void read_output(solver_output &so, const int &nblock, const int &nstatev) {
+void read_output(solver_output &so, const int &nblock, const int &nstatev, const string &path_data, const string &outputfile) {
         
     string buffer;
     string file;
+    string path_outputfile = path_data + "/" + outputfile;
     
     ifstream cyclic_output;
-	cyclic_output.open("data/output.dat", ios::in);
+	cyclic_output.open(path_outputfile, ios::in);
 	if(cyclic_output)
 	{
         cyclic_output >> buffer;
@@ -178,7 +166,7 @@ void read_output(solver_output &so, const int &nblock, const int &nstatev) {
                 
                 if(so.o_range_statev(i) > nstatev -1) {
                     cout << "Error : The range of outputed statev is greater than the actual number of statev!\n";
-                    cout << "Check output.dat and/or material.dat\n\n";
+                    cout << "Check output file and/or material input file\n\n";
                     
                     exit(0);
                 }
@@ -293,20 +281,22 @@ void check_path_output(const std::vector<block> &blocks, const solver_output &so
     
 }
     
-void read_path(std::vector<block> &blocks, double &T, const string &pathfile) {
+void read_path(std::vector<block> &blocks, double &T, const string &path_data, const string &pathfile) {
     
 	/// Reading the loading path file, Path.txt
     string buffer;
+    string pathfile_inc;
     int conver;
     char bufferchar;
     int nblock;
     Col<int> Equiv = subdiag2vec();
     
-	ifstream path;
-	path.open(pathfile, ios::in);
+    std::string path_inputfile = path_data + "/" + pathfile;
+    std::ifstream path;
+	path.open(path_inputfile, ios::in);
 	if(!path)
 	{
-		cout << "Error: cannot open the file " << pathfile << "\n";
+		cout << "Error: cannot open the file " << pathfile << " in the folder :" << path_data << "\n";
 	}
 
 	///temperature is initialized
@@ -362,7 +352,9 @@ void read_path(std::vector<block> &blocks, double &T, const string &pathfile) {
                         
                         shared_ptr<step_meca> sptr_meca = std::dynamic_pointer_cast<step_meca>(blocks[i].steps[j]);                        
                         
-                        path >> buffer >> sptr_meca->file >> buffer >> sptr_meca->Dn_init >> buffer >> sptr_meca->Dn_mini >> buffer;
+                        path >> buffer >> pathfile_inc >> buffer >> sptr_meca->Dn_init >> buffer >> sptr_meca->Dn_mini >> buffer;
+                        
+                        sptr_meca->file = path_data + "/" + pathfile_inc;
                         
                         for(int k = 0 ; k < 6 ; k++) {
                             path >> bufferchar;
