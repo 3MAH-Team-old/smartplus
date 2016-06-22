@@ -40,13 +40,12 @@ class individual
 		int id;
 		int rank;		
         arma::vec p;
+        double lambda;   //The step or Lambda applied
 		
 		individual(); 	//default constructor
-		individual(const int&,const int&);	//constructor - allocates memory for statev
+		individual(const int&,const int&,const double&);	//constructor - allocates memory for statev
 		individual(const individual&);	//Copy constructor
 		~individual();
-		
-		int dimp() const {return np;}       // returns the number of parameters
 
 		void construct();
 
