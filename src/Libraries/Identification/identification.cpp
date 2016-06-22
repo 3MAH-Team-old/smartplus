@@ -45,8 +45,8 @@ using namespace std;
 using namespace arma;
 
 namespace smart{
-    
-void run_identification_solver(const std::string &simul_type, const int &n_param, const int &n_consts, const int &nfiles, const int &ngen, const int &aleaspace, int &apop, int &spop, const int &ngboys, const int &maxpop, const std::string &path_data, const std::string &path_keys, const std::string &path_results, const std::string &outputfile, const std::string &data_num_name, const double &probaMut, const double &pertu, const double &c, const double &p0, const double &lambdaLM) {
+        
+void run_identification_solver(const std::string &simul_type, const int &n_param, const int &n_consts, const int &nfiles, const int &ngen, const int &aleaspace, int &apop, int &spop, const int &ngboys, const int &maxpop, const std::string &path_data, const std::string &path_keys, const std::string &path_results, const std::string &materialfile, const std::string &outputfile, const std::string &data_num_name, const double &probaMut, const double &pertu, const double &c, const double &p0, const double &lambdaLM) {
 
     std::string data_num_ext = data_num_name.substr(data_num_name.length()-4,data_num_name.length());
     std::string data_num_name_root = data_num_name.substr(0,data_num_name.length()-4); //to remove the extension
@@ -59,7 +59,7 @@ void run_identification_solver(const std::string &simul_type, const int &n_param
         return;
     }
     if(!boost::filesystem::is_directory(path_keys)) {
-        cout << "error: the folder for the keys, " << path_data << ", is not present" << endl;
+        cout << "error: the folder for the keys, " << path_keys << ", is not present" << endl;
         return;
     }
     if(!boost::filesystem::is_directory(path_results)) {
@@ -158,7 +158,7 @@ void run_identification_solver(const std::string &simul_type, const int &n_param
     /// Run the simulations corresponding to each individual
     /// The simulation input files should be ready!
     for(int i=0; i<geninit.size(); i++) {
-        run_simulation(simul_type, geninit.pop[i], nfiles, params, consts, data_num, data_num_folder, data_num_name, path_data, path_keys);
+        run_simulation(simul_type, geninit.pop[i], nfiles, params, consts, data_num, data_num_folder, data_num_name, path_data, path_keys, materialfile);
         
         //Calculation of the cost function
         geninit.pop[i].cout = calc_cost(vexp, vnum, W, data_num, data_exp, nfiles, sizev);
@@ -221,7 +221,7 @@ void run_identification_solver(const std::string &simul_type, const int &n_param
             ///prepare the individuals to run
             
             for(int i=0; i<gensons.size(); i++) {
-                run_simulation(simul_type, gensons.pop[i], nfiles, params, consts, data_num, data_num_folder, data_num_name, path_data, path_keys);
+                run_simulation(simul_type, gensons.pop[i], nfiles, params, consts, data_num, data_num_folder, data_num_name, path_data, path_keys, materialfile);
                 //Calculation of the cost function
                 gensons.pop[i].cout = calc_cost(vexp, vnum, W, data_num, data_exp, nfiles, sizev);
             }
@@ -231,7 +231,7 @@ void run_identification_solver(const std::string &simul_type, const int &n_param
             
             cost_gb_cost_n[i] = gen[g].pop[i].cout;
             
-            S = calc_sensi(gboys[g].pop[i], n_gboys, simul_type, nfiles, n_param, params, consts, vnum, data_num, data_exp, data_num_folder, data_num_name, path_data, path_keys, sizev, Dp_gb_n[i]);
+            S = calc_sensi(gboys[g].pop[i], n_gboys, simul_type, nfiles, n_param, params, consts, vnum, data_num, data_exp, data_num_folder, data_num_name, path_data, path_keys, sizev, Dp_gb_n[i], materialfile);
             gboys[g].pop[i].cout = calcC(vexp, vnum, W);
             p = gboys[g].pop[i].p;
             ///Compute the parameters increment
@@ -285,7 +285,7 @@ void run_identification_solver(const std::string &simul_type, const int &n_param
         }
         
         //Run the identified simulation and store results in the results folder
-        run_simulation(simul_type, gen[g].pop[0], nfiles, params, consts, data_num, path_results, data_num_name, path_data, path_keys);
+        run_simulation(simul_type, gen[g].pop[0], nfiles, params, consts, data_num, path_results, data_num_name, path_data, path_keys, materialfile);
         
         copy_parameters(params, path_keys, path_results);
         apply_parameters(params, path_results);
