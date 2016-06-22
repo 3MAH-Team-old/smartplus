@@ -44,13 +44,13 @@ void apply_parameters(const std::vector<parameters> &, const std::string &);
 void apply_constants(const std::vector<constants> &, const std::string &);
     
 //Read the control parameters of the optimization algorithm
-void launch_solver(const generation &, const int &, std::vector<parameters> &, std::vector<constants> &, const std::string &, const std::string &, const std::string &, const std::string &);
+void launch_solver(const generation &, const int &, std::vector<parameters> &, std::vector<constants> &, const std::string &, const std::string &, const std::string &, const std::string &, const std::string&);
     
-void run_simulation(const std::string &, const individual &, const int &, std::vector<parameters> &, std::vector<constants> &, std::vector<opti_data> &, const std::string &, const std::string &, const std::string &, const std::string &);
+void run_simulation(const std::string &, const individual &, const int &, std::vector<parameters> &, std::vector<constants> &, std::vector<opti_data> &, const std::string &, const std::string &, const std::string &, const std::string &, const std::string&);
     
 double calc_cost(const arma::vec &, arma::vec &, const arma::vec &, const std::vector<opti_data> &, const std::vector<opti_data> &, const int &, const int &);
 
-arma::mat calc_sensi(const individual &, generation &, const std::string &, const int &, const int &, std::vector<parameters> &, std::vector<constants> &, arma::vec &, std::vector<opti_data> &, std::vector<opti_data> &, const std::string &, const std::string &, const std::string &, const std::string &, const int &, const arma::vec &);
+arma::mat calc_sensi(const individual &, generation &, const std::string &, const int &, const int &, std::vector<parameters> &, std::vector<constants> &, arma::vec &, std::vector<opti_data> &, std::vector<opti_data> &, const std::string &, const std::string &, const std::string &, const std::string &, const int &, const arma::vec &, const std::string&);
 
     
 } //namespace smart
