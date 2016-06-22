@@ -36,6 +36,6 @@ arma::mat doe_uniform_limit(const int &, const int &, const std::vector<paramete
 arma::mat doe_random(const int &, const int &, const std::vector<parameters> &);
 
 //This function is utilized to initialize the first generation
-void gen_initialize(generation &, int &, int&, int &, const int &, const int &, const std::vector<parameters> &);
+void gen_initialize(generation &, int &, int&, int &, const int &, const int &, const std::vector<parameters> &, const double &);
     
 } //namespace smart
