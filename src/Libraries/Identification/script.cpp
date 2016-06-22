@@ -53,8 +53,8 @@ void copy_parameters(const vector<parameters> &params, const string &src_path, c
     
     for (auto pa : params) {
         for(auto ifiles : pa.input_files) {
-            src_files = src_path + ifiles;
-            dst_files = dst_path + ifiles;
+            src_files = src_path + "/" + ifiles;
+            dst_files = dst_path + "/" + ifiles;
             boost::filesystem::copy_file(src_files,dst_files,boost::filesystem::copy_option::overwrite_if_exists);
         }
     }
@@ -68,8 +68,8 @@ void copy_constants(const vector<constants> &consts, const string &src_path, con
     
     for (auto co : consts) {
         for(auto ifiles : co.input_files) {
-            src_files = src_path + ifiles;
-            dst_files = dst_path + ifiles;
+            src_files = src_path + "/" + ifiles;
+            dst_files = dst_path + "/" + ifiles;
             boost::filesystem::copy_file(src_files,dst_files,boost::filesystem::copy_option::overwrite_if_exists);
         }
     }
@@ -86,7 +86,7 @@ void apply_parameters(const vector<parameters> &params, const string &dst_path) 
     
     for (auto pa : params) {
         for(auto ifiles : pa.input_files) {
-            mod_files = dst_path + ifiles;
+            mod_files = dst_path + "/" + ifiles;
 
             in_files.open(mod_files, ios::in);
             
@@ -120,7 +120,7 @@ void apply_constants(const vector<constants> &consts, const string &dst_path) {
     
     for (auto co : consts) {
         for(auto ifiles : co.input_files) {
-            mod_files = dst_path + ifiles;
+            mod_files = dst_path + "/" + ifiles;
             
             in_files.open(mod_files, ios::in);
             
@@ -143,12 +143,11 @@ void apply_constants(const vector<constants> &consts, const string &dst_path) {
     
 }
     
-void launch_solver(const individual &ind, const int &nfiles, vector<parameters> &params, vector<constants> &consts, const string &folder, const string &name, const string &path_data, const string &path_keys)
+void launch_solver(const individual &ind, const int &nfiles, vector<parameters> &params, vector<constants> &consts, const string &folder, const string &name, const string &path_data, const string &path_keys, const string &materialfile)
 {
 	string outputfile;
     string simulfile;
 	string pathfile;
-    string materialfile = "data/material.dat";
     
     string name_ext = name.substr(name.length()-4,name.length());
     string name_root = name.substr(0,name.length()-4); //to remove the extension
@@ -188,7 +187,7 @@ void launch_solver(const individual &ind, const int &nfiles, vector<parameters> 
         apply_parameters(params, path_data);
         
         //Then read the material properties
-        read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p, materialfile);
+        read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p, path_data, materialfile);
         
         ///Launching the solver with relevant parameters
         solver(umat_name, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p, pathfile, outputfile);
@@ -201,7 +200,7 @@ void launch_solver(const individual &ind, const int &nfiles, vector<parameters> 
     }
 }
     
-void run_simulation(const string &simul_type, const individual &ind, const int &nfiles, vector<parameters> &params, vector<constants> &consts, vector<opti_data> &data_num, const string &folder, const string &name, const string &path_data, const string &path_keys) {
+void run_simulation(const string &simul_type, const individual &ind, const int &nfiles, vector<parameters> &params, vector<constants> &consts, vector<opti_data> &data_num, const string &folder, const string &name, const string &path_data, const string &path_keys, const string &materialfile) {
     
     //In the simulation run, make sure that we remove all the temporary files
     boost::filesystem::path path_to_remove(folder);
@@ -215,7 +214,7 @@ void run_simulation(const string &simul_type, const individual &ind, const int &
     switch (list_simul[simul_type]) {
             
         case 1: {
-            launch_solver(ind, nfiles, params, consts, folder, name, path_data, path_keys);
+            launch_solver(ind, nfiles, params, consts, folder, name, path_data, path_keys, materialfile);
             break;
         }
         default: {
@@ -244,7 +243,7 @@ double calc_cost(const vec &vexp, vec &vnum, const vec &W, const vector<opti_dat
     return calcC(vexp, vnum, W);
 }
      
-mat calc_sensi(const individual &gboy, generation &n_gboy, const string &simul_type, const int &nfiles, const int &n_param, vector<parameters> &params, vector<constants> &consts, vec &vnum0, vector<opti_data> &data_num, vector<opti_data> &data_exp, const string &folder, const string &name, const string &path_data, const string &path_keys, const int &sizev, const vec &Dp_n) {
+mat calc_sensi(const individual &gboy, generation &n_gboy, const string &simul_type, const int &nfiles, const int &n_param, vector<parameters> &params, vector<constants> &consts, vec &vnum0, vector<opti_data> &data_num, vector<opti_data> &data_exp, const string &folder, const string &name, const string &path_data, const string &path_keys, const int &sizev, const vec &Dp_n, const string &materialfile) {
     
     //delta
     vec delta = 0.01*ones(n_param);
@@ -252,7 +251,7 @@ mat calc_sensi(const individual &gboy, generation &n_gboy, const string &simul_t
     mat S = zeros(sizev,n_param);
     //genrun part of the gradient
     
-    run_simulation(simul_type, gboy, nfiles, params, consts, data_num, folder, name, path_data, path_keys);
+    run_simulation(simul_type, gboy, nfiles, params, consts, data_num, folder, name, path_data, path_keys, materialfile);
     vnum0 = calcV(data_num, data_exp, nfiles, sizev);
     
     for(int j=0; j<n_param; j++) {
@@ -270,7 +269,7 @@ mat calc_sensi(const individual &gboy, generation &n_gboy, const string &simul_t
     
     for(int j=0; j<n_param; j++) {
         //run the simulation
-        run_simulation(simul_type, n_gboy.pop[j], nfiles, params, consts, data_num, folder, name, path_data, path_keys);
+        run_simulation(simul_type, n_gboy.pop[j], nfiles, params, consts, data_num, folder, name, path_data, path_keys, materialfile);
         vec vnum = calcV(data_num, data_exp, nfiles, sizev);
         
         calcS(S, vnum, vnum0, j, delta);
