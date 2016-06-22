@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <math.h>
 #include <memory>
+#include <boost/filesystem.hpp>
 #include <armadillo>
 #include <smartplus/parameter.hpp>
 #include <smartplus/Libraries/Phase/material_characteristics.hpp>
@@ -44,13 +45,25 @@ using namespace arma;
 
 namespace smart{
 
-void solver(const string &umat_name, const vec &props, const double &nstatev, const double &psi_rve, const double &theta_rve, const double &phi_rve,const double &rho, const double &c_p, const std::string &pathfile, const std::string &outputfile) {
+void solver(const string &umat_name, const vec &props, const double &nstatev, const double &psi_rve, const double &theta_rve, const double &phi_rve,const double &rho, const double &c_p, const std::string &path_data, const std::string &path_results, const std::string &pathfile, const std::string &outputfile) {
+
+    //Check if the required directories exist:
+    if(!boost::filesystem::is_directory(path_data)) {
+        cout << "error: the folder for the data, " << path_data << ", is not present" << endl;
+        return;
+    }
+    if(!boost::filesystem::is_directory(path_results)) {
+        cout << "The folder for the results, " << path_results << ", is not present and has been created" << endl;
+        boost::filesystem::create_directory(path_results);
+    }
     
     std::string ext_filename = outputfile.substr(outputfile.length()-4,outputfile.length());
     std::string filename = outputfile.substr(0,outputfile.length()-4); //to remove the extension
     
     std::string outputfile_global = filename + "_global" + ext_filename;
-    std::string outputfile_local = filename + "_local" + ext_filename;;
+    std::string outputfile_local = filename + "_local" + ext_filename;
+    
+    std::string output_info_file = "output.dat";
     
 	///Usefull UMAT variables
 	int ndi = 3;
@@ -75,7 +88,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
     
     //read the material properties
     //Read the loading path
-    read_path(blocks, T_init, pathfile);
+    read_path(blocks, T_init, path_data, pathfile);
     
 /*    for(auto b : blocks) {
         cout << "blocks = " << b << "\n";
@@ -88,7 +101,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
     int o_ncount = 0;
     double o_tcount = 0.;
     solver_output so(blocks.size());
-    read_output(so, blocks.size(), nstatev);
+    read_output(so, blocks.size(), nstatev, path_data, output_info_file);
     
     //Check output and step files
     check_path_output(blocks, so);
@@ -148,8 +161,8 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                 
                 if(start) {
                     //Use the number of phases saved to define the files
-                    rve.define_output(outputfile_global, "global");
-                    rve.define_output(outputfile_local, "local");
+                    rve.define_output(path_results, outputfile_global, "global");
+                    rve.define_output(path_results, outputfile_local, "local");
                     //Write the initial results
 //                    rve.output(so, -1, -1, -1, -1, Time, "global");
 //                    rve.output(so, -1, -1, -1, -1, Time, "local");
@@ -198,7 +211,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                     ///Saving stress and stress set point at the beginning of the loop
                                     
                                     error = 1.;
-                                   
+                                    
                                     sv_M->DEtot = zeros(6);
                                     
                                     for(int k = 0 ; k < 6 ; k++)
@@ -374,8 +387,8 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                 
                 if(start) {
                     //Use the number of phases saved to define the files
-                    rve.define_output(outputfile_global, "global");
-                    rve.define_output(outputfile_local, "local");
+                    rve.define_output(path_results, outputfile_global, "global");
+                    rve.define_output(path_results, outputfile_local, "local");
                     //Write the initial results
 //                    rve.output(so, -1, -1, -1, -1, Time, "global");
 //                    rve.output(so, -1, -1, -1, -1, Time, "local");
