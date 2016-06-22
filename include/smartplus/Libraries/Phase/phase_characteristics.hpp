@@ -72,7 +72,7 @@ class phase_characteristics
     
 		virtual phase_characteristics& operator = (const phase_characteristics&);
     
-        virtual void define_output(const std::string &, const std::string & = "global");
+        virtual void define_output(const std::string &, const std::string & = "results", const std::string & = "global");
         virtual void output(const solver_output &, const int &, const int &, const int &, const int &, const double &, const std::string & = "global");
     
     
