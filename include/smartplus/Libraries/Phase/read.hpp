@@ -26,16 +26,16 @@
 
 namespace smart{
     
-/// Function that reads the output parameters
-void read_phase(phase_characteristics &, const int &);
+/// Function that reads the characteristics of a phase
+void read_phase(phase_characteristics &, const std::string & = "data", const std::string & = "Nphases0.dat");
 
-/// Function that reads the output parameters
-void read_layer(phase_characteristics &, const int &);
+/// Function that reads the characteristics of a layer
+void read_layer(phase_characteristics &, const std::string & = "data", const std::string & = "Nlayers0.dat");
     
-/// Function that checks the coherency between the path and the step increments provided
-void read_ellipsoid(phase_characteristics &, const int &);
+/// Function that reads the characteristics of an ellipsoid
+void read_ellipsoid(phase_characteristics &, const std::string & = "data", const std::string & = "Nellipsoids0.dat");
 
-/// Function that checks the coherency between the path and the step increments provided
-void read_cylinder(phase_characteristics &, const int &);
+/// Function that reads the characteristics of a cylinder
+void read_cylinder(phase_characteristics &, const std::string & = "data", const std::string & = "Ncylinders0.dat");
 
 } //namespace smart
