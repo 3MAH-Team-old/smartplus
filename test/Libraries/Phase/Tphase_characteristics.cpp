@@ -40,8 +40,12 @@ BOOST_AUTO_TEST_CASE( read_write )
 
     
     string umat_name;
-//    int nprops = 2;
-//    int nstatev = 0;
+    string inputfile;
+    string outputfile;
+    string path_data = "data";
+    string path_inputfile;
+    string path_outputfile;
+    
     vec props = {2,0};
     
     double rho = 1.12;
@@ -55,11 +59,18 @@ BOOST_AUTO_TEST_CASE( read_write )
     phase_characteristics rve_phase;
     rve_phase.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props, rho, c_p);
     rve_phase.construct(0,1); //The rve is supposed to be mechanical only here
-    read_phase(rve_phase, 0);
-    write_phase(rve_phase, 1);
+
+    inputfile = "Nphases" + to_string(int(rve_phase.sptr_matprops->props(1))) + ".dat";
+    outputfile = "Nphases1.dat";
     
-    std::ifstream ifs1_phase("data/Nphases0.dat");
-    std::ifstream ifs2_phase("data/Nphases1.dat");
+    read_phase(rve_phase, path_data, inputfile);
+    write_phase(rve_phase, path_data, outputfile);
+    
+    path_inputfile = path_data + "/" + inputfile;
+    path_outputfile = path_data + "/" + outputfile;
+    
+    std::ifstream ifs1_phase(path_inputfile);
+    std::ifstream ifs2_phase(path_outputfile);
     
     std::istream_iterator<char> b1_phase(ifs1_phase), e1_phase;
     std::istream_iterator<char> b2_phase(ifs2_phase), e2_phase;
@@ -70,11 +81,18 @@ BOOST_AUTO_TEST_CASE( read_write )
     phase_characteristics rve_layer;
     rve_layer.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props, rho, c_p);
     rve_layer.construct(1,1); //The rve is supposed to be mechanical only here
-    read_layer(rve_layer, 0);
-    write_layer(rve_layer, 1);
+
+    inputfile = "Nlayers" + to_string(int(rve_layer.sptr_matprops->props(1))) + ".dat";
+    outputfile = "Nlayers1.dat";
     
-    std::ifstream ifs1_layer("data/Nlayers0.dat");
-    std::ifstream ifs2_layer("data/Nlayers1.dat");
+    read_layer(rve_layer, path_data, inputfile);
+    write_layer(rve_layer, path_data, outputfile);
+    
+    path_inputfile = path_data + "/" + inputfile;
+    path_outputfile = path_data + "/" + outputfile;
+    
+    std::ifstream ifs1_layer(path_inputfile);
+    std::ifstream ifs2_layer(path_outputfile);
     
     std::istream_iterator<char> b1_layer(ifs1_layer), e1_layer;
     std::istream_iterator<char> b2_layer(ifs2_layer), e2_layer;
@@ -85,11 +103,18 @@ BOOST_AUTO_TEST_CASE( read_write )
     phase_characteristics rve_ellipsoid;
     rve_ellipsoid.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props, rho, c_p);
     rve_ellipsoid.construct(2,1); //The rve is supposed to be mechanical only here
-    read_ellipsoid(rve_ellipsoid, 0);
-    write_ellipsoid(rve_ellipsoid, 1);
+
+    inputfile = "Nellipsoids" + to_string(int(rve_ellipsoid.sptr_matprops->props(1))) + ".dat";
+    outputfile = "Nellipsoids1.dat";
     
-    std::ifstream ifs1_ellipsoid("data/Nellipsoids0.dat");
-    std::ifstream ifs2_ellipsoid("data/Nellipsoids1.dat");
+    read_ellipsoid(rve_ellipsoid, path_data, inputfile);
+    write_ellipsoid(rve_ellipsoid, path_data, outputfile);
+    
+    path_inputfile = path_data + "/" + inputfile;
+    path_outputfile = path_data + "/" + outputfile;
+    
+    std::ifstream ifs1_ellipsoid(path_inputfile);
+    std::ifstream ifs2_ellipsoid(path_outputfile);
     
     std::istream_iterator<char> b1_ellipsoid(ifs1_ellipsoid), e1_ellipsoid;
     std::istream_iterator<char> b2_ellipsoid(ifs2_ellipsoid), e2_ellipsoid;
@@ -100,13 +125,18 @@ BOOST_AUTO_TEST_CASE( read_write )
     phase_characteristics rve_cylinder;
     rve_cylinder.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props, rho, c_p);
     rve_cylinder.construct(3,1); //The rve is supposed to be mechanical only here
-    read_cylinder(rve_cylinder, 0);
-    write_cylinder(rve_cylinder, 1);
-
-    cout << "La tete a Toto!" << endl;
     
-    std::ifstream ifs1_cylinder("data/Ncylinders0.dat");
-    std::ifstream ifs2_cylinder("data/Ncylinders1.dat");
+    inputfile = "Ncylinders" + to_string(int(rve_cylinder.sptr_matprops->props(1))) + ".dat";
+    outputfile = "Ncylinders1.dat";
+    
+    read_cylinder(rve_cylinder, path_data, inputfile);
+    write_cylinder(rve_cylinder, path_data, outputfile);
+    
+    path_inputfile = path_data + "/" + inputfile;
+    path_outputfile = path_data + "/" + outputfile;
+    
+    std::ifstream ifs1_cylinder(path_inputfile);
+    std::ifstream ifs2_cylinder(path_outputfile);
     
     std::istream_iterator<char> b1_cylinder(ifs1_cylinder), e1_cylinder;
     std::istream_iterator<char> b2_cylinder(ifs2_cylinder), e2_cylinder;
