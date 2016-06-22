@@ -301,7 +301,7 @@ phase_characteristics& phase_characteristics::operator = (const phase_characteri
 }
 
 //----------------------------------------------------------------------
-void phase_characteristics::define_output(const std::string &outputfile, const std::string &coordsys)
+void phase_characteristics::define_output(const std::string &path, const std::string &outputfile, const std::string &coordsys)
 //----------------------------------------------------------------------
 {
 
@@ -309,19 +309,20 @@ void phase_characteristics::define_output(const std::string &outputfile, const s
     std::string filename = outputfile.substr(0,outputfile.length()-4); //to remove the extension
 //    if(sptr_matprops->number > 0)
     filename = filename + '-' + std::to_string(sptr_matprops->number) + ext_filename;
+    std::string path_filename = path + "/" + filename;
 //    else
 //        filename = filename + ext_filename;
     
 //    std::ofstream of_file(filename);
     if(coordsys == "global") {
-        sptr_out_global = make_shared<ofstream>(filename);
+        sptr_out_global = make_shared<ofstream>(path_filename);
     }
     else if(coordsys == "local") {
-        sptr_out_local = make_shared<ofstream>(filename);
+        sptr_out_local = make_shared<ofstream>(path_filename);
     }
     
     for(unsigned int i=0; i<sub_phases.size(); i++) {
-        sub_phases[i].define_output(filename, coordsys);
+        sub_phases[i].define_output(path, filename, coordsys);
     }
     
 }
