@@ -40,13 +40,13 @@ class generation
         std::vector<individual> pop;
 		
 		generation(); 	//default constructor
-		generation(const int&, const int&, int&);	//constructor - allocates memory for statev
+		generation(const int&, const int&, int&, const double & = 0.);	//constructor - allocates memory for statev
 		generation(const generation&);	//Copy constructor
 		~generation();
 		
 		int size() const {return pop.size();}       // returns the number of individuals
 
-		void construct(const int&, const int&, int&);
+		void construct(const int&, const int&, int&, const double & = 0.);
 		void classify();
 		void newid(int &);
 		void destruct();
