@@ -27,6 +27,6 @@
 namespace smart{
     
 /// Function that reads the output parameters
-void read_peak(ODF &, const int &);
+    void read_peak(ODF &, const std::string &, const std::string &);
 
 } //namespace smart
