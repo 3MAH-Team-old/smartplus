@@ -20,7 +20,7 @@
 ///@version 1.0
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "rotation"
+#define BOOST_TEST_MODULE "phase_characteristics"
 #include <boost/test/unit_test.hpp>
 
 #include <fstream>
@@ -37,8 +37,6 @@ using namespace smart;
 
 BOOST_AUTO_TEST_CASE( read_write )
 {
-
-    
     string umat_name;
     string inputfile;
     string outputfile;
@@ -54,18 +52,17 @@ BOOST_AUTO_TEST_CASE( read_write )
     double psi_rve = 0.;
     double theta_rve = 0.;
     double phi_rve = 0.;
-
+    
     //Phases
     phase_characteristics rve_phase;
+    
     rve_phase.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props, rho, c_p);
     rve_phase.construct(0,1); //The rve is supposed to be mechanical only here
-
     inputfile = "Nphases" + to_string(int(rve_phase.sptr_matprops->props(1))) + ".dat";
     outputfile = "Nphases1.dat";
     
     read_phase(rve_phase, path_data, inputfile);
     write_phase(rve_phase, path_data, outputfile);
-    
     path_inputfile = path_data + "/" + inputfile;
     path_outputfile = path_data + "/" + outputfile;
     
