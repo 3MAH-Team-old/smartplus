@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <armadillo>
 #include <memory>
+#include <smartplus/parameter.hpp>
 #include <smartplus/Libraries/Material/peak.hpp>
 #include <smartplus/Libraries/Material/ODF.hpp>
 
@@ -56,20 +57,23 @@ ODF::ODF() : limits(2)
 }
 
 //-------------------------------------------------------------
-ODF::ODF(const int &npeaks, const int &nAngle, const bool &nradian) : limits(2)
+ODF::ODF(const int &nAngle, const bool &nradian, const double &angle_min, const double &angle_max) : limits(2)
 //-------------------------------------------------------------
 {
     
     Nphases = 0;
     Angle = nAngle; //0 : Psi, 1: Theta, 2: Phi
     radian = nradian;
-    for(int i=0; i<npeaks; i++) {
-        peaks.push_back(peak());
-    }
     n_densities = 0;
     norm = 0.;
-}
+    limits(0) = angle_min;
+    limits(1) = angle_max;
     
+    if (radian == false) {
+        limits(0) *= (pi/180.);
+        limits(1) *= (pi/180.);
+    }
+}
     
 /*!
  \brief Constructor with parameters
@@ -176,15 +180,15 @@ ostream& operator << (ostream& s, const ODF& pc)
     s << "Number of phases Nphases:\t" << pc.Nphases << "\n";
     s << "Angle:\t" << pc.Angle << "\n";
     s << "radian:\t" << pc.radian << "\n";
-    
+
+    s << "number of peaks:" << pc.peaks.size() << "\n";    
     s << "peaks:\n";
-    for(auto p: pc.peaks) {
+    
+    for(auto p : pc.peaks) {
         s << p << "\n";
     }
 //    s << "n_densities:\t" << pc.n_densities << "\n";
     s << "norm:\t" << pc.norm << "\n";
-    
-    s << "\n\n";
     
     return s;
 }
