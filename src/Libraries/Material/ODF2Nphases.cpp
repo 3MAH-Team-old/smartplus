@@ -30,8 +30,11 @@
 #include <smartplus/Libraries/Phase/phase_characteristics.hpp>
 #include <smartplus/Libraries/Material/ODF.hpp>
 #include <smartplus/Libraries/Material/ODF2Nphases.hpp>
+#include <smartplus/Libraries/Material/read.hpp>
 #include <smartplus/Libraries/Phase/phase_characteristics.hpp>
+#include <smartplus/Libraries/Geometry/layer.hpp>
 #include <smartplus/Libraries/Geometry/ellipsoid.hpp>
+#include <smartplus/Libraries/Geometry/cylinder.hpp>
 #include <smartplus/Libraries/Maths/random.hpp>
 #include <smartplus/Libraries/Maths/stats.hpp>
 
@@ -39,53 +42,152 @@ using namespace std;
 using namespace arma;
 
 namespace smart{
-    
-void discretize_ODF(phase_characteristics &rve, const phase_characteristics &rve_init, ODF &odf_rve) {
 
-    double alpha = odf_rve.limits(0);
+vec get_densities(const vec &x, const string &path_data, const string &input_peaks, const bool &radian) {
+    
+    vec y = zeros(x.n_elem);
+    vec x_rad;
+    if (!radian) {
+        x_rad = x*(pi/180.);
+        if(x_rad.min() < 0.) {
+            cout << "Error : x.min() < 0. Please provide an angle vector with all angles >=0.";
+            return y;
+        }
+        if(x_rad.max() > pi) {
+            cout << "Error : x.max() > pi Please provide an angle vector with all angles <=pi/180";
+            return y;
+        }
+    }
+    else {
+        if(x.min() < 0.) {
+            cout << "Error : x.min() < 0. Please provide an angle vector with all angles >=0.";
+            return y;
+        }
+        if(x.max() > pi) {
+            cout << "Error : x.max() > pi Please provide an angle vector with all angles <=pi";
+            return y;
+        }
+    }
+    
+    
+    ODF odf_rve(0, radian, x.min(), x.max());
+    read_peak(odf_rve, path_data, input_peaks);
+    
+    for(unsigned int i=0; i<x.n_elem; i++) {
+        if (radian)
+            y(i) = odf_rve.density(x(i));
+        else
+            y(i) = odf_rve.density(x_rad(i));
+    }
+    return y;
+}
+    
+void fill_angles(const double &alpha, phase_characteristics &phase, const ODF &odf_rve, const int &angles_mat) {
+    
+    double temp_psi_geom = 0.;
+    double temp_theta_geom = 0.;
+    double temp_phi_geom = 0.;
+    
+    switch (odf_rve.Angle) {
+        case 0: {
+            if (angles_mat)
+                phase.sptr_matprops->psi_mat = alpha;
+            temp_psi_geom = alpha;
+            break;
+        }
+        case 1: {
+            if (angles_mat)
+                phase.sptr_matprops->theta_mat = alpha;
+            temp_theta_geom = alpha;
+            break;
+        }
+        case 2: {
+            if (angles_mat)
+                phase.sptr_matprops->phi_mat = alpha;
+            temp_phi_geom = alpha;
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+    
+    //Switch case for the geometry of the phase
+    switch (phase.shape_type) {
+        case 0: {
+            break;
+        }
+        case 1: {
+            std::shared_ptr<layer> lay = std::dynamic_pointer_cast<layer>(phase.sptr_shape);
+            lay->psi_geom = temp_psi_geom;
+            lay->theta_geom = temp_theta_geom;
+            lay->phi_geom = temp_phi_geom;
+            break;
+        }
+        case 2: {
+            std::shared_ptr<ellipsoid> elli = std::dynamic_pointer_cast<ellipsoid>(phase.sptr_shape);
+            elli->psi_geom = temp_psi_geom;
+            elli->theta_geom = temp_theta_geom;
+            elli->phi_geom = temp_phi_geom;
+            break;
+        }
+        case 3: {
+            std::shared_ptr<cylinder> cyl = std::dynamic_pointer_cast<cylinder>(phase.sptr_shape);
+            cyl->psi_geom = temp_psi_geom;
+            cyl->theta_geom = temp_theta_geom;
+            cyl->phi_geom = temp_phi_geom;
+            break;
+        }
+    }
+}
+    
+phase_characteristics discretize_ODF(const phase_characteristics &rve_init, ODF &odf_rve, const int &num_phase_disc, const int &nb_phases_disc, const int &angles_mat) {
+    
+    phase_characteristics rve;
+    rve.copy(rve_init);
+    
+    int number = 0;
     odf_rve.norm = 0.;
     
     double angle_range = odf_rve.limits(1) - odf_rve.limits(0);
     assert(angle_range > 0.);
-    int Nphases = rve.sub_phases.size();
     
-    double dalpha = double(Nphases)/angle_range;
+    double dalpha = angle_range/double(nb_phases_disc);
+    double alpha = odf_rve.limits(0);
     
-    for (auto r: rve.sub_phases) {
-        if(alpha < dalpha)
-            r.sptr_shape->concentration = dalpha/6. * odf_rve.density(pi+alpha-dalpha/2) + 4.*odf_rve.density(alpha) + odf_rve.density(alpha+dalpha/2);
+    rve.sub_phases.erase(rve.sub_phases.begin()+num_phase_disc);
+    for (int i=0; i<nb_phases_disc; i++) {
+        
+        phase_characteristics temp;
+        temp.copy(rve_init.sub_phases[num_phase_disc]);
+        
+        fill_angles(alpha, temp, odf_rve, angles_mat);
+        
+        if(alpha - odf_rve.limits(0) < dalpha)
+            temp.sptr_shape->concentration = dalpha/6. * (odf_rve.density(pi+alpha-dalpha/2) + 4.*odf_rve.density(alpha) + odf_rve.density(alpha+dalpha/2));
         else
-            r.sptr_shape->concentration = dalpha/6. * odf_rve.density(alpha-dalpha/2) + 4.*odf_rve.density(alpha) + odf_rve.density(alpha+dalpha/2);
+            temp.sptr_shape->concentration = dalpha/6. * (odf_rve.density(alpha-dalpha/2) + 4.*odf_rve.density(alpha) + odf_rve.density(alpha+dalpha/2));
+
+        odf_rve.norm += temp.sptr_shape->concentration;
         
-        //Fill the correct angles
-/*        if (odf_rve.Angle == 0)
-            r.sptr_shape->psi_geom = alpha;
-        else if(odf_rve.Angle == 1)
-            r.sptr_shape->theta_geom = alpha;
-        else if(odf_rve.Angle == 2)
-            r.sptr_shape->phi_geom = alpha;*/
-        
-        r.sptr_shape->concentration = dalpha/6. * odf_rve.density(pi+alpha-dalpha/2) + 4.*odf_rve.density(alpha) + odf_rve.density(alpha+dalpha/2);
-        
-        odf_rve.norm += r.sptr_shape->concentration;
+        rve.sub_phases.insert(rve.sub_phases.begin()+i+num_phase_disc, temp);
         alpha += dalpha;
     }
-    
-    
-/*    for (auto r: rve.sub_phases) {
-        if(alpha < iota)
-            rve.sub_phases[j].sptr_shape->concentration = dalpha/6. * (ODF(pi-dalpha/2, method(i), paramODF.row(i).t(), radian, dec)+4.*ODF(alpha, method(i), paramODF.row(i).t(), radian, dec)+ODF(alpha+dalpha/2, method(i), paramODF.row(i).t(), radian, dec));
-        else
-            rve.sub_phases[j].sptr_shape->concentration = dalpha/6. * (ODF(alpha-dalpha/2, method(i), paramODF.row(i).t(), radian, dec)+4.*ODF(alpha, method(i), paramODF.row(i).t(), radian, dec)+ODF(alpha+dalpha/2, method(i), paramODF.row(i).t(), radian, dec));
-        
-        normODF += rvesvs[i][j].concentration;
-        alpha += dalpha;
-    }*/
     
     ///Normalization
-    for(auto r : rve.sub_phases) {
-        r.sptr_shape->concentration *= (rve_init.sptr_shape->concentration / odf_rve.norm);
+    for(int i=0; i<nb_phases_disc; i++) {
+        rve.sub_phases[i+num_phase_disc].sptr_shape->concentration *= (rve_init.sub_phases[num_phase_disc].sptr_shape->concentration / odf_rve.norm);
     }
+    
+    for (unsigned int i=0; i<rve.sub_phases.size(); i++) {
+        rve.sub_phases[i].sptr_matprops->number = number;
+        number++;
+    }
+    
+//    cout << "rve = " << rve;
+    
+    return rve;
+    
 }
 
 
