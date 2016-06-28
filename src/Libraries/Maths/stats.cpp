@@ -108,8 +108,8 @@ double PseudoVoigt(const double &X, const double &mean, const double &std_dev, c
 ///6. Pearson VII
 double Pearson7(const double& X, const double& mean, const double &inv_width, vec &params){
 	
-    double shape = params(0);
-    double max = params(1);
+    double max = params(0);
+    double shape = params(1);
     assert(shape>0);
     if (fabs(max) < limit) {
         max = 1.;
