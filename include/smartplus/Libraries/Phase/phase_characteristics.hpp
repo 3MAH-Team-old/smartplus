@@ -69,7 +69,8 @@ class phase_characteristics
         virtual void set_start();
         virtual void local2global();
         virtual void global2local();
-    
+        virtual void copy(const phase_characteristics&);   //Be warned that the ofstreams are NOT copied
+
 		virtual phase_characteristics& operator = (const phase_characteristics&);
     
         virtual void define_output(const std::string &, const std::string & = "results", const std::string & = "global");
