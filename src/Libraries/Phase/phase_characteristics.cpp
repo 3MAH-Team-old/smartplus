@@ -57,7 +57,7 @@ namespace smart{
 */
 
 //-------------------------------------------------------------
-    phase_characteristics::phase_characteristics()
+phase_characteristics::phase_characteristics()
 //-------------------------------------------------------------
 {
     shape_type = 0;
@@ -74,7 +74,7 @@ namespace smart{
 */
 
 //-------------------------------------------------------------
-    phase_characteristics::phase_characteristics(const int &mshape_type, const int &msv_type, const std::shared_ptr<geometry> &msptr_shape, const std::shared_ptr<phase_multi> &msptr_multi, const std::shared_ptr<material_characteristics> &msptr_matprops, const std::shared_ptr<state_variables> &msptr_sv_global, const std::shared_ptr<state_variables> &msptr_sv_local, const std::shared_ptr<std::ofstream> &msptr_out_global, const std::shared_ptr<std::ofstream> &msptr_out_local, const std::string &msub_phases_file)
+phase_characteristics::phase_characteristics(const int &mshape_type, const int &msv_type, const std::shared_ptr<geometry> &msptr_shape, const std::shared_ptr<phase_multi> &msptr_multi, const std::shared_ptr<material_characteristics> &msptr_matprops, const std::shared_ptr<state_variables> &msptr_sv_global, const std::shared_ptr<state_variables> &msptr_sv_local, const std::shared_ptr<std::ofstream> &msptr_out_global, const std::shared_ptr<std::ofstream> &msptr_out_local, const std::string &msub_phases_file)
 //-------------------------------------------------------------
 {
     shape_type = mshape_type;
@@ -111,6 +111,7 @@ phase_characteristics::phase_characteristics(const phase_characteristics& pc)
     sub_phases = pc.sub_phases;
     sub_phases_file = pc.sub_phases_file;
 }
+    
 
 /*!
   \brief Destructor
@@ -167,6 +168,10 @@ void phase_characteristics::construct(const int &mshape_type, const int &msv_typ
     
     //Switch case for the state_variables type of the phase
     switch (sv_type) {
+        case 0: {
+            sptr_sv_global = std::make_shared<state_variables>();
+            sptr_sv_local = std::make_shared<state_variables>();
+        }
         case 1: {
             sptr_sv_global = std::make_shared<state_variables_M>();
             sptr_sv_local = std::make_shared<state_variables_M>();
@@ -280,7 +285,7 @@ void phase_characteristics::global2local()
         }
     }
 }
-    
+
 //----------------------------------------------------------------------
 phase_characteristics& phase_characteristics::operator = (const phase_characteristics& pc)
 //----------------------------------------------------------------------
@@ -297,7 +302,7 @@ phase_characteristics& phase_characteristics::operator = (const phase_characteri
     sub_phases = pc.sub_phases;
     sub_phases_file = pc.sub_phases_file;
     
-	return *this;
+    return *this;
 }
 
 //----------------------------------------------------------------------
@@ -487,6 +492,86 @@ ostream& operator << (ostream& s, const phase_characteristics& pc)
     s << "\n\n";
 
 	return s;
+}
+    
+//----------------------------------------------------------------------
+void phase_characteristics::copy(const phase_characteristics& pc)
+//----------------------------------------------------------------------
+{
+    shape_type =  pc.shape_type;
+    sv_type = pc.sv_type;
+    sptr_matprops = std::make_shared<material_characteristics>(*pc.sptr_matprops);
+    
+    //Switch case for the geometry of the phase
+    switch (shape_type) {
+        case 0: {
+            sptr_shape = std::make_shared<geometry>(*pc.sptr_shape);
+            sptr_multi = std::make_shared<phase_multi>(*pc.sptr_multi);
+            break;
+        }
+        case 1: {
+            std::shared_ptr<layer> lay = std::dynamic_pointer_cast<layer>(pc.sptr_shape);
+            std::shared_ptr<layer_multi> lay_multi = std::dynamic_pointer_cast<layer_multi>(pc.sptr_multi);
+            sptr_shape = std::make_shared<layer>(*lay);
+            sptr_multi = std::make_shared<layer_multi>(*lay_multi);
+            break;
+        }
+        case 2: {
+            std::shared_ptr<ellipsoid> elli = std::dynamic_pointer_cast<ellipsoid>(pc.sptr_shape);
+            std::shared_ptr<ellipsoid_multi> elli_multi = std::dynamic_pointer_cast<ellipsoid_multi>(pc.sptr_multi);
+            sptr_shape = std::make_shared<ellipsoid>(*elli);
+            sptr_multi = std::make_shared<ellipsoid_multi>(*elli_multi);
+            break;
+        }
+        case 3: {
+            std::shared_ptr<cylinder> cyl = std::dynamic_pointer_cast<cylinder>(pc.sptr_shape);
+            std::shared_ptr<cylinder_multi> cyl_multi = std::dynamic_pointer_cast<cylinder_multi>(pc.sptr_multi);
+            sptr_shape = std::make_shared<cylinder>(*cyl);
+            sptr_multi = std::make_shared<cylinder_multi>(*cyl_multi);
+            break;
+        }
+        default: {
+            cout << "error: The geometry type does not correspond (0 for general, 1 for layer, 2 for ellipsoid, 3 for cylinder)\n";
+            exit(0);
+            break;
+        }
+    }
+    
+    //Switch case for the state_variables type of the phase
+    switch (sv_type) {
+        case 0: {
+            sptr_sv_global = std::make_shared<state_variables>(*pc.sptr_sv_global);
+            sptr_sv_local = std::make_shared<state_variables>(*pc.sptr_sv_local);
+            break;
+        }
+        case 1: {
+            std::shared_ptr<state_variables_M> sv_M_g = std::dynamic_pointer_cast<state_variables_M>(pc.sptr_sv_global);
+            std::shared_ptr<state_variables_M> sv_M_l = std::dynamic_pointer_cast<state_variables_M>(pc.sptr_sv_local);
+            sptr_sv_global = std::make_shared<state_variables_M>(*sv_M_g);
+            sptr_sv_local = std::make_shared<state_variables_M>(*sv_M_l);
+            break;
+        }
+        case 2: {
+            std::shared_ptr<state_variables_T> sv_T_g = std::dynamic_pointer_cast<state_variables_T>(pc.sptr_sv_global);
+            std::shared_ptr<state_variables_T> sv_T_l = std::dynamic_pointer_cast<state_variables_T>(pc.sptr_sv_local);
+            sptr_sv_global = std::make_shared<state_variables_T>(*sv_T_g);
+            sptr_sv_local = std::make_shared<state_variables_T>(*sv_T_l);
+            break;
+        }
+        default: {
+            cout << "error: The state_variable type does not correspond (1 for Mechanical, 2 for Thermomechanical)\n";
+            exit(0);
+            break;
+        }
+    }
+
+    sub_phases.clear();
+    for (unsigned int i=0; i<pc.sub_phases.size(); i++) {
+        phase_characteristics temp;
+        temp.copy(pc.sub_phases[i]);
+        sub_phases.push_back(temp);
+    }
+    sub_phases_file = pc.sub_phases_file;
 }
 
 } //namespace smart
