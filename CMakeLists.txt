@@ -112,12 +112,17 @@ add_executable(identification software/identification.cpp)
 target_link_libraries(identification smartplus ${ARMADILLO_LIBRARIES})
 
 
-
-#Add the identification executable
+#Add the L_eff executable
 add_executable(L_eff software/Leff.cpp)
 
-#Link the identification executable with armadillo
+#Link the L_eff executable with smartplus and armadillo
 target_link_libraries(L_eff smartplus ${ARMADILLO_LIBRARIES})
+
+#Add the ODF executable
+add_executable(ODF software/ODF.cpp)
+
+#Link the ODF executable with smartplus and armadillo
+target_link_libraries(ODF smartplus ${ARMADILLO_LIBRARIES})
 
 ##Testing
 #Test files are in a separate source directory called test
