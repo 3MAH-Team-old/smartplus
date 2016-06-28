@@ -29,8 +29,14 @@
 
 namespace smart{
 
+//Fill the ODF from a vector of angles, providing a file with the peak informations
+arma::vec get_densities(const arma::vec &, const std::string &, const std::string &, const bool &);
+    
+//Fill the angles of the geom and material (if indicated 1 in angles_mat)
+void fill_angles(const double &, phase_characteristics &, const ODF &, const int & = 1);
+    
 //This function computes the ODF of the selected angle, according to different methods (Lorentzian, Pearson...)
-void discretize_ODF(phase_characteristics &, const phase_characteristics &, ODF &);
+phase_characteristics discretize_ODF(const phase_characteristics &, ODF &, const int &, const int &, const int & = 1);
 
 //Writes the Nphases.dat file for multiphase modeling, according to specific ODFs
 //void ODF2Nphases(const arma::Col<int> &, const arma::Col<int> &, const arma::Col<int> &, const std::vector<std::string> &, const arma::mat &, const bool& = false, const double& = 0.);
