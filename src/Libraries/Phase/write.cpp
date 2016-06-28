@@ -73,7 +73,6 @@ void write_layer(phase_characteristics &rve, const string &path_data, const stri
     paramphases << "Number\t" << "umat\t" << "save\t" << "c\t" << "psi_mat\t" << "theta_mat\t" << "phi_mat\t" << "psi_geom\t" << "theta_geom\t"	<< "phi_geom\t" << "nprops\t" << "nstatev\t" << "props\n";
     
     for(auto r : rve.sub_phases) {
-        
 
         r.sptr_matprops->psi_mat*=(180./pi);
         r.sptr_matprops->theta_mat*=(180./pi);
