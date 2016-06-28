@@ -34,6 +34,7 @@
 #include <smartplus/Libraries/Phase/write.hpp>
 #include <smartplus/Libraries/Material/peak.hpp>
 #include <smartplus/Libraries/Material/ODF.hpp>
+#include <smartplus/Libraries/Material/ODF2Nphases.hpp>
 #include <smartplus/Libraries/Material/read.hpp>
 
 using namespace std;
@@ -45,22 +46,18 @@ int main() {
     int nphases_rve = 36;
     
     phase_characteristics rve_init;
-    phase_characteristics rve;
     
     string umat_name = "MIPLN";
-//    int nprops = 0;
-//    int nstatev = 0;
     vec props = {2,0};
     
-    double rho = 0.;
-    double c_p = 0.;
+    double rho = 1.12;
+    double c_p = 1.68;
     
     double psi_rve = 0.;
     double theta_rve = 0.;
     double phi_rve = 0.;
     
     rve_init.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props, rho, c_p);
-    rve.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props, rho, c_p);
     
     string path_data = "data";
     string inputfile;
@@ -75,48 +72,49 @@ int main() {
         case 100: case 101: case 102: case 103: {
             rve_init.construct(2,1); //The rve is supposed to be mechanical only here
             
-            inputfile = "Nellipsoids" + to_string(rve_init.sptr_matprops->props(1)) + ".dat";
+            inputfile = "Nellipsoids" + to_string(int(rve_init.sptr_matprops->props(1))) + ".dat";
             read_ellipsoid(rve_init, path_data, inputfile);
-            
-            rve.construct(2,1); //The rve is supposed to be mechanical only here
-            rve.sub_phases_construct(nphases_rve,2,1);
             break;
         }
         case 104: {
             rve_init.construct(1,1); //The rve is supposed to be mechanical only here
-
-            inputfile = "Nlayers" + to_string(rve_init.sptr_matprops->props(1)) + ".dat";
-            read_ellipsoid(rve_init, path_data, inputfile);
             
-            rve.construct(1,1); //The rve is supposed to be mechanical only here
-            rve.sub_phases_construct(nphases_rve,1,1);
-
+            inputfile = "Nlayers" + to_string(int(rve_init.sptr_matprops->props(1))) + ".dat";
+            read_layer(rve_init, path_data, inputfile);
             break;
         }
     }
     
     double angle_min = 0.;
-    double angle_max = pi;
+    double angle_max = 180.;
     
-    ODF odf_rve;
-    read_peak(odf_rve, 0);
+    ODF odf_rve(0, false, angle_min, angle_max);
+    read_peak(odf_rve, path_data, "Npeaks0.dat");
     
-    cout << odf_rve;
+    vec x = linspace<vec>(0,  178,  90);
+    cout << "x = " << x.t() << endl;
+    
+    vec y = get_densities(x, path_data, "Npeaks0.dat", false);
+    cout << "y = " << y.t() << endl;
+    
+    phase_characteristics rve = discretize_ODF(rve_init, odf_rve, 1, nphases_rve,0);
 
-    cout << "rve.shape_type" << rve.shape_type << endl;
-    
+    if(rve.shape_type == 0) {
+        outputfile = "Nphases1.dat";
+        write_phase(rve, path_data, outputfile);
+    }
     if(rve.shape_type == 1) {
         outputfile = "Nlayers1.dat";
         write_layer(rve, path_data, outputfile);
-        cout << "Nlayers1" << endl;
     }
     else if(rve.shape_type == 2) {
         outputfile = "Nellipsopids1.dat";
-        write_layer(rve, path_data, outputfile);
-        cout << "Nlayers1" << endl;
+        write_ellipsoid(rve, path_data, outputfile);
+    }
+    else if(rve.shape_type == 3) {
+        outputfile = "Ncylinders1.dat";
+        write_cylinder(rve, path_data, outputfile);
     }
 
-    
-    
 	return 0;
 }
