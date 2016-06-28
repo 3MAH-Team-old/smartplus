@@ -42,7 +42,6 @@ void read_phase(phase_characteristics &rve, const string &path_data, const strin
     std::string buffer;
     std::string path_inputfile = path_data + "/" + inputfile;
     std::ifstream paramphases;
-//    std::shared_ptr<phase> sptr_phase;
     
     paramphases.open(path_inputfile, ios::in);
     if(paramphases) {
