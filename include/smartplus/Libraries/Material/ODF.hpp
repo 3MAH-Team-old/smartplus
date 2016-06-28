@@ -24,6 +24,7 @@
 #include <iostream>
 #include <string>
 #include <armadillo>
+#include "../../parameter.hpp"
 #include "peak.hpp"
 
 namespace smart{
@@ -51,7 +52,7 @@ class ODF
         arma::vec limits; //minimal and maximal angles of orientation
     
 		ODF(); 	//default constructor
-        ODF(const int &, const int &, const bool &); //Partial constructor
+        ODF(const int &, const bool & = false, const double & = 0., const double & = pi); //Partial constructor
         ODF(const int &, const int &, const int &, const std::vector<peak> &, const double &, const arma::vec &, const arma::vec &, const bool & = false); //Full constructor
 
 		ODF(const ODF&);	//Copy constructor
