@@ -120,7 +120,8 @@ void umat_multi(phase_characteristics &phase, const mat &DR, const double &Time,
                 break;
             }
             case 102: {
-                DE_Self_Consistent(phase, start, 0);
+                int n_matrix = phase.sptr_matprops->props(4);
+                DE_Self_Consistent(phase, n_matrix, start, 0);
                 break;
             }
             case 104: {
@@ -163,7 +164,8 @@ void umat_multi(phase_characteristics &phase, const mat &DR, const double &Time,
                 break;
             }
             case 102: {
-                Lt_Self_Consistent(phase, start, 0);
+                int n_matrix = phase.sptr_matprops->props(4);
+                Lt_Self_Consistent(phase, n_matrix, start, 0);
                 break;
             }
             case 104: {
