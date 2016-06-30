@@ -110,13 +110,11 @@ void get_L_elastic(phase_characteristics &rve)
             double Gxz = rve.sptr_matprops->props(7);
             double Gyz = rve.sptr_matprops->props(8);
             
-            L_ortho(Ex,Ey,Ez,nuxy,nuxz,nuyz,Gxy,Gxz,Gyz, "EnuG");
+            umat_M->Lt = L_ortho(Ex,Ey,Ez,nuxy,nuxz,nuyz,Gxy,Gxz,Gyz, "EnuG");
             break;
         }
         case 100: {
-            
              for (auto r : rve.sub_phases) {
-
                 get_L_elastic(r);
             }
             Lt_Homogeneous_E(rve);
@@ -125,7 +123,6 @@ void get_L_elastic(phase_characteristics &rve)
         case 101: {
             for (auto r : rve.sub_phases) {
                 get_L_elastic(r);
-                
             }
             Lt_Mori_Tanaka(rve);
             break;
@@ -133,9 +130,28 @@ void get_L_elastic(phase_characteristics &rve)
         case 102: {
             for (auto r : rve.sub_phases) {
                 get_L_elastic(r);
-                
             }
-            Lt_Self_Consistent(rve, true, 0);
+            int n_matrix = rve.sptr_matprops->props(4);
+            Lt_Self_Consistent(rve, n_matrix, true, 1);
+            
+            mat Lt_n = zeros(6,6);
+            int nbiter=0;
+            double error = 1.;
+            
+            while ((error > precision_micro)&&(nbiter <= maxiter_micro)) {
+                Lt_n = umat_M->Lt;
+                for (auto r : rve.sub_phases) {
+                    get_L_elastic(r);
+                }
+                Lt_Self_Consistent(rve, n_matrix, false, 1);
+                umat_M->Lt = zeros(6,6);
+                for (auto r : rve.sub_phases) {
+                    umat_sub_phases_M = std::dynamic_pointer_cast<state_variables_M>(r.sptr_sv_global);
+                    umat_M->Lt += r.sptr_shape->concentration*(umat_sub_phases_M->Lt*r.sptr_multi->A);
+                }
+                error = norm(umat_M->Lt - Lt_n,2.);
+                nbiter++;
+            }
             break;
         }
         case 104: {
@@ -147,16 +163,24 @@ void get_L_elastic(phase_characteristics &rve)
         }
         default: {
             cout << "Error: The choice of Cnstitutive model is not purely linear elastic or could not be found in the umat library :" << rve.sptr_matprops->umat_name << "\n";
-            exit(0);
+            return;
         }
     }
+
+    switch (method) {
+            
+        case 100: case 101: case 102: case 103: case 104: {
     
-    // Compute the effective tangent modulus, and the effective stress
-    for (auto r : rve.sub_phases) {
-        umat_sub_phases_M = std::dynamic_pointer_cast<state_variables_M>(r.sptr_sv_global);
-        umat_M->Lt += r.sptr_shape->concentration*(umat_sub_phases_M->Lt*r.sptr_multi->A);
+            // Compute the effective tangent modulus, and the effective stress
+            umat_M->Lt = zeros(6,6);
+            for (auto r : rve.sub_phases) {
+                umat_sub_phases_M = std::dynamic_pointer_cast<state_variables_M>(r.sptr_sv_global);
+                umat_M->Lt += r.sptr_shape->concentration*(umat_sub_phases_M->Lt*r.sptr_multi->A);
+            }
+            break;
+        }
+        default: break;
     }
-    
     rve.local2global();
     
 }
