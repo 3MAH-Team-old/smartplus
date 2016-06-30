@@ -63,20 +63,29 @@ then
     #if debug existsn, copy of solver from Debug
     if [ -f ${current_dir}/build/bin/Debug/identification ]
     then
-    cp ${current_dir}/build/bin/Debug/identification ${current_dir}/build/bin
+        cp ${current_dir}/build/bin/Debug/identification ${current_dir}/build/bin
     fi
 
     #if debug existsn, copy of solver from Debug
     if [ -f ${current_dir}/build/bin/Debug/L_eff ]
     then
-    cp ${current_dir}/build/bin/Debug/L_eff ${current_dir}/build/bin
+        cp ${current_dir}/build/bin/Debug/L_eff ${current_dir}/build/bin
     fi
 
+    #if debug existsn, copy of solver from Debug
+    if [ -f ${current_dir}/build/bin/Debug/ODF ]
+    then
+        cp ${current_dir}/build/bin/Debug/ODF ${current_dir}/build/bin
+    fi
 
 	cp ${current_dir}/build/bin/solver ${current_dir}/exec
 	cp ${current_dir}/build/bin/identification ${current_dir}/exec
 	cp ${current_dir}/build/bin/L_eff ${current_dir}/exec
-	echo "Solver copied in ${current_dir}/exec"
+	cp ${current_dir}/build/bin/ODF ${current_dir}/exec
+	echo "solver copied in ${current_dir}/exec"
+	echo "identification copied in ${current_dir}/exec"
+	echo "L_eff copied in ${current_dir}/exec"
+	echo "ODF copied in ${current_dir}/exec"
 	echo "libsmartplus.so available in ${current_dir}/lib"
 	echo "---------------------------"
 	echo "SMART+ compilation done.\n"
