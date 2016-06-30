@@ -39,8 +39,8 @@ void DE_Homogeneous_E(phase_characteristics &);
 void Lt_Mori_Tanaka(phase_characteristics &);
 void DE_Mori_Tanaka(phase_characteristics &);
     
-void Lt_Self_Consistent(phase_characteristics &, const bool &, const int &);
-void DE_Self_Consistent(phase_characteristics &, const bool &, const int &);
+void Lt_Self_Consistent(phase_characteristics &, const int &, const bool &, const int & = 1);
+void DE_Self_Consistent(phase_characteristics &, const int &, const bool &, const int & = 1);
 
 void Lt_Periodic_Layer(phase_characteristics &);
 void dE_Periodic_Layer(phase_characteristics &, const int &);
