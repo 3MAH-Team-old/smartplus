@@ -42,7 +42,8 @@ int main() {
     
 	///Material properties reading, use "material.dat" to specify parameters values
     string umat_name;
-	string materialfile = "data/material.dat";
+    string path_data = "data";
+	string materialfile = "material.dat";
 	
     int nprops = 0;
     int nstatev = 0;
@@ -57,7 +58,7 @@ int main() {
     
     double T_init = 273.15;
     
-    read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p, materialfile);
+    read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p, path_data, materialfile);
     phase_characteristics rve;
     
     rve.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props, rho, c_p);
