@@ -95,7 +95,7 @@ Col<int> checkS(const mat &S) {
 mat reduce_S(const mat &S, const Col<int> &pb_col) {
     
     mat S_reduced = S;
-    for (int j = (fabs(S.n_cols)); j > 0; j--) {
+    for (int j = (fabs(S.n_cols))-1; j > -1; j--) {
         if (pb_col(j) == 1) {
             S_reduced.shed_col(j);
         }
