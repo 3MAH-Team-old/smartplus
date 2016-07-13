@@ -190,7 +190,7 @@ void launch_solver(const individual &ind, const int &nfiles, vector<parameters> 
         read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p, path_data, materialfile);
         
         ///Launching the solver with relevant parameters
-        solver(umat_name, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p, pathfile, outputfile);
+        solver(umat_name, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p, path_data, ".", pathfile, outputfile);
         
         //Get the simulation files according to the proper name
         outputfile = folder + "/" + name_root + + "_" + to_string(ind.id) + "_" + to_string(i+1) + "_global-0" + name_ext;
