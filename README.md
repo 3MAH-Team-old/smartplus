@@ -31,7 +31,10 @@ How to install SMART+ :
 2 - Unzip the file in a source location, and rename it 'smartplus'.
 3 - Go to such folder "smartplus"
 4 - Execute the installation bash file : 
-** sh Install.sh
+```bash
+sh Install.sh
+```
+
 5 - Enjoy
 
 
@@ -55,7 +58,10 @@ An example is provided on how to use smartplus constitutive models as Umat libra
 
 You can directly copy-paste "umat_single.o" (mechanical) or "umat_singleT.o" (thermomechanical) from 'pathtothefile'/smartplus/build/bin to your Abaqus work directory and use it like a classical Umat.
 
-Example : abaqus job=mymodel.inp user=umat_single.o
+Example : 
+```bash
+abaqus job=mymodel.inp user=umat_single.o
+```
 
 4- Build your own projects using the SMART+ library
 
