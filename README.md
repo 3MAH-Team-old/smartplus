@@ -28,9 +28,13 @@ Installation
 How to install SMART+ :
 
 1 - Make sure you have Boost (1.60 at least) installed and Armadillo installed to use smartplus.
+
 2 - Unzip the file in a source location, and rename it 'smartplus'.
+
 3 - Go to such folder "smartplus"
+
 4 - Execute the installation bash file : 
+
 ```bash
 sh Install.sh
 ```
@@ -50,6 +54,7 @@ Several possibilities
 By doing, so, you can utilize smartplus in Ipython (jupyter) notebooks
 
 2 - Use the executables provided by smartplus
+
 For instance, a solver, an identification software, etc..
 
 3 - Link smartplus with FEA Packages
@@ -66,7 +71,6 @@ abaqus job=mymodel.inp user=umat_single.o
 4- Build your own projects using the SMART+ library
 
 Link with -lsmartplus
-
 Have fun :)
 
 Authors
