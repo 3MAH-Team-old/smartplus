@@ -19,7 +19,7 @@ Documentation
 
 Provider      | Status
 --------      | ------
-Read the Docs | [![Documentation Status](http://smartplus.readthedocs.io/en/latest)](https://readthedocs.org/projects/smartplus/badge/?version=latest)
+Read the Docs | [![Documentation Status](https://readthedocs.org/projects/smartplus/badge/?version=latest)](http://smartplus.readthedocs.io/en/latest)
 
 
 Installation
@@ -29,8 +29,9 @@ How to install SMART+ :
 
 1 - Make sure you have Boost (1.60 at least) installed and Armadillo installed to use smartplus.
 2 - Unzip the file in a source location, and rename it 'smartplus'.
-3 - Go to such folder "smartplus" (** cd 'pathtothefile'/smartplus)
-4 - Execute the installation bash file : (** sh Install.sh)
+3 - Go to such folder "smartplus"
+4 - Execute the installation bash file : 
+** sh Install.sh
 5 - Enjoy
 
 
@@ -41,7 +42,7 @@ Several possibilities
 
 1 - Use the python wrapper for smartplus, simmit :
 
-[![simmit](https://github.com/chemiskyy/simmit)
+[![simmit](https://img.shields.io/badge/simmit-v0.9-blue.svg)](https://github.com/chemiskyy/simmit)
 
 By doing, so, you can utilize smartplus in Ipython (jupyter) notebooks
 
