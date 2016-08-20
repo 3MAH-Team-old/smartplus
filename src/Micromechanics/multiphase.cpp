@@ -116,7 +116,8 @@ void umat_multi(phase_characteristics &phase, const mat &DR, const double &Time,
                 break;
             }
             case 101: {
-                DE_Mori_Tanaka(phase);
+                int n_matrix = phase.sptr_matprops->props(4);
+                DE_Mori_Tanaka(phase, n_matrix);
                 break;
             }
             case 102: {
@@ -160,7 +161,8 @@ void umat_multi(phase_characteristics &phase, const mat &DR, const double &Time,
                 break;
             }
             case 101: {
-                Lt_Mori_Tanaka(phase);
+                int n_matrix = phase.sptr_matprops->props(4);
+                Lt_Mori_Tanaka(phase, n_matrix);
                 break;
             }
             case 102: {
