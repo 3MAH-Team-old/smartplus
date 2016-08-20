@@ -46,9 +46,6 @@ BOOST_AUTO_TEST_CASE( read_write )
     
     vec props = {2,0};
     
-    double rho = 1.12;
-    double c_p = 1.68;
-    
     double psi_rve = 0.;
     double theta_rve = 0.;
     double phi_rve = 0.;
@@ -56,7 +53,7 @@ BOOST_AUTO_TEST_CASE( read_write )
     //Phases
     phase_characteristics rve_phase;
     
-    rve_phase.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props, rho, c_p);
+    rve_phase.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props);
     rve_phase.construct(0,1); //The rve is supposed to be mechanical only here
     inputfile = "Nphases" + to_string(int(rve_phase.sptr_matprops->props(1))) + ".dat";
     outputfile = "Nphases1.dat";
@@ -76,7 +73,7 @@ BOOST_AUTO_TEST_CASE( read_write )
     
     //Layers
     phase_characteristics rve_layer;
-    rve_layer.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props, rho, c_p);
+    rve_layer.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props);
     rve_layer.construct(1,1); //The rve is supposed to be mechanical only here
 
     inputfile = "Nlayers" + to_string(int(rve_layer.sptr_matprops->props(1))) + ".dat";
@@ -98,7 +95,7 @@ BOOST_AUTO_TEST_CASE( read_write )
     
     //Ellipsoid
     phase_characteristics rve_ellipsoid;
-    rve_ellipsoid.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props, rho, c_p);
+    rve_ellipsoid.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props);
     rve_ellipsoid.construct(2,1); //The rve is supposed to be mechanical only here
 
     inputfile = "Nellipsoids" + to_string(int(rve_ellipsoid.sptr_matprops->props(1))) + ".dat";
@@ -120,7 +117,7 @@ BOOST_AUTO_TEST_CASE( read_write )
     
     //Cylinder
     phase_characteristics rve_cylinder;
-    rve_cylinder.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props, rho, c_p);
+    rve_cylinder.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props);
     rve_cylinder.construct(3,1); //The rve is supposed to be mechanical only here
     
     inputfile = "Ncylinders" + to_string(int(rve_cylinder.sptr_matprops->props(1))) + ".dat";
