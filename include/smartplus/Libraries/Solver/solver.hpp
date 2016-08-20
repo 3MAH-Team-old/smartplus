@@ -26,6 +26,6 @@
 namespace smart{
 
 //function that solves a
-void solver(const std::string &, const arma::vec &, const double &, const double &, const double &, const double &, const double &, const double &, const std::string& = "data", const std::string& = "results", const std::string& = "path.txt", const std::string& = "result_job.txt");
+void solver(const std::string &, const arma::vec &, const double &, const double &, const double &, const double &, const std::string& = "data", const std::string& = "results", const std::string& = "path.txt", const std::string& = "result_job.txt");
 
 } //namespace smart
