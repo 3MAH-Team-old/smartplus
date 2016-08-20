@@ -50,20 +50,17 @@ class material_characteristics
 		int nprops;
 		arma::vec props;
     
-        double rho;
-        double c_p;
-    
 		material_characteristics(); 	//default constructor
 		material_characteristics(const int &, const bool& = true, const double& = 0.);	//constructor - allocates memory for props
     
-        material_characteristics(const int &, const std::string &, const int &, const double &, const double &, const double &, const int &, const arma::vec &, const double &, const double &);
+        material_characteristics(const int &, const std::string &, const int &, const double &, const double &, const double &, const int &, const arma::vec &);
 
 		material_characteristics(const material_characteristics&);	//Copy constructor
         virtual ~material_characteristics();
 
 		virtual void resize();
 		virtual void resize(const int &, const bool & = true, const double & = 0.);
-		virtual void update(const int &, const std::string &, const int &, const double &, const double &, const double &, const int &, const arma::vec &, const double &, const double &);
+		virtual void update(const int &, const std::string &, const int &, const double &, const double &, const double &, const int &, const arma::vec &);
 		virtual int dimprops () const {return nprops;}       // returns the number of props, nprops
     
 		virtual material_characteristics& operator = (const material_characteristics&);
