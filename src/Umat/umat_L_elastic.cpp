@@ -124,7 +124,8 @@ void get_L_elastic(phase_characteristics &rve)
             for (auto r : rve.sub_phases) {
                 get_L_elastic(r);
             }
-            Lt_Mori_Tanaka(rve);
+            int n_matrix = rve.sptr_matprops->props(4);
+            Lt_Mori_Tanaka(rve, n_matrix);
             break;
         }
         case 102: {
