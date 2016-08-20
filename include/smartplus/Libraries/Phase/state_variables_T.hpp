@@ -36,24 +36,32 @@ namespace smart{
 	protected:
 
 	public :
+    
+        arma::vec Wm;
+        arma::vec Wt;
+        arma::vec Wm_start;
+        arma::vec Wt_start;
 		
         arma::mat dSdE;
         arma::mat dSdEt;
         arma::mat dSdT;
         double Q;
-        double rpl;
-        arma::mat drpldE;
-        arma::mat drpldT;
+        double r;
+    
+        arma::mat drdE;
+        arma::mat drdT;
 
 		state_variables_T(); 	//default constructor
-		state_variables_T(const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const double &, const double &, const double &, const double &, const int &, const arma::vec &, const arma::vec &, const double &, const double &, const arma::mat &, const arma::mat &, const arma::mat &, const arma::mat &, const arma::mat &); //Constructor with parameters
+		state_variables_T(const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const double &, const double &, const int &, const arma::vec &, const arma::vec &, const double &, const double &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::mat &, const arma::mat &, const arma::mat &, const arma::mat &, const arma::mat &); //Constructor with parameters
 		state_variables_T(const state_variables_T &);	//Copy constructor
 		virtual ~state_variables_T();
 		
 		virtual state_variables_T& operator = (const state_variables_T&);
 		
         using state_variables::update;
-        virtual void update(const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const double &, const double &, const double &, const double &, const int &, const arma::vec &, const arma::vec &, const double &, const double &, const arma::mat &, const arma::mat &, const arma::mat &, const arma::mat &, const arma::mat &);
+    virtual void update(const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const double &, const double &, const int &, const arma::vec &, const arma::vec &, const double &, const double &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::mat &, const arma::mat &, const arma::mat &, const arma::mat &, const arma::mat &);
+        virtual void to_start(); //Wm & Wt goes to Wm_start & Wt_start, respectively
+        virtual void set_start(); //Wm_start & Wt_start goes to Wm & Wt, respectively
     
         using state_variables::rotate_l2g;
         virtual state_variables_T& rotate_l2g(const state_variables_T&, const double&, const double&, const double&);
