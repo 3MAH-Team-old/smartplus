@@ -82,7 +82,7 @@ void Lth_2_K(const mat &dSdE, mat &dSdT, mat &dQdE, mat &dQdT, mat &K, const Col
     }
 }
 
-void read_matprops(string &umat_name, int &nprops, vec &props, int &nstatev, double &psi_rve, double &theta_rve, double &phi_rve, double &rho, double &c_p, const string &path_data, const string &materialfile) {
+void read_matprops(string &umat_name, int &nprops, vec &props, int &nstatev, double &psi_rve, double &theta_rve, double &phi_rve, const string &path_data, const string &materialfile) {
 
     ///Material properties reading, use "material.dat" to specify parameters values
 	string buffer;
@@ -108,7 +108,7 @@ void read_matprops(string &umat_name, int &nprops, vec &props, int &nstatev, dou
 	propsmat.open(path_materialfile, ios::in);
 	if(propsmat) {
 		string buffer;
-		propsmat >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> psi_rve >> buffer >> theta_rve >> buffer >> phi_rve >> buffer >> buffer >> rho >> buffer >> c_p >> buffer;
+		propsmat >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> psi_rve >> buffer >> theta_rve >> buffer >> phi_rve >> buffer;
         
 		for(int i=0;i<nprops;i++)
 			propsmat >> buffer >> props(i);
