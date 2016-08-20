@@ -50,14 +50,11 @@ int main() {
     string umat_name = "MIPLN";
     vec props = {2,0};
     
-    double rho = 1.12;
-    double c_p = 1.68;
-    
     double psi_rve = 0.;
     double theta_rve = 0.;
     double phi_rve = 0.;
     
-    rve_init.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props, rho, c_p);
+    rve_init.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props);
     
     string path_data = "data";
     string inputfile;
