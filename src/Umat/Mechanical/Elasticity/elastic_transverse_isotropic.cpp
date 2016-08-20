@@ -42,7 +42,7 @@ namespace smart {
 
 ///@brief No statev is required for thermoelastic constitutive law
 
-void umat_elasticity_trans_iso(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT,const double &Time,const double &DTime, double &sse, double &spd, const int &ndi, const int &nshr, const bool &start, double &tnew_dt)
+void umat_elasticity_trans_iso(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT, const double &Time, const double &DTime, double &Wm, double &Wm_r, double &Wm_ir, double &Wm_d, const int &ndi, const int &nshr, const bool &start, double &tnew_dt)
 {  	
 
     UNUSED(Etot);
@@ -108,15 +108,11 @@ void umat_elasticity_trans_iso(const vec &Etot, const vec &DEtot, vec &sigma, ma
     else
         sigma = sigma_start + (Lt*DEel);
     
-    //Returning the energy
-    vec Dsigma = sigma - sigma_start;
-    
-    double Dtde = 0.5*sum((sigma_start+sigma)%DEtot);
-    double Dsse = sum(sigma_start%DEel) + 0.5*sum(Dsigma%DEel);
-    
-    sse += Dsse;
-    spd += Dtde - Dsse;
-        
+    //Computation of the mechanical and thermal work quantities
+    Wm += 0.5*sum((sigma_start+sigma)%DEtot);
+    Wm_r += 0.5*sum((sigma_start+sigma)%DEtot);
+    Wm_ir += 0.;
+    Wm_d += 0.;
 }
     
 } //namespace smart

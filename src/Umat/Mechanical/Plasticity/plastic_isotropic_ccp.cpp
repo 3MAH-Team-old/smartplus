@@ -53,7 +53,7 @@ namespace smart {
 ///@brief statev[6] : Plastic strain 13: EP(0,2) (*2)
 ///@brief statev[7] : Plastic strain 23: EP(1,2) (*2)
 
-void umat_plasticity_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT,const double &Time,const double &DTime, double &sse, double &spd, const int &ndi, const int &nshr, const bool &start, double &tnew_dt)
+void umat_plasticity_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT, const double &Time, const double &DTime, double &Wm, double &Wm_r, double &Wm_ir, double &Wm_d, const int &ndi, const int &nshr, const bool &start, double &tnew_dt)
 {
 
     UNUSED(nprops);
@@ -101,6 +101,7 @@ void umat_plasticity_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, mat 
 		p = 0.;
 	}
     vec sigma_start = sigma;
+    vec EP_start = EP;
     
     double p_temp = p;
     double p_start = p;
@@ -143,6 +144,7 @@ void umat_plasticity_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, mat 
         Hp = k*pow(p, m);
 	else
         Hp = 0.;
+    double Hp_start = Hp;
     
     //Initialization of the function that defines the elastic domain
 	Phi = Mises_stress(sigma) - Hp - sigmaY;
@@ -254,15 +256,18 @@ void umat_plasticity_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, mat 
 	statev(6) = EP(4);
 	statev(7) = EP(5);
     
-	//Returning the energy
-    vec DEel = Eel - Eel_start;
-	vec Dsigma = sigma - sigma_start;
+    //Computation of the increments of variables
+    vec Dsigma = sigma - sigma_start;
+    vec DEP = EP - EP_start;
+    double Dp = p-p_start;
     
-	double Dtde = 0.5*sum((sigma_start+sigma)%DEtot);
-	double Dsse = sum(sigma_start%DEel) + 0.5*sum(Dsigma%DEel);
+    double gamma_loc = 0.5*sum((sigma_start+sigma)%DEP) - 0.5*(Hp_start + Hp)*Dp;
     
-	sse += Dsse;
-	spd += Dtde - Dsse;
+    //Computation of the mechanical and thermal work quantities
+    Wm += 0.5*sum((sigma_start+sigma)%DEtot);
+    Wm_r += 0.5*sum((sigma_start+sigma)%(DEtot-DEP));
+    Wm_ir += 0.5*(Hp_start + Hp)*Dp;
+    Wm_d += gamma_loc;
 }
     
 } //namespace smart

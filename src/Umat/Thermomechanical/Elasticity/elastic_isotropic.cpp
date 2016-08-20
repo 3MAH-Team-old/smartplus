@@ -37,7 +37,7 @@ namespace smart{
 
 ///@brief No statev is required for thermoelastic constitutive law
 
-void umat_elasticity_iso_T(const vec &Etot, const vec &DEtot, vec &sigma, double &rpl, mat &dSdE, mat &dSdT, mat &drpldE, mat &drpldT, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT,const double &Time,const double &DTime, double &sse, double &spd, const int &ndi, const int &nshr, const bool &start, double &tnew_dt)
+void umat_elasticity_iso_T(const vec &Etot, const vec &DEtot, vec &sigma, double &r, mat &dSdE, mat &dSdT, mat &drdE, mat &drdT, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT,const double &Time,const double &DTime, double &Wm, double &Wm_r, double &Wm_ir, double &Wm_d, double &Wt, double &Wt_r, double &Wt_ir, const int &ndi, const int &nshr, const bool &start, double &tnew_dt)
 {  	
 
     UNUSED(Etot);
@@ -52,59 +52,109 @@ void umat_elasticity_iso_T(const vec &Etot, const vec &DEtot, vec &sigma, double
     UNUSED(tnew_dt);    
     
 	//From the props to the material properties
-	double E = props(0);
-	double nu = props(1);
-	double alpha = props(2);
-	
+    double rho = props(0);
+    double c_p = props(1); // Make sure c_p has been identified at T = T_init
+    double E = props(2);
+	double nu = props(3);
+	double alpha_iso = props(4);
+    
+    double T_init = statev(0);
+    
+    //definition of the CTE tensor
+    vec alpha = alpha_iso*Ith();
+    
 	// ######################  Elastic compliance and stiffness #################################			
 	//defines L
 	dSdE = L_iso(E, nu, "Enu");
+    dSdT = -1.*dSdE*alpha;
 	
 	if(start) { //Initialization
+        T_init = T;
 		sigma = zeros(6);
+        
+        Wm = 0.;
+        Wm_r = 0.;
+        Wm_ir = 0.;
+        Wm_d = 0.;
+        
+        Wt = 0.;
+        Wt_r = 0.;
+        Wt_ir = 0.;        
 	}	
-	
+
+    //Additional parameters
+    double c_0 = rho*c_p;
+    
 	vec sigma_start = sigma;
 	
-	//Compute the elastic strain and the related stress	
-	vec DEel = DEtot - alpha*Ith()*DT;
+	//Compute the elastic strain and the related stress
+	vec Eel = Etot + DEtot - alpha*(T+DT-T_init);
 
 	if (ndi == 1) {
-        sigma(0) = sigma_start(0) + E*(DEel(0));
+        sigma(0) = E*Eel(0);
     }
 	else if (ndi == 2) {
-        sigma(0) = sigma_start(0) + E/(1. - (nu*nu))*(DEel(0)) + nu*(DEel(1));
-        sigma(1) = sigma_start(1) + E/(1. - (nu*nu))*(DEel(1)) + nu*(DEel(0));
-        sigma(3) = sigma_start(3) + E/(1.+nu)*0.5*DEel(3);
+        sigma(0) = E/(1. - (nu*nu))*(Eel(0)) + nu*(Eel(1));
+        sigma(1) = E/(1. - (nu*nu))*(Eel(1)) + nu*(Eel(0));
+        sigma(3) = E/(1.+nu)*0.5*Eel(3);
     }
     else
-        sigma = sigma_start + (dSdE*DEel);
+        sigma = dSdE*Eel;
     
-    //Returning the energy
+    //Computation of the increments of variables
     vec Dsigma = sigma - sigma_start;
+
+    //computation of the internal energy production
+    double eta_r = c_0*log((T+DT)/T_init) + sum(alpha%sigma);
+    double eta_r_start = c_0*log(T/T_init) + sum(alpha%sigma_start);
     
-    double Dtde = 0.5*sum((sigma_start+sigma)%DEtot);
-    double Dsse = sum(sigma_start%DEel) + 0.5*sum(Dsigma%DEel);
+    double eta_ir = 0.;
+    double eta_ir_start = 0.;
     
-    sse += Dsse;
-    spd += Dtde - Dsse;
+    double eta = eta_r + eta_ir;
+    double eta_start = eta_r_start + eta_ir_start;
     
-    //Computation of the Thermal coupling variables
-    vec Lth = -1.*(dSdE*Ith())*alpha;
+    double Deta = eta - eta_start;
+    double Deta_r = eta_r - eta_r_start;
+    double Deta_ir = eta_ir - eta_ir_start;
+    
+    vec Gamma_epsilon = zeros(6);
+    double Gamma_theta = 0.;
+    
+    vec N_epsilon = zeros(6);
+    double N_theta = 0.;
     
     if(DTime < 1.E-12) {
-        rpl = 0.;
-        dSdT = Lth;
-        drpldE = zeros(6);
-        drpldT = 0.;
+        r = 0.;
+        drdE = zeros(6);
+        drdT = 0.;
     }
     else {
-        rpl = -alpha/DTime*(T + DT)*sum(Ith()%Dsigma);
-        dSdT = Lth;
-        drpldE = 1./DTime*(T + DT)*Lth;
-        drpldT = -1./DTime*alpha*(sum(Ith()%Dsigma)+(T + DT)*sum(Lth%Ith()));
+        Gamma_epsilon = zeros(6);
+        Gamma_theta = 0.;
+        
+        N_epsilon = -1./DTime*(T + DT)*(dSdE*alpha);
+        N_theta = -1./DTime*(T + DT)*sum(dSdT%alpha) -1.*Deta/DTime - rho*c_p*(1./DTime);
+        
+        drdE = N_epsilon;// + Gamma_epsilon;
+        drdT = N_theta;// + Gamma_theta;
+        
+        r = sum(N_epsilon%DEtot) + N_theta*DT + sum(Gamma_epsilon%DEtot) + Gamma_theta*DT;
     }
-                
+    
+    double Dgamma_loc = 0.;
+    
+    //Computation of the mechanical and thermal work quantities
+    Wm += 0.5*sum((sigma_start+sigma)%DEtot);
+    Wm_r += 0.5*sum((sigma_start+sigma)%(DEtot));
+    Wm_ir += 0.;
+    Wm_d += Dgamma_loc;
+    
+    Wt += (T+0.5*DT)*Deta;
+    Wt_r += (T+0.5*DT)*Deta_r;
+    Wt_ir = (T+0.5*DT)*Deta_ir;
+    
+    statev(0) = T_init;
 }
     
 } //namespace smart
