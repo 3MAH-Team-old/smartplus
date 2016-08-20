@@ -36,8 +36,8 @@ namespace smart{
 void Lt_Homogeneous_E(phase_characteristics &);
 void DE_Homogeneous_E(phase_characteristics &);
 
-void Lt_Mori_Tanaka(phase_characteristics &);
-void DE_Mori_Tanaka(phase_characteristics &);
+void Lt_Mori_Tanaka(phase_characteristics &, const int &);
+void DE_Mori_Tanaka(phase_characteristics &, const int &);
     
 void Lt_Self_Consistent(phase_characteristics &, const int &, const bool &, const int & = 1);
 void DE_Self_Consistent(phase_characteristics &, const int &, const bool &, const int & = 1);
