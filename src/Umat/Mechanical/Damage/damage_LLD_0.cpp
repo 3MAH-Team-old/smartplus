@@ -42,7 +42,7 @@ namespace smart {
 ///@param props(5) : lambdaD Damage evolution parameter lambda
 ///@param props(6) : deltaD Damage evolution parameter delta
     
-void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT,const double &Time,const double &DTime, double &sse, double &spd, const int &ndi, const int &nshr, const bool &start, double &tnew_dt) {
+void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT, const double &Time, const double &DTime, double &Wm, double &Wm_r, double &Wm_ir, double &Wm_d, const int &ndi, const int &nshr, const bool &start, double &tnew_dt) {
     
     UNUSED(nprops);
     UNUSED(nstatev);
@@ -636,16 +636,12 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     statev(7) = EP(3);
     statev(8) = EP(4);
     statev(9) = EP(5);
-    
-    //Returning the energy
-    vec DEel = Eel - Eel_start;
-    vec Dsigma = sigma - sigma_start;
-    
-    double Dtde = 0.5*sum((sigma_start+sigma)%DEtot);
-    double Dsse = sum(sigma_start%DEel) + 0.5*sum(Dsigma%DEel);
-    
-    sse += Dsse;
-    spd += Dtde - Dsse;
+            
+    //Computation of the mechanical and thermal work quantities
+    Wm += 0.5*sum((sigma_start+sigma)%DEtot);
+    Wm_r += 0.5*sum((sigma_start+sigma)%DEtot);
+    Wm_ir += 0.;
+    Wm_d += 0.;
 }
     
 } //namespace smart
