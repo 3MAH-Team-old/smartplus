@@ -37,18 +37,23 @@ class state_variables_M : public state_variables
 
 	public :
 		
+        arma::vec Wm;
+        arma::vec Wm_start;
+    
 		arma::mat L;
 		arma::mat Lt;
 		
 		state_variables_M(); 	//default constructor
-        state_variables_M(const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const double &, const double &, const double &, const double &, const int &, const arma::vec &, const arma::vec &, const arma::mat &, const arma::mat &); //Constructor with parameters
+        state_variables_M(const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const double &, const double &, const arma::vec &, const arma::vec &, const int &, const arma::vec &, const arma::vec &, const arma::mat &, const arma::mat &); //Constructor with parameters
 		state_variables_M(const state_variables_M &);	//Copy constructor
 		virtual ~state_variables_M();
 		
 		virtual state_variables_M& operator = (const state_variables_M&);
 		
         using state_variables::update;
-        virtual void update(const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const double &, const double &, const double &, const double &, const int &, const arma::vec &, const arma::vec &, const arma::mat &, const arma::mat &); //Initialize with parameters
+        virtual void update(const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const double &, const double &, const arma::vec &, const arma::vec &, const int &, const arma::vec &, const arma::vec &, const arma::mat &, const arma::mat &); //Initialize with parameters
+        virtual void to_start(); //Wm goes to Wm_start
+        virtual void set_start(); //Wm_start goes to Wm
     
         using state_variables::rotate_l2g;
         virtual state_variables_M& rotate_l2g(const state_variables_M&, const double&, const double&, const double&);
