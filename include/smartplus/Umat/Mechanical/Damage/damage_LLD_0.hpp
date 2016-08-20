@@ -21,6 +21,6 @@
 
 namespace smart {
     
-    void umat_damage_LLD_0(const arma::vec &, const arma::vec &, arma::vec &, arma::mat &, const arma::mat &, const int &, const arma::vec &, const int &, arma::vec &, const double &, const double &,const double &,const double &, double &, double &, const int &, const int &, const bool &, double &);
+    void umat_damage_LLD_0(const arma::vec &, const arma::vec &, arma::vec &, arma::mat &, const arma::mat &, const int &, const arma::vec &, const int &, arma::vec &, const double &, const double &,const double &,const double &, double &, double &, double &, double &, const int &, const int &, const bool &, double &);
     
 } //namespace smart
