@@ -45,7 +45,7 @@ using namespace arma;
 
 namespace smart{
 
-void solver(const string &umat_name, const vec &props, const double &nstatev, const double &psi_rve, const double &theta_rve, const double &phi_rve,const double &rho, const double &c_p, const std::string &path_data, const std::string &path_results, const std::string &pathfile, const std::string &outputfile) {
+void solver(const string &umat_name, const vec &props, const double &nstatev, const double &psi_rve, const double &theta_rve, const double &phi_rve, const std::string &path_data, const std::string &path_results, const std::string &pathfile, const std::string &outputfile) {
 
     //Check if the required directories exist:
     if(!boost::filesystem::is_directory(path_data)) {
@@ -95,7 +95,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
     }*/
     
     ///Material properties reading, use "material.dat" to specify parameters values
-    rve.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props, rho, c_p);
+    rve.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props);
     
     //Output
     int o_ncount = 0;
@@ -118,7 +118,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
     double tinc=0.;
     double Dtinc=0.;
     double Dtinc_cur=0.;
-    double tau = 0.;        //Time constant for convexion thermal mechanical conditions
+    double q_conv = 0.;        //q_conv parameter for 0D convexion, Q_conv = qconv (T-T_init), with q_conv = rho*c_p\tau, tau being a time constant for convexion thermal mechanical conditions
     
     /// Block loop
     for(unsigned int i = 0 ; i < blocks.size() ; i++){
@@ -136,7 +136,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                 
                 if(start) {
                     rve.construct(0,blocks[i].type);
-                    rve.sptr_sv_global->update(zeros(6), zeros(6), zeros(6), zeros(6), T_init, 0., 0., 0., nstatev, zeros(nstatev), zeros(nstatev));
+                    rve.sptr_sv_global->update(zeros(6), zeros(6), zeros(6), zeros(6), T_init, 0., nstatev, zeros(nstatev), zeros(nstatev));
                     sv_M = std::dynamic_pointer_cast<state_variables_M>(rve.sptr_sv_global);
                 }
                 else {
@@ -357,7 +357,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                 
                 if(start) {
                     rve.construct(0,blocks[i].type);
-                    rve.sptr_sv_global->update(zeros(6), zeros(6), zeros(6), zeros(6), T_init, 0., 0., 0., nstatev, zeros(nstatev), zeros(nstatev));
+                    rve.sptr_sv_global->update(zeros(6), zeros(6), zeros(6), zeros(6), T_init, 0., nstatev, zeros(nstatev), zeros(nstatev));
                     sv_T = std::dynamic_pointer_cast<state_variables_T>(rve.sptr_sv_global);
                 }
                 else {
@@ -382,7 +382,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                 //Run the umat for the first time in the block. So that we get the proper tangent properties
                 run_umat_T(rve, DR, Time, DTime, ndi, nshr, start, tnew_dt);
                 
-                sv_T->Q = -1.*sv_T->rpl;    //Since DTime=0;
+                sv_T->Q = -1.*sv_T->r;    //Since DTime=0;
                 dQdT = lambda_solver;  //To avoid any singularity in the system                
                 
                 if(start) {
@@ -411,7 +411,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                         
                         inc = 0;
                         if(sptr_thermomeca->cBC_T == 3)
-                            tau = sptr_thermomeca->BC_T;
+                            q_conv = sptr_thermomeca->BC_T;
                         
                         while(inc < sptr_thermomeca->ninc) {
                             
@@ -440,12 +440,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                     
                                     run_umat_T(rve, DR, Time, DTime, ndi, nshr, start, tnew_dt);
                                     
-                                    if (DTime < 1.E-12) {
-                                        sv_T->Q = -1.*sv_T->rpl;    //Since DTime=0;
-                                    }
-                                    else{
-                                        sv_T->Q = rve.sptr_matprops->rho*rve.sptr_matprops->c_p*sv_T->DT*(1./DTime) - sv_T->rpl;
-                                    }
+                                    sv_T->Q = -1.*sv_T->r;
                                     
                                 }
                                 else{
@@ -474,7 +469,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                         residual(6) = lambda_solver*(sv_T->DT - Dtinc*sptr_thermomeca->Ts(inc));
                                     }
                                     else if(sptr_thermomeca->cBC_T == 3) { //Special case of 0D convexion that depends on temperature assumption
-                                        residual(6) = sv_T->Q + (rve.sptr_matprops->rho*rve.sptr_matprops->c_p/tau)*(sv_T->T-T_init);
+                                        residual(6) = sv_T->Q + q_conv*(sv_T->T-T_init);
                                     }
                                     else {
                                         cout << "error : The Thermal BC is not recognized\n";
@@ -504,30 +499,29 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                         run_umat_T(rve, DR, Time, DTime, ndi, nshr, start, tnew_dt);
                                         
                                         if (DTime < 1.E-12) {
-                                            sv_T->Q = -1.*sv_T->rpl;    //Since DTime=0;
+                                            sv_T->Q = -1.*sv_T->r;    //Since DTime=0;
                                             
-                                            dQdE = -sv_T->drpldE.t();
+                                            dQdE = -1.*sv_T->drdE.t();
                                             dQdT = lambda_solver;  //To avoid any singularity in the system
                      
                                         }
                                         else{
-                                            //Attention here, we solve Phi = Q - rho*c_p*(1./tau)*(sv_T->T-T_init) = rho*c_p*DT*(1./DTime) - rpl -(-rho*c_p*(1./tau)*(sv_T->T-T_init)) = 0
-                                            //So the derivative / T has the extra rho*c_p*(1./tau)
+                                            //Attention here, we solve Phi = Q - Q_conv = Q - q_conv*(sv_T->T-T_init)) = Q - (rho*c_p*(1./tau)*(sv_T->T-T_init)) = 0
+                                            //So the derivative / T has the extra q_conv = rho*c_p*(1./tau)
                                             //It is actually icluded here in dQdT
-                                            sv_T->Q = rve.sptr_matprops->rho*rve.sptr_matprops->c_p*sv_T->DT*(1./DTime) - sv_T->rpl;
+                                            sv_T->Q = -1.*sv_T->r;
                                             
-                                            dQdE = -sv_T->drpldE.t();
+                                            dQdE = -sv_T->drdE.t();
                                             
                                             if (sptr_thermomeca->cBC_T < 3) {
-                                                dQdT = rve.sptr_matprops->rho*rve.sptr_matprops->c_p*(1./DTime) - sv_T->drpldT;
+                                                dQdT = -1.*sv_T->drdT;
                                             }
                                             else if(sptr_thermomeca->cBC_T == 3) {
-                                                dQdT = rve.sptr_matprops->rho*rve.sptr_matprops->c_p*(1./DTime) - sv_T->drpldT + rve.sptr_matprops->rho*rve.sptr_matprops->c_p*(1./tau);
-
+                                                dQdT = -1.*sv_T->drdT + q_conv;
                                             }
                                             
                                         }
-                                        
+                                                                                
                                         for(int k = 0 ; k < 6 ; k++)
                                         {
                                             if (sptr_thermomeca->cBC_meca(k)) {
@@ -544,7 +538,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                             residual(6) = lambda_solver*(sv_T->DT - Dtinc*sptr_thermomeca->Ts(inc));
                                         }
                                         else if(sptr_thermomeca->cBC_T == 3) { //Special case of 0D convexion that depends on temperature assumption
-                                            residual(6) = sv_T->Q + (rve.sptr_matprops->rho*rve.sptr_matprops->c_p/tau)*(sv_T->T-T_init);
+                                            residual(6) = sv_T->Q + q_conv*(sv_T->T-T_init);
                                         }
                                         else {
                                             cout << "error : The Thermal BC is not recognized\n";
@@ -565,13 +559,13 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                 }
                                 
                                 if((fabs(Dtinc_cur - sptr_thermomeca->Dn_mini) < iota)&&(tnew_dt < 1.)) {
-//                                    cout << "The subroutine has required a step reduction lower than the minimal indicated at" << sptr_thermomeca->number << " inc: " << inc << " and fraction:" << tinc << "\n";
+                                    cout << "The subroutine has required a step reduction lower than the minimal indicated at" << sptr_thermomeca->number << " inc: " << inc << " and fraction:" << tinc << "\n";
                                     //The solver has been inforced!
                                     return;
                                 }
                                 
                                 if((error > 1000.*precision_solver)&&(Dtinc_cur == sptr_thermomeca->Dn_mini)) {
-//                                    cout << "The error has exceeded 100 times the precision, the simulation has stopped at " << sptr_thermomeca->number << " inc: " << inc << " and fraction:" << tinc << "\n";
+                                    cout << "The error has exceeded 1000 times the precision, the simulation has stopped at " << sptr_thermomeca->number << " inc: " << inc << " and fraction:" << tinc << "\n";
                                     //The solver has been inforced!
                                     return;
                                 }
@@ -580,8 +574,8 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                     if(Dtinc_cur == sptr_thermomeca->Dn_mini) {
                                         if(inforce_solver == 1) {
                                         
-//                                            cout << "The solver has been inforced to proceed (Solver issue) at step:" << sptr_thermomeca->number << " inc: " << inc << " and fraction:" << tinc << ", with the error: " << error << "\n";
-//                                            cout << "The next increment has integrated the error to avoid propagation\n";
+                                            cout << "The solver has been inforced to proceed (Solver issue) at step:" << sptr_thermomeca->number << " inc: " << inc << " and fraction:" << tinc << ", with the error: " << error << "\n";
+                                            cout << "The next increment has integrated the error to avoid propagation\n";
                                             //The solver has been inforced!
                                             tnew_dt = 1.;
                                         
@@ -626,7 +620,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                             
                             //Write the results
                             if (((so.o_type(i) == 1)&&(o_ncount == so.o_nfreq(i)))||(((so.o_type(i) == 2)&&(fabs(o_tcount - so.o_tfreq(i)) < 1.E-12)))) {
-                                
+                    
                                 rve.output(so, i, n, j, inc, Time, "global");
                                 rve.output(so, i, n, j, inc, Time, "local");
                                 if (so.o_type(i) == 1) {
