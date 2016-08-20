@@ -51,9 +51,6 @@ material_characteristics::material_characteristics()
 	phi_mat=0.;
 	
 	nprops=0;
-    
-    rho = 0.;
-    c_p = 0.;
 }
 
 /*!
@@ -86,9 +83,6 @@ material_characteristics::material_characteristics(const int &n, const bool &ini
     else{
         props = zeros(n);
     }
-
-    rho = 0.;
-    c_p = 0.;
 }
 
 /*!
@@ -100,7 +94,7 @@ material_characteristics::material_characteristics(const int &n, const bool &ini
 */
 
 //-------------------------------------------------------------
-material_characteristics::material_characteristics(const int &mnumber, const string &mumat_name, const int &msave, const double &mpsi_mat, const double &mtheta_mat, const double &mphi_mat, const int &mnprops, const vec &mprops, const double &mrho, const double &mc_p)
+material_characteristics::material_characteristics(const int &mnumber, const string &mumat_name, const int &msave, const double &mpsi_mat, const double &mtheta_mat, const double &mphi_mat, const int &mnprops, const vec &mprops)
 //-------------------------------------------------------------
 {	
 	assert(mnprops);
@@ -115,9 +109,6 @@ material_characteristics::material_characteristics(const int &mnumber, const str
     
 	nprops = mnprops;
 	props = mprops;
-    
-    rho = mrho;
-    c_p = mc_p;
 }
 
 /*!
@@ -139,9 +130,6 @@ material_characteristics::material_characteristics(const material_characteristic
     
 	nprops = sv.nprops;
 	props = sv.props;
-    
-    rho = sv.rho;
-    c_p = sv.c_p;
 }
 
 /*!
@@ -182,7 +170,7 @@ void material_characteristics::resize(const int &n, const bool &init, const doub
 */
 
 //-------------------------------------------------------------
-void material_characteristics::update(const int &mnumber, const string &mumat_name, const int &msave, const double &mpsi_mat, const double &mtheta_mat, const double &mphi_mat, const int &mnprops, const vec &mprops, const double &mrho, const double &mc_p)
+void material_characteristics::update(const int &mnumber, const string &mumat_name, const int &msave, const double &mpsi_mat, const double &mtheta_mat, const double &mphi_mat, const int &mnprops, const vec &mprops)
 //-------------------------------------------------------------
 {
     assert(mnprops);
@@ -197,9 +185,6 @@ void material_characteristics::update(const int &mnumber, const string &mumat_na
     
     nprops = mnprops;
     props = mprops;
-    
-    rho = mrho;
-    c_p = mc_p;
 }
     
 //----------------------------------------------------------------------
@@ -219,9 +204,6 @@ material_characteristics& material_characteristics::operator = (const material_c
 	nprops = sv.nprops;
 	props = sv.props;
     
-    rho = sv.rho;
-    c_p = sv.c_p;
-    
 	return *this;
 }
 
@@ -238,10 +220,7 @@ ostream& operator << (ostream& s, const material_characteristics& sv)
 	s << "nprops: \n" << sv.nprops << "\n";
 	s << "props: \n";
     s << sv.props.t();
-	s << "\n";	
-        
-    s << "rho: \n" << sv.rho << "\n";
-    s << "c_p: \n" << sv.c_p << "\n";
+	s << "\n";
 
 	s << "\n\n";
 
