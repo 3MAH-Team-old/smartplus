@@ -143,7 +143,7 @@ void apply_constants(const vector<constants> &consts, const string &dst_path) {
     
 }
     
-void launch_solver(const individual &ind, const int &nfiles, vector<parameters> &params, vector<constants> &consts, const string &folder, const string &name, const string &path_data, const string &path_keys, const string &materialfile)
+void launch_solver(const individual &ind, const int &nfiles, vector<parameters> &params, vector<constants> &consts, const string &path_results, const string &name, const string &path_data, const string &path_keys, const string &materialfile)
 {
 	string outputfile;
     string simulfile;
@@ -156,7 +156,7 @@ void launch_solver(const individual &ind, const int &nfiles, vector<parameters> 
     for (int i = 0; i<nfiles; i++) {
         ///Creating the right path & output filenames
         
-        outputfile = folder + "/" + name_root + "_" + to_string(ind.id) + "_" + to_string(i+1) + name_ext;
+        outputfile = name_root + "_" + to_string(ind.id) + "_" + to_string(i+1) + name_ext;
         pathfile = "path_id_" + to_string(i+1) + ".txt";
         
         string umat_name;
@@ -167,10 +167,7 @@ void launch_solver(const individual &ind, const int &nfiles, vector<parameters> 
         double psi_rve = 0.;
         double theta_rve = 0.;
         double phi_rve = 0.;
-        
-        double rho = 0.;
-        double c_p = 0.;
-        
+                
         //Replace the constants
         for (unsigned int k=0; k<consts.size(); k++) {
             consts[k].value = consts[k].input_values(i);
@@ -187,14 +184,14 @@ void launch_solver(const individual &ind, const int &nfiles, vector<parameters> 
         apply_parameters(params, path_data);
         
         //Then read the material properties
-        read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p, path_data, materialfile);
+        read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, path_data, materialfile);
         
         ///Launching the solver with relevant parameters
-        solver(umat_name, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p, path_data, ".", pathfile, outputfile);
+        solver(umat_name, props, nstatev, psi_rve, theta_rve, phi_rve, path_data, path_results, pathfile, outputfile);
         
         //Get the simulation files according to the proper name
-        outputfile = folder + "/" + name_root + + "_" + to_string(ind.id) + "_" + to_string(i+1) + "_global-0" + name_ext;
-        simulfile = folder + "/" + name_root + + "_" + to_string(ind.id)  +"_" + to_string(i+1) + name_ext;
+        outputfile = path_results + "/" + name_root + + "_" + to_string(ind.id) + "_" + to_string(i+1) + "_global-0" + name_ext;
+        simulfile = path_results + "/" + name_root + + "_" + to_string(ind.id)  +"_" + to_string(i+1) + name_ext;
         
         boost::filesystem::copy_file(outputfile,simulfile,boost::filesystem::copy_option::overwrite_if_exists);
     }
