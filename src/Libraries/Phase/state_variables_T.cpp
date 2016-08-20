@@ -42,15 +42,18 @@ namespace smart{
 */
 
 //-------------------------------------------------------------
-state_variables_T::state_variables_T() : state_variables(), dSdE(6,6), dSdEt(6,6), dSdT(1,6), drpldE(1,6), drpldT(1,1)
+state_variables_T::state_variables_T() : state_variables(), Wm(4), Wt(3), Wm_start(4), Wt_start(3), dSdE(6,6), dSdEt(6,6), dSdT(1,6), drdE(1,6), drdT(1,1)
 //-------------------------------------------------------------
 {
-    rpl = 0.;
+    Q = 0.;
+    r = 0.;
+    Wt = zeros(3);
+    Wt_start = zeros(3);
     dSdE = zeros(6,6);
     dSdEt = zeros(6,6);
     dSdT = zeros(1,6);
-    drpldE = zeros(1,6);
-    drpldT = zeros(1,1);
+    drdE = zeros(1,6);
+    drdT = zeros(1,1);
 }
 
 /*!
@@ -60,9 +63,15 @@ state_variables_T::state_variables_T() : state_variables(), dSdE(6,6), dSdEt(6,6
 */
 
 //-------------------------------------------------------------
-state_variables_T::state_variables_T(const vec &mEtot, const vec &mDEtot, const vec &msigma, const vec &msigma_start, const double &mT, const double &mDT, const double &msse, const double &mspd, const int &mnstatev, const vec &mstatev, const vec &mstatev_start, const double &mQ, const double &mrpl, const mat &mdSdE, const mat &mdSdEt, const mat &mdSdT, const mat &mdrpldE, const mat &mdrpldT) : state_variables(mEtot, mDEtot, msigma, msigma_start, mT, mDT, msse, mspd, mnstatev, mstatev, mstatev_start), dSdE(6,6), dSdEt(6,6), dSdT(1,6), drpldE(1,6), drpldT(1,1)
+state_variables_T::state_variables_T(const vec &mEtot, const vec &mDEtot, const vec &msigma, const vec &msigma_start, const double &mT, const double &mDT, const int &mnstatev, const vec &mstatev, const vec &mstatev_start, const double &mQ, const double &mr, const vec &mWm, const vec &mWt, const vec &mWm_start, const vec &mWt_start, const mat &mdSdE, const mat &mdSdEt, const mat &mdSdT, const mat &mdrdE, const mat &mdrdT) : state_variables(mEtot, mDEtot, msigma, msigma_start, mT, mDT, mnstatev, mstatev, mstatev_start), Wm(4), Wt(3), Wm_start(4), Wt_start(3), dSdE(6,6), dSdEt(6,6), dSdT(1,6), drdE(1,6), drdT(1,1)
 //-------------------------------------------------------------
 {	
+
+    assert (mWm.size() == 4);
+    assert (mWt.size() == 3);
+    
+    assert (mWm_start.size() == 4);
+    assert (mWt_start.size() == 3);
     
 	assert (mdSdE.n_rows == 6);
 	assert (mdSdE.n_cols == 6);
@@ -73,19 +82,23 @@ state_variables_T::state_variables_T(const vec &mEtot, const vec &mDEtot, const 
     assert (mdSdT.n_rows == 1);
     assert (mdSdT.n_cols == 6);
     
-    assert (mdrpldE.n_rows == 1);
-    assert (mdrpldE.n_cols == 6);
+    assert (mdrdE.n_rows == 1);
+    assert (mdrdE.n_cols == 6);
     
-    assert (mdrpldT.n_rows == 1);
-    assert (mdrpldT.n_cols == 1);
+    assert (mdrdT.n_rows == 1);
+    assert (mdrdT.n_cols == 1);
 
     Q = mQ;
-    rpl = mrpl;
+    r = mr;
+    Wm = mWm;
+    Wm_start = mWm_start;
+    Wt = mWt;
+    Wt_start = mWt_start;
     dSdE = mdSdE;
 	dSdEt = mdSdEt;
     dSdT = mdSdT;
-    drpldE = mdrpldE;
-    drpldT = mdrpldT;
+    drdE = mdrdE;
+    drdT = mdrdT;
 }
 
 /*!
@@ -94,16 +107,20 @@ state_variables_T::state_variables_T(const vec &mEtot, const vec &mDEtot, const 
 */
 
 //------------------------------------------------------
-state_variables_T::state_variables_T(const state_variables_T& sv) : state_variables(sv), dSdE(6,6), dSdEt(6,6), dSdT(1,6), drpldE(1,6), drpldT(1,1)
+state_variables_T::state_variables_T(const state_variables_T& sv) : state_variables(sv), Wm(4), Wt(3), Wm_start(4), Wt_start(3), dSdE(6,6), dSdEt(6,6), dSdT(1,6), drdE(1,6), drdT(1,1)
 //------------------------------------------------------
 {
     Q = sv.Q;
-    rpl = sv.rpl;
+    r = sv.r;
+    Wm = sv.Wm;
+    Wt = sv.Wt;
+    Wm_start = sv.Wm_start;
+    Wt_start = sv.Wt_start;
     dSdE = sv.dSdE;
 	dSdEt = sv.dSdEt;
     dSdT = sv.dSdT;
-    drpldE = sv.drpldE;
-    drpldT = sv.drpldT;
+    drdE = sv.drdE;
+    drdT = sv.drdT;
 }
 
 /*!
@@ -134,12 +151,15 @@ state_variables_T& state_variables_T::operator = (const state_variables_T& sv)
     dSdE = sv.dSdE;
     dSdEt = sv.dSdEt;
     dSdT = sv.dSdT;
-    drpldE = sv.drpldE;
-    drpldT = sv.drpldT;
-    sse = sv.sse;
-    spd = sv.spd;
+    drdE = sv.drdE;
+    drdT = sv.drdT;
+    Wm = sv.Wm;
+    Wt = sv.Wt;
+    Wm_start = sv.Wm_start;
+    Wt_start = sv.Wt_start;
+    
     Q = sv.Q;
-    rpl = sv.rpl;
+    r = sv.r;
     T = sv.T;
     DT = sv.DT;
 
@@ -147,10 +167,16 @@ state_variables_T& state_variables_T::operator = (const state_variables_T& sv)
 }
 
 //-------------------------------------------------------------
-void state_variables_T::update(const vec &mEtot, const vec &mDEtot, const vec &msigma, const vec &msigma_start, const double &mT, const double &mDT, const double &msse, const double &mspd, const int &mnstatev, const vec &mstatev, const vec &mstatev_start, const double &mQ, const double &mrpl, const mat &mdSdE, const mat &mdSdEt, const mat &mdSdT, const mat &mdrpldE, const mat &mdrpldT)
+void state_variables_T::update(const vec &mEtot, const vec &mDEtot, const vec &msigma, const vec &msigma_start, const double &mT, const double &mDT, const int &mnstatev, const vec &mstatev, const vec &mstatev_start, const double &mQ, const double &mr, const vec &mWm, const vec &mWt, const vec &mWm_start, const vec &mWt_start, const mat &mdSdE, const mat &mdSdEt, const mat &mdSdT, const mat &mdrdE, const mat &mdrdT)
 //-------------------------------------------------------------
 {
-    state_variables::update(mEtot, mDEtot, msigma, msigma_start, mT, mDT, msse, mspd, mnstatev, mstatev, mstatev_start);
+    state_variables::update(mEtot, mDEtot, msigma, msigma_start, mT, mDT, mnstatev, mstatev, mstatev_start);
+    
+    assert (mWm.size() == 4);
+    assert (mWt.size() == 3);
+    
+    assert (mWm_start.size() == 4);
+    assert (mWt_start.size() == 3);
     
     assert (mdSdE.n_rows == 6);
     assert (mdSdE.n_cols == 6);
@@ -161,19 +187,41 @@ void state_variables_T::update(const vec &mEtot, const vec &mDEtot, const vec &m
     assert (mdSdT.n_rows == 1);
     assert (mdSdT.n_cols == 6);
     
-    assert (mdrpldE.n_rows == 1);
-    assert (mdrpldE.n_cols == 6);
+    assert (mdrdE.n_rows == 1);
+    assert (mdrdE.n_cols == 6);
     
-    assert (mdrpldT.n_rows == 1);
-    assert (mdrpldT.n_cols == 1);
+    assert (mdrdT.n_rows == 1);
+    assert (mdrdT.n_cols == 1);
     
     Q = mQ;
-    rpl = mrpl;
+    r = mr;
+    Wm = mWm;
+    Wt = mWt;
+    Wm_start = mWm_start;
+    Wt_start = mWt_start;
     dSdE = mdSdE;
     dSdEt = mdSdEt;
     dSdT = mdSdT;
-    drpldE = mdrpldE;
-    drpldT = mdrpldT;
+    drdE = mdrdE;
+    drdT = mdrdT;
+}
+    
+//-------------------------------------------------------------
+void state_variables_T::to_start()
+//-------------------------------------------------------------
+{
+    state_variables::to_start();
+    Wm = Wm_start;
+    Wt = Wt_start;
+}
+
+//-------------------------------------------------------------
+void state_variables_T::set_start()
+//-------------------------------------------------------------
+{
+    state_variables::set_start();
+    Wm_start = Wm;
+    Wt_start = Wt;
 }
     
 //----------------------------------------------------------------------
@@ -186,28 +234,32 @@ state_variables_T& state_variables_T::rotate_l2g(const state_variables_T& sv, co
     dSdE = sv.dSdE;
     dSdEt = sv.dSdEt;
     dSdT = sv.dSdT;
-    drpldE = sv.drpldE;
-    drpldT = sv.drpldT;
+    drdE = sv.drdE;
+    drdT = sv.drdT;
     Q = sv.Q;
-    rpl = sv.rpl;
+    r = sv.r;
+    Wm = sv.Wm;
+    Wt = sv.Wt;
+    Wm_start = sv.Wm_start;
+    Wt_start = sv.Wt_start;
     
   	if(fabs(phi) > iota) {
 		dSdE = rotateL(dSdE, -phi, axis_phi);
 		dSdEt = rotateL(dSdEt, -phi, axis_phi);
         dSdT = rotate_stress(dSdT, -phi, axis_phi);
-		drpldE = rotate_strain(drpldE, -phi, axis_phi);
+		drdE = rotate_strain(drdE, -phi, axis_phi);
 	}
   	if(fabs(theta) > iota) {
 		dSdE = rotateL(dSdE, -theta, axis_theta);
 		dSdEt = rotateL(dSdEt, -theta, axis_theta);
         dSdT = rotate_stress(dSdT, -theta, axis_theta);
-		drpldE = rotate_strain(drpldE, -theta, axis_theta);
+		drdE = rotate_strain(drdE, -theta, axis_theta);
 	}
 	if(fabs(psi) > iota) {
 		dSdE = rotateL(dSdE, -psi, axis_psi);
 		dSdEt = rotateL(dSdEt, -psi, axis_psi);
         dSdT = rotate_stress(dSdT, -psi, axis_psi);
-		drpldE = rotate_strain(drpldE, -psi, axis_psi);
+		drdE = rotate_strain(drdE, -psi, axis_psi);
 	}
     
 	return *this;
@@ -223,29 +275,33 @@ state_variables_T& state_variables_T::rotate_g2l(const state_variables_T& sv, co
     dSdE = sv.dSdE;
     dSdEt = sv.dSdEt;
     dSdT = sv.dSdT;
-    drpldE = sv.drpldE;
-    drpldT = sv.drpldT;
+    drdE = sv.drdE;
+    drdT = sv.drdT;
     Q = sv.Q;
-    rpl = sv.rpl;
+    r = sv.r;
+    Wm = sv.Wm;
+    Wt = sv.Wt;
+    Wm_start = sv.Wm_start;
+    Wt_start = sv.Wt_start;
     
   	if(fabs(psi) > iota) {
 		dSdE = rotateL(dSdE, psi, axis_psi);
 		dSdEt = rotateL(dSdEt, psi, axis_psi);
         dSdT = rotate_stress(dSdT, psi, axis_psi);
-        drpldE = rotate_strain(drpldE, psi, axis_psi);
+        drdE = rotate_strain(drdE, psi, axis_psi);
         
 	}			
 	if(fabs(theta) > iota) {
 		dSdE = rotateL(dSdE, theta, axis_theta);
 		dSdEt = rotateL(dSdEt, theta, axis_theta);
         dSdT = rotate_stress(dSdT, theta, axis_theta);
-        drpldE = rotate_strain(drpldE, theta, axis_theta);
+        drdE = rotate_strain(drdE, theta, axis_theta);
 	}
 	if(fabs(phi) > iota) {
 		dSdE = rotateL(dSdE, phi, axis_phi);
 		dSdEt = rotateL(dSdEt, phi, axis_phi);
         dSdT = rotate_stress(dSdT, phi, axis_phi);
-        drpldE = rotate_strain(drpldE, phi, axis_phi);
+        drdE = rotate_strain(drdE, phi, axis_phi);
     }
     
 	return *this;
@@ -262,12 +318,16 @@ ostream& operator << (ostream& s, const state_variables_T& sv)
     s << "T: \n" << sv.T << "\n";
     s << "DT: \n" << sv.DT << "\n";
     s << "Q: \n" << sv.Q << "\n";
-    s << "rpl: \n" << sv.rpl << "\n";
+    s << "r: \n" << sv.r << "\n";
+    s << "Wm: \n" << sv.Wm << "\n";
+    s << "Wm_start: \n" << sv.Wm_start << "\n";
+    s << "Wt: \n" << sv.Wt << "\n";
+    s << "Wt_start: \n" << sv.Wt_start << "\n";
 	s << "dSdE: \n" << sv.dSdE << "\n";
 	s << "dSdEt: \n" << sv.dSdEt << "\n";
 	s << "dSdT: \n" << sv.dSdT << "\n";
-	s << "drpldE: \n" << sv.drpldE << "\n";
-	s << "drpldT: \n" << sv.drpldT << "\n";
+	s << "drdE: \n" << sv.drdE << "\n";
+	s << "drdT: \n" << sv.drdT << "\n";
     
     s << "nstatev: \n" << sv.nstatev << "\n";
     if (sv.nstatev) {

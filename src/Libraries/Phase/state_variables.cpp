@@ -51,10 +51,6 @@ state_variables::state_variables() : Etot(6), DEtot(6), sigma(6), sigma_start(6)
 	sigma_start = zeros(6);
     T = 0.;
     DT = 0.;
-    
-    sse = 0.;
-    spd = 0.;
-    
 	nstatev=0;    
 }
 
@@ -76,9 +72,6 @@ state_variables::state_variables(const int &m, const bool &init, const double &v
     T = 0.;
     DT = 0.;
     
-    sse = 0.;
-    spd = 0.;
-        
     assert(m>=0);    
     nstatev = m;
     if (m>0) {
@@ -94,7 +87,7 @@ state_variables::state_variables(const int &m, const bool &init, const double &v
 }
     
 //-------------------------------------------------------------
-state_variables::state_variables(const vec &mEtot, const vec &mDEtot, const vec &msigma, const vec &msigma_start, const double &mT, const double &mDT, const double &msse, const double &mspd, const int &mnstatev, const vec &mstatev, const vec &mstatev_start) : Etot(6), DEtot(6), sigma(6), sigma_start(6)
+state_variables::state_variables(const vec &mEtot, const vec &mDEtot, const vec &msigma, const vec &msigma_start, const double &mT, const double &mDT, const int &mnstatev, const vec &mstatev, const vec &mstatev_start) : Etot(6), DEtot(6), sigma(6), sigma_start(6)
 //-------------------------------------------------------------
 {	
 	assert (mEtot.size() == 6);
@@ -111,9 +104,6 @@ state_variables::state_variables(const vec &mEtot, const vec &mDEtot, const vec 
     nstatev = mnstatev;
     statev = mstatev;
     statev_start = mstatev_start;
-    
-    sse = msse;
-    spd = mspd;
 }
 
 /*!
@@ -135,9 +125,6 @@ state_variables::state_variables(const state_variables& sv) : Etot(6), DEtot(6),
     nstatev = sv.nstatev;
     statev = sv.statev;
     statev_start = sv.statev_start;
-    
-    sse = sv.sse;
-    spd = sv.spd;
 }
 
 /*!
@@ -172,9 +159,6 @@ state_variables& state_variables::operator = (const state_variables& sv)
     statev = sv.statev;
     statev_start = sv.statev_start;
     
-    sse = sv.sse;
-    spd = sv.spd;
-    
 	return *this;
 }
 
@@ -208,7 +192,7 @@ void state_variables::resize(const int &m, const bool &init, const double &value
     
     
 //-------------------------------------------------------------
-void state_variables::update(const vec &mEtot, const vec &mDEtot, const vec &msigma, const vec &msigma_start, const double &mT, const double &mDT, const double &msse, const double &mspd, const int &mnstatev, const vec &mstatev, const vec &mstatev_start)
+void state_variables::update(const vec &mEtot, const vec &mDEtot, const vec &msigma, const vec &msigma_start, const double &mT, const double &mDT, const int &mnstatev, const vec &mstatev, const vec &mstatev_start)
 //-------------------------------------------------------------
 {
     assert (mEtot.size() == 6);
@@ -225,9 +209,6 @@ void state_variables::update(const vec &mEtot, const vec &mDEtot, const vec &msi
     nstatev = mnstatev;
     statev = mstatev;
     statev_start = mstatev_start;
-    
-    sse = msse;
-    spd = mspd;
 }
     
 //-------------------------------------------------------------
@@ -260,9 +241,7 @@ state_variables& state_variables::rotate_l2g(const state_variables& sv, const do
 	sigma_start = sv.sigma_start;
     T = sv.T;
     DT = sv.DT;
-    sse = sv.sse;
-    spd = sv.spd;
-
+    
     nstatev = sv.nstatev;
     statev = sv.statev;
     statev_start = sv.statev_start;
@@ -300,8 +279,6 @@ state_variables& state_variables::rotate_g2l(const state_variables& sv, const do
     sigma_start = sv.sigma_start;
     T = sv.T;
     DT = sv.DT;
-    sse = sv.sse;
-    spd = sv.spd;
     
     nstatev = sv.nstatev;
     statev = sv.statev;
@@ -339,9 +316,6 @@ ostream& operator << (ostream& s, const state_variables& sv)
 	s << "sigma_start: \n" << sv.sigma_start << "\n";
     s << "T: \n" << sv.T << "\n";
     s << "DT: \n" << sv.DT << "\n";
-	s << "sse: \n" << sv.sse << "\n";
-	s << "spd: \n" << sv.spd << "\n";
-	s << "\n";
     
     s << "nstatev: \n" << sv.nstatev << "\n";
     if (sv.nstatev) {
