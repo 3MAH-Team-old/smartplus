@@ -65,7 +65,7 @@ void DE_Homogeneous_E(phase_characteristics &phase) {
     }
 }
 
-void Lt_Mori_Tanaka(phase_characteristics &phase) {
+void Lt_Mori_Tanaka(phase_characteristics &phase, const int &n_matrix) {
     
     mat sumT = zeros(6,6);
     mat inv_sumT = zeros(6,6);
@@ -73,7 +73,7 @@ void Lt_Mori_Tanaka(phase_characteristics &phase) {
     std::shared_ptr<ellipsoid_multi> elli_multi;
     std::shared_ptr<ellipsoid> elli;
     //ptr on the matrix properties
-    std::shared_ptr<state_variables_M> sv_0 = std::dynamic_pointer_cast<state_variables_M>(phase.sub_phases[0].sptr_sv_global);
+    std::shared_ptr<state_variables_M> sv_0 = std::dynamic_pointer_cast<state_variables_M>(phase.sub_phases[n_matrix].sptr_sv_global);
     std::shared_ptr<state_variables_M> sv_eff = std::dynamic_pointer_cast<state_variables_M>(phase.sptr_sv_local);
     std::shared_ptr<state_variables_M> sv_r;
     
@@ -84,7 +84,12 @@ void Lt_Mori_Tanaka(phase_characteristics &phase) {
         sv_r = std::dynamic_pointer_cast<state_variables_M>(r.sptr_sv_global);
         
         //Note The tangent modulus are turned in the coordinate system of the ellipspoid in the fillT function
-        elli_multi->fillT(sv_0->Lt, sv_r->Lt, *elli);
+        //Note The tangent modulus are turned in the coordinate system of the ellipspoid in the fillT function
+        if (r.sptr_matprops->number == n_matrix)
+            elli_multi->T = eye(6,6);
+        else
+            elli_multi->fillT(sv_0->Lt, sv_r->Lt, *elli);
+
         //Compute the normalization interaction tensir sumT
 		sumT += elli->concentration*elli_multi->T;
     }
@@ -98,7 +103,7 @@ void Lt_Mori_Tanaka(phase_characteristics &phase) {
     }
 }
     
-void DE_Mori_Tanaka(phase_characteristics &phase) {
+void DE_Mori_Tanaka(phase_characteristics &phase, const int &n_matrix) {
     
     mat sumT = zeros(6,6);
     mat inv_sumT = zeros(6,6);
@@ -106,7 +111,7 @@ void DE_Mori_Tanaka(phase_characteristics &phase) {
     std::shared_ptr<ellipsoid_multi> elli_multi;
     std::shared_ptr<ellipsoid> elli;
     //ptr on the matrix properties
-    std::shared_ptr<state_variables_M> sv_0 = std::dynamic_pointer_cast<state_variables_M>(phase.sub_phases[0].sptr_sv_global);
+    std::shared_ptr<state_variables_M> sv_0 = std::dynamic_pointer_cast<state_variables_M>(phase.sub_phases[n_matrix].sptr_sv_global);
     std::shared_ptr<state_variables_M> sv_eff = std::dynamic_pointer_cast<state_variables_M>(phase.sptr_sv_local);
     std::shared_ptr<state_variables_M> sv_r;
     
@@ -117,7 +122,11 @@ void DE_Mori_Tanaka(phase_characteristics &phase) {
         sv_r = std::dynamic_pointer_cast<state_variables_M>(r.sptr_sv_global);
         
         //Note The tangent modulus are turned in the coordinate system of the ellipspoid in the fillT function
-        elli_multi->fillT(sv_0->Lt, sv_r->Lt, *elli);
+        if (r.sptr_matprops->number == n_matrix)
+            elli_multi->T = eye(6,6);
+        else
+            elli_multi->fillT(sv_0->Lt, sv_r->Lt, *elli);
+
         //Compute the normalization interaction tensir sumT
         sumT += elli->concentration*elli_multi->T;
     }
@@ -148,7 +157,7 @@ void Lt_Self_Consistent(phase_characteristics &phase, const int &n_matrix, const
         if(option_start == 0)
             Lt_Homogeneous_E(phase);
         else if(option_start == 1)
-            Lt_Mori_Tanaka(phase);
+            Lt_Mori_Tanaka(phase, n_matrix);
         else {
             cout << "error , option is not valid for the start option of Self-Consistent scheme (0 : MT, 1 : h_E)";
         }
@@ -194,7 +203,7 @@ void DE_Self_Consistent(phase_characteristics &phase, const int &n_matrix, const
         if(option_start == 0)
             Lt_Homogeneous_E(phase);
         else if(option_start == 1)
-            Lt_Mori_Tanaka(phase);
+            Lt_Mori_Tanaka(phase, n_matrix);
         else {
             cout << "error , option is not valid for the start option of Self-Consistent scheme (0 : MT, 1 : h_E)";
         }
