@@ -212,8 +212,27 @@ void phase_characteristics::to_start()
 //----------------------------------------------------------------------
 {
     
-    sptr_sv_global->to_start();
-    sptr_sv_local->to_start();
+    switch (sv_type) {
+        case 1: {
+            auto sv_M_g = std::dynamic_pointer_cast<state_variables_M>(sptr_sv_global);
+            auto sv_M_l = std::dynamic_pointer_cast<state_variables_M>(sptr_sv_local);
+            sv_M_g->to_start();
+            sv_M_l->to_start();
+            break;
+        }
+        case 2: {
+            auto sv_T_g = std::dynamic_pointer_cast<state_variables_T>(sptr_sv_global);
+            auto sv_T_l = std::dynamic_pointer_cast<state_variables_T>(sptr_sv_local);
+            sv_T_g->to_start();
+            sv_T_l->to_start();
+            break;
+        }
+        default: {
+            cout << "error: The state_variable type does not correspond (1 for Mechanical, 2 for Thermomechanical)\n";
+            exit(0);
+            break;
+        }
+    }
     sptr_multi->to_start();
     for(auto r : sub_phases) {
         r.to_start();
@@ -225,8 +244,27 @@ void phase_characteristics::to_start()
 void phase_characteristics::set_start()
 //----------------------------------------------------------------------
 {
-    sptr_sv_global->set_start();
-    sptr_sv_local->set_start();
+    switch (sv_type) {
+        case 1: {
+            auto sv_M_g = std::dynamic_pointer_cast<state_variables_M>(sptr_sv_global);
+            auto sv_M_l = std::dynamic_pointer_cast<state_variables_M>(sptr_sv_local);
+            sv_M_g->set_start();
+            sv_M_l->set_start();
+            break;
+        }
+        case 2: {
+            auto sv_T_g = std::dynamic_pointer_cast<state_variables_T>(sptr_sv_global);
+            auto sv_T_l = std::dynamic_pointer_cast<state_variables_T>(sptr_sv_local);
+            sv_T_g->set_start();
+            sv_T_l->set_start();
+            break;
+        }
+        default: {
+            cout << "error: The state_variable type does not correspond (1 for Mechanical, 2 for Thermomechanical)\n";
+            exit(0);
+            break;
+        }
+    }
     sptr_multi->set_start();
     for(auto r : sub_phases) {
         r.set_start();
@@ -343,7 +381,7 @@ void phase_characteristics::output(const solver_output &so, const int &kblock, c
         *sptr_out_global << kstep+1 << "\t";
         *sptr_out_global << kinc+1 << "\t";
         *sptr_out_global << Time << "\t\t";
-    
+        
         //Switch case for the state_variables type of the phase
         if (so.o_nb_T) {
     
@@ -359,7 +397,7 @@ void phase_characteristics::output(const solver_output &so, const int &kblock, c
                     std::shared_ptr<state_variables_T> sv_T = std::dynamic_pointer_cast<state_variables_T>(sptr_sv_global);
                     *sptr_out_global << sv_T->T  << "\t";
                     *sptr_out_global << sv_T->Q << "\t";                //This is for the flux
-                    *sptr_out_global << sv_T->rpl << "\t";                //This is for the rpl
+                    *sptr_out_global << sv_T->r << "\t";                //This is for the r
                     break;
                 }
                 default: {
@@ -379,7 +417,35 @@ void phase_characteristics::output(const solver_output &so, const int &kblock, c
                 *sptr_out_global << sptr_sv_global->sigma(so.o_meca(z)) << "\t";
             }
         }
-    
+
+        switch (sv_type) {
+            case 1: {
+                std::shared_ptr<state_variables_M> sv_M = std::dynamic_pointer_cast<state_variables_M>(sptr_sv_global);
+                *sptr_out_global << sv_M->Wm(0)  << "\t";
+                *sptr_out_global << sv_M->Wm(1)  << "\t";
+                *sptr_out_global << sv_M->Wm(2)  << "\t";
+                *sptr_out_global << sv_M->Wm(3)  << "\t";
+                break;
+            }
+            case 2: {
+                //We need to cast sv
+                std::shared_ptr<state_variables_T> sv_T = std::dynamic_pointer_cast<state_variables_T>(sptr_sv_global);
+                *sptr_out_global << sv_T->Wm(0)  << "\t";
+                *sptr_out_global << sv_T->Wm(1)  << "\t";
+                *sptr_out_global << sv_T->Wm(2)  << "\t";
+                *sptr_out_global << sv_T->Wm(3)  << "\t";
+                *sptr_out_global << sv_T->Wt(0)  << "\t";
+                *sptr_out_global << sv_T->Wt(1)  << "\t";
+                *sptr_out_global << sv_T->Wt(2)  << "\t";
+                break;
+            }
+            default: {
+                cout << "error: The state_variable type does not correspond (1 for Mechanical, 2 for Thermomechanical)\n";
+                exit(0);
+                break;
+            }
+        }
+        
         *sptr_out_global << "\t";
         if(so.o_nw_statev != 0){
             if (so.o_wanted_statev(0) < 0) {
@@ -415,7 +481,7 @@ void phase_characteristics::output(const solver_output &so, const int &kblock, c
                     case 1: {
                         *sptr_out_local << sptr_sv_local->T  << "\t";
                         *sptr_out_local << 0 << "\t";                //This is for the flux Q
-                        *sptr_out_local << 0 << "\t";                //This is for the rpl
+                        *sptr_out_local << 0 << "\t";                //This is for the r
                         break;
                     }
                     case 2: {
@@ -423,7 +489,7 @@ void phase_characteristics::output(const solver_output &so, const int &kblock, c
                         std::shared_ptr<state_variables_T> sv_T = std::dynamic_pointer_cast<state_variables_T>(sptr_sv_local);
                         *sptr_out_local << sv_T->T  << "\t";
                         *sptr_out_local << sv_T->Q << "\t";                //This is for the flux
-                        *sptr_out_local << sv_T->rpl << "\t";                //This is for the rpl
+                        *sptr_out_local << sv_T->r << "\t";                //This is for the r
                         break;
                     }
                 default: {
@@ -441,6 +507,34 @@ void phase_characteristics::output(const solver_output &so, const int &kblock, c
             }
             for (int z=0; z<so.o_nb_meca; z++) {
                 *sptr_out_local << sptr_sv_local->sigma(so.o_meca(z)) << "\t";
+            }
+        }
+        
+        switch (sv_type) {
+            case 1: {
+                std::shared_ptr<state_variables_M> sv_M = std::dynamic_pointer_cast<state_variables_M>(sptr_sv_global);
+                *sptr_out_local << sv_M->Wm(0)  << "\t";
+                *sptr_out_local << sv_M->Wm(1)  << "\t";
+                *sptr_out_local << sv_M->Wm(2)  << "\t";
+                *sptr_out_local << sv_M->Wm(3)  << "\t";
+                break;
+            }
+            case 2: {
+                //We need to cast sv
+                std::shared_ptr<state_variables_T> sv_T = std::dynamic_pointer_cast<state_variables_T>(sptr_sv_global);
+                *sptr_out_local << sv_T->Wm(0)  << "\t";
+                *sptr_out_local << sv_T->Wm(1)  << "\t";
+                *sptr_out_local << sv_T->Wm(2)  << "\t";
+                *sptr_out_local << sv_T->Wm(3)  << "\t";
+                *sptr_out_local << sv_T->Wt(0)  << "\t";
+                *sptr_out_local << sv_T->Wt(1)  << "\t";
+                *sptr_out_local << sv_T->Wt(2)  << "\t";
+                break;
+            }
+            default: {
+                cout << "error: The state_variable type does not correspond (1 for Mechanical, 2 for Thermomechanical)\n";
+                exit(0);
+                break;
             }
         }
         
