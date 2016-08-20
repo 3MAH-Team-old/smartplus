@@ -43,27 +43,24 @@ int main() {
 	///Material properties reading, use "material.dat" to specify parameters values
     string umat_name;
     string path_data = "data";
-	string materialfile = "material.dat";
+    string materialfile = "material.dat";
 	
     int nprops = 0;
     int nstatev = 0;
     vec props;
-    
-    double rho = 0.;
-    double c_p = 0.;
     
     double psi_rve = 0.;
     double theta_rve = 0.;
     double phi_rve = 0.;
     
     double T_init = 273.15;
-    
-    read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, rho, c_p, path_data, materialfile);
+
+    read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, path_data, materialfile);
     phase_characteristics rve;
     
-    rve.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props, rho, c_p);
+    rve.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props);
     rve.construct(0,1);
-    rve.sptr_sv_global->update(zeros(6), zeros(6), zeros(6), zeros(6), T_init, 0., 0., 0., nstatev, zeros(nstatev), zeros(nstatev));
+    rve.sptr_sv_global->update(zeros(6), zeros(6), zeros(6), zeros(6), T_init, 0., nstatev, zeros(nstatev), zeros(nstatev));
     
     auto sv_M = std::dynamic_pointer_cast<state_variables_M>(rve.sptr_sv_global);
 
