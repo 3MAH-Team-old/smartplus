@@ -1,4 +1,4 @@
-FROM smartplus_stack
+FROM chemiskyy/smartplus-stack
 
 # install smartplus
 RUN export SMART_URL=https://github.com/smartplus-team/smartplus.git && \
