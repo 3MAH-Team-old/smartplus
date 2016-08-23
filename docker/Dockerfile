@@ -92,3 +92,9 @@ RUN export ARMA_URL=http://sourceforge.net/projects/arma/files/armadillo-7.400.1
     rm -rf ${ARMA_ARCHIVE} && \
     rm -rf ${PREFIX}/source/armadillo && \
     rm -rf ${PREFIX}/build/armadillo
+
+# install tini
+RUN export TINI_VERSION=0.10.0 && \
+    wget --quiet https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini && \
+    chmod +x tini && \
+    mv tini /usr/local/bin/
