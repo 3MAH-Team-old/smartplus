@@ -110,7 +110,7 @@ void step_thermomeca::generate(const double &mTime, const vec &mEtot, const vec 
         if(!pathinc)
         {
             cout << "Error: cannot open the file << " << file << "\n Please check if the file is correct and is you have added the extension" << endl;
-            break;
+            exit(0);
         }
         //read the file to get the number of increments
         while (!pathinc.eof())
