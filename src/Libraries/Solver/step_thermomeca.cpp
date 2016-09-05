@@ -246,7 +246,7 @@ void step_thermomeca::generate(const double &mTime, const vec &mEtot, const vec 
 	}
 	else {
 		cout << "\nError: The mode of the step number " << number << " does not correspond to an existing loading mode." << endl;
-		break;
+		exit(0);
 	}
     
 }
