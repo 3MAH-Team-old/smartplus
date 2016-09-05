@@ -95,7 +95,7 @@ void read_matprops(string &umat_name, int &nprops, vec &props, int &nstatev, dou
 		propsmat >> buffer >> buffer >> umat_name >> buffer >> nprops >> buffer >> nstatev;
 	}
 	else {
-		cout << "Error: cannot open the file " << materialfile << " in the folder :" << path_data << "\n";
+		cout << "Error: cannot open the file " << materialfile << " in the folder :" << path_data << endl;
 	}
 	
 	char *cmname = new char [umat_name.length()];
@@ -114,7 +114,7 @@ void read_matprops(string &umat_name, int &nprops, vec &props, int &nstatev, dou
 			propsmat >> buffer >> props(i);
 	}
 	else {
-		cout << "Error: cannot open the file " << materialfile << " in the folder :" << path_data << "\n";
+		cout << "Error: cannot open the file " << materialfile << " in the folder :" << path_data << endl;
         return;
 	}
     
@@ -166,7 +166,7 @@ void read_output(solver_output &so, const int &nblock, const int &nstatev, const
                 
                 if(so.o_range_statev(i) > nstatev -1) {
                     cout << "Error : The range of outputed statev is greater than the actual number of statev!\n";
-                    cout << "Check output file and/or material input file\n\n";
+                    cout << "Check output file and/or material input file\n" << endl;
                     
                     exit(0);
                 }
@@ -296,7 +296,7 @@ void read_path(std::vector<block> &blocks, double &T, const string &path_data, c
 	path.open(path_inputfile, ios::in);
 	if(!path)
 	{
-		cout << "Error: cannot open the file " << pathfile << " in the folder :" << path_data << "\n";
+		cout << "Error: cannot open the file " << pathfile << " in the folder :" << path_data << endl;
 	}
 
 	///temperature is initialized
@@ -309,7 +309,7 @@ void read_path(std::vector<block> &blocks, double &T, const string &path_data, c
         path >> buffer >> blocks[i].number >> buffer >> blocks[i].type >> buffer >> blocks[i].ncycle >> buffer >> blocks[i].nstep;
 
         if (blocks[i].number != i+1) {
-            cout << "The number of blocks could not be found. Please verify the blocks order in the path file";
+            cout << "The number of blocks could not be found. Please verify the blocks order in the path file" << endl;
         }
         
         blocks[i].generate();
@@ -345,7 +345,7 @@ void read_path(std::vector<block> &blocks, double &T, const string &path_data, c
                             path >> sptr_meca->BC_T;
                         }
                         else
-                            cout << "Error, This is a mechanical step, only temperature boundary condition is allowed here\n";
+                            cout << "Error, This is a mechanical step, only temperature boundary condition is allowed here" << endl;
 
                     }
                     else if (blocks[i].steps[j]->mode == 3) {
@@ -380,7 +380,7 @@ void read_path(std::vector<block> &blocks, double &T, const string &path_data, c
                         }
                     }
                     else {
-                        cout << "Please enter a suitable block mode (1 for linear, 2 for sinusoidal, 3 for user-input)";
+                        cout << "Please enter a suitable block mode (1 for linear, 2 for sinusoidal, 3 for user-input)" << endl;
                     }
                 }
                 break;
@@ -472,7 +472,7 @@ void read_path(std::vector<block> &blocks, double &T, const string &path_data, c
                 break;
             }
             default: {
-                cout << "Please enter a valid block type (1 for mechanical, 2 for thermomechanical)\n";
+                cout << "Please enter a valid block type (1 for mechanical, 2 for thermomechanical)" << endl;
                 break;
             }
             
