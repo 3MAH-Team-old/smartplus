@@ -96,6 +96,7 @@ void read_matprops(string &umat_name, int &nprops, vec &props, int &nstatev, dou
 	}
 	else {
 		cout << "Error: cannot open the file " << materialfile << " in the folder :" << path_data << endl;
+		exit(0);
 	}
 	
 	char *cmname = new char [umat_name.length()];
@@ -115,6 +116,7 @@ void read_matprops(string &umat_name, int &nprops, vec &props, int &nstatev, dou
 	}
 	else {
 		cout << "Error: cannot open the file " << materialfile << " in the folder :" << path_data << endl;
+		exit(0);
         return;
 	}
     
@@ -273,7 +275,7 @@ void check_path_output(const std::vector<block> &blocks, const solver_output &so
             }
             default: {
                 cout << "The block type is incorrect. Please enter a valid block type (1) : Mechanical (2) Thermomechanical";
-                break;
+                exit(0);
             }
         }
         
@@ -297,6 +299,7 @@ void read_path(std::vector<block> &blocks, double &T, const string &path_data, c
 	if(!path)
 	{
 		cout << "Error: cannot open the file " << pathfile << " in the folder :" << path_data << endl;
+		exit(0);
 	}
 
 	///temperature is initialized
@@ -473,7 +476,7 @@ void read_path(std::vector<block> &blocks, double &T, const string &path_data, c
             }
             default: {
                 cout << "Please enter a valid block type (1 for mechanical, 2 for thermomechanical)" << endl;
-                break;
+                exit(0);
             }
             
         }
