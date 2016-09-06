@@ -67,6 +67,24 @@ void run_identification_solver(const std::string &simul_type, const int &n_param
         boost::filesystem::create_directory(path_results);
     }
     
+    //Check consistency of data
+    if((aleaspace==0)||(aleaspace==1)) {
+        if(maxpop > spop*n_param) {
+            cout << "Please increase the mesh grid for the first generation (Space population) or reduce the max number population per subgeneration\n";
+            exit(0);
+        }
+    }
+    else if((aleaspace==2)||(aleaspace==3)) {
+        if(maxpop > apop) {
+            cout << "Please increase the Space population or reduce the max number population per subgeneration\n";
+            exit(0);
+        }
+    }
+    
+    if(ngboys > maxpop) {
+        cout << "Please increase the the max number population per subgeneration or reduce the number of gboys\n";
+        exit(0);
+    }
     
     ///Allow non-repetitive pseudo-random number generation
     srand(time(0));
@@ -118,12 +136,12 @@ void run_identification_solver(const std::string &simul_type, const int &n_param
     vector<opti_data> data_num(nfiles);
     read_data_num(nfiles, data_exp, data_num);
     vec vnum = zeros(sizev);   //num vector
-
+    
     //Data structure has been created. Next is the generation of structures to compute cost function and associated derivatives
     mat S(sizev,n_param);
     Col<int> pb_col;
     pb_col.zeros(n_param);
-
+    
     result.open(outputfile,  ios::out);
     result << "g" << "\t";
     result << "nindividual" << "\t";
@@ -148,13 +166,12 @@ void run_identification_solver(const std::string &simul_type, const int &n_param
     }
     gen_initialize(geninit, spop, apop, idnumber, aleaspace, n_param, params, lambdaLM);
 
-    
     string data_num_folder = "num_data";
     if(!boost::filesystem::is_directory(data_num_folder)) {
         cout << "The folder for the numerical data, " << data_num_folder << ", is not present and has been created" << endl;
         boost::filesystem::create_directory(data_num_folder);
     }
-    
+        
     /// Run the simulations corresponding to each individual
     /// The simulation input files should be ready!
     for(int i=0; i<geninit.size(); i++) {
