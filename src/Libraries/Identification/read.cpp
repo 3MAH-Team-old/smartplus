@@ -265,78 +265,59 @@ void read_data_num(const int &nfiles, const vector<opti_data> &data_exp, vector<
 void ident_essentials(int &n_param, int &n_consts, int &n_files, const string &path, const string &filename) {
 
     string pathfile = path + "/" + filename;
-    
-    ifstream paraminit;
+    ifstream param_essentials;
     string buffer;
 
-    paraminit.open(pathfile, ios::in);
-    if(!paraminit) {
+    param_essentials.open(pathfile, ios::in);
+    if(!param_essentials) {
         cout << "Error: cannot open : " << filename << " in :" << path << endl;
         return;
     }
         
     ///Get the control values for the genetic algorithm
-    paraminit >> buffer >> n_param;
-    paraminit >> buffer >> n_consts;
-    paraminit >> buffer >> n_files;
+    param_essentials >> buffer >> n_param;
+    param_essentials >> buffer >> n_consts;
+    param_essentials >> buffer >> n_files;
+    
+    param_essentials.close();
+    
 }
     
-void ident_control(int &n_param, int &n_consts, int &n_files, int &ngen, int &aleaspace, int &apop, int &spop, int &ngboys, int &maxpop, double &probaMut, double &pertu, double &c, double &p0, double &lambdaLM) {
+void ident_control(int &ngen, int &aleaspace, int &apop, int &spop, int &ngboys, int &maxpop, double &probaMut, double &pertu, double &c, double &p0, double &lambdaLM, const string &path, const string &filename) {
     
-    ifstream paraminit;
+    string pathfile = path + "/" + filename;
+    ifstream param_control;
     string buffer;
-    
-    paraminit.open("data/ident_control.inp", ios::in);
-    if(!paraminit) {
-        cout << "Error: cannot open ident_control.inp file\n";
+        
+    param_control.open(pathfile, ios::in);
+    if(!param_control) {
+        cout << "Error: cannot open : " << filename << " in :" << path << endl;
         return;
     }
-    
+        
     ///Get the control values for the genetic algorithm
-    paraminit >> buffer >> n_param;
-    paraminit >> buffer >> n_consts;
-    paraminit >> buffer >> n_files;
-    paraminit >> buffer >> ngen;
-    paraminit >> buffer >> aleaspace;
+    param_control >> buffer >> ngen;
+    param_control >> buffer >> aleaspace;
     ///Get the state of the initial population : 0 = equidistant individuals, 1 = random individuals, 2 = previously computed population, 3 = equidistant individuals with boundary ones
     if((aleaspace==0)||(aleaspace==1))
-        paraminit >> buffer >> spop;
+        param_control >> buffer >> spop;
     else if((aleaspace==2)||(aleaspace==3))
-        paraminit >> buffer >> apop;
+        param_control >> buffer >> apop;
     else {
         cout << "Please select if the initial space is filled with random or equidistant values\n";
         exit(0);
     }
     
-    paraminit >> buffer >> ngboys;
-    paraminit >> buffer >> maxpop;
-
-    if((aleaspace==0)||(aleaspace==1)) {
-        if(maxpop > spop*n_param) {
-            cout << "Please increase the mesh grid for the first generation (Space population) or reduce the max number population per subgeneration\n";
-            exit(0);
-        }
-    }
-    else if((aleaspace==2)||(aleaspace==3)) {
-        if(maxpop > apop) {
-            cout << "Please increase the Space population or reduce the max number population per subgeneration\n";
-            exit(0);
-        }
-    }
+    param_control >> buffer >> ngboys;
+    param_control >> buffer >> maxpop;
     
-    if(ngboys > maxpop) {
-        cout << "Please increase the the max number population per subgeneration or reduce the number of gboys\n";
-        exit(0);
-    }
+    param_control >> buffer >> probaMut;
+    param_control >> buffer >> pertu;
     
+    param_control >> buffer >> c >> p0;
+    param_control >> buffer >> lambdaLM;
     
-    paraminit >> buffer >> probaMut;
-    paraminit >> buffer >> pertu;
-    
-    paraminit >> buffer >> c >> p0;
-    paraminit >> buffer >> lambdaLM;
-    
-    paraminit.close();
+    param_control.close();
 }
     
 void read_gen(int &apop, mat &samples, const int &n_param) {
