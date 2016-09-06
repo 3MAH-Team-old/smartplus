@@ -39,6 +39,8 @@
 #include <smartplus/Umat/Mechanical/Damage/damage_LLD_0.hpp>
 
 #include <smartplus/Umat/Thermomechanical/Elasticity/elastic_isotropic.hpp>
+#include <smartplus/Umat/Thermomechanical/Elasticity/elastic_transverse_isotropic.hpp>
+#include <smartplus/Umat/Thermomechanical/Elasticity/elastic_orthotropic.hpp>
 #include <smartplus/Umat/Thermomechanical/Plasticity/plastic_isotropic_ccp.hpp>
 #include <smartplus/Umat/Thermomechanical/Plasticity/plastic_kin_iso_ccp.hpp>
 
@@ -226,6 +228,14 @@ void select_umat_T(phase_characteristics &rve, const mat &DR,const double &Time,
     switch (list_umat[rve.sptr_matprops->umat_name]) {
         case 1: {
             umat_elasticity_iso_T(umat_T->Etot, umat_T->DEtot, umat_T->sigma, umat_T->r, umat_T->dSdE, umat_T->dSdT, umat_T->drdE, umat_T->drdT, DR, rve.sptr_matprops->nprops, rve.sptr_matprops->props, umat_T->nstatev, umat_T->statev, umat_T->T, umat_T->DT, Time, DTime, umat_T->Wm(0), umat_T->Wm(1), umat_T->Wm(2), umat_T->Wm(3), umat_T->Wt(0), umat_T->Wt(1), umat_T->Wt(2), ndi, nshr, start, tnew_dt);
+            break;
+        }
+        case 2: {
+            umat_elasticity_trans_iso_T(umat_T->Etot, umat_T->DEtot, umat_T->sigma, umat_T->r, umat_T->dSdE, umat_T->dSdT, umat_T->drdE, umat_T->drdT, DR, rve.sptr_matprops->nprops, rve.sptr_matprops->props, umat_T->nstatev, umat_T->statev, umat_T->T, umat_T->DT, Time, DTime, umat_T->Wm(0), umat_T->Wm(1), umat_T->Wm(2), umat_T->Wm(3), umat_T->Wt(0), umat_T->Wt(1), umat_T->Wt(2), ndi, nshr, start, tnew_dt);
+            break;
+        }
+        case 3: {
+            umat_elasticity_ortho_T(umat_T->Etot, umat_T->DEtot, umat_T->sigma, umat_T->r, umat_T->dSdE, umat_T->dSdT, umat_T->drdE, umat_T->drdT, DR, rve.sptr_matprops->nprops, rve.sptr_matprops->props, umat_T->nstatev, umat_T->statev, umat_T->T, umat_T->DT, Time, DTime, umat_T->Wm(0), umat_T->Wm(1), umat_T->Wm(2), umat_T->Wm(3), umat_T->Wt(0), umat_T->Wt(1), umat_T->Wt(2), ndi, nshr, start, tnew_dt);
             break;
         }
         case 4: {
