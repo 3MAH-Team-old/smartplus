@@ -96,7 +96,6 @@ void read_matprops(string &umat_name, int &nprops, vec &props, int &nstatev, dou
 	}
 	else {
 		cout << "Error: cannot open the file " << materialfile << " in the folder :" << path_data << endl;
-		exit(0);
 	}
 	
 	char *cmname = new char [umat_name.length()];
@@ -116,7 +115,6 @@ void read_matprops(string &umat_name, int &nprops, vec &props, int &nstatev, dou
 	}
 	else {
 		cout << "Error: cannot open the file " << materialfile << " in the folder :" << path_data << endl;
-		exit(0);
         return;
 	}
     
@@ -170,7 +168,7 @@ void read_output(solver_output &so, const int &nblock, const int &nstatev, const
                     cout << "Error : The range of outputed statev is greater than the actual number of statev!\n";
                     cout << "Check output file and/or material input file\n" << endl;
                     
-                    exit(0);
+                    return;
                 }
             }
         }
@@ -220,7 +218,7 @@ void check_path_output(const std::vector<block> &blocks, const solver_output &so
                     
                     if (sptr_meca->mode == 3) {
                         if((so.o_type(i) == 2)||(sptr_meca->ninc%so.o_nfreq(i))) {
-                            cout << "The output nfreq is not compatible with the number of increments of the step)";
+                            cout << "The output nfreq is not compatible with the number of increments of the step)" << endl;
                             break;
                         }
                     }
@@ -228,13 +226,13 @@ void check_path_output(const std::vector<block> &blocks, const solver_output &so
                         
                         if(so.o_type(i) == 1) {
                             if(sptr_meca->ninc%so.o_nfreq(i) > 0) {
-                                cout << "The output nfreq is not compatible with the number of increments of the step)";
+                                cout << "The output nfreq is not compatible with the number of increments of the step)" << endl;
                                 break;
                             }
                         }
                         else if(so.o_type(i) == 2) {
                             if((fmod(1, so.o_tfreq(i)) > limit)||(fmod(so.o_tfreq(i), sptr_meca->Dn_inc) > 0.)) {
-                                cout << "The output tfreq is not compatible with the time of increments of the step)";
+                                cout << "The output tfreq is not compatible with the time of increments of the step)" << endl;
                                 break;
                             }
                         }
@@ -252,20 +250,20 @@ void check_path_output(const std::vector<block> &blocks, const solver_output &so
                     
                     if (sptr_thermomeca->mode == 3) {
                         if((so.o_type(i) == 2)||(sptr_thermomeca->ninc%so.o_nfreq(i))) {
-                            cout << "The output nfreq is not compatible with the number of increments of the step)";
+                            cout << "The output nfreq is not compatible with the number of increments of the step)" << endl;
                             break;
                         }
                     }
                     else {
                         if(so.o_type(i) == 1) {
                             if(sptr_thermomeca->ninc%so.o_nfreq(i) > 0) {
-                                cout << "The output nfreq is not compatible with the number of increments of the step)";
+                                cout << "The output nfreq is not compatible with the number of increments of the step)" << endl;
                                 break;
                             }
                         }
                         else if(so.o_type(i) == 2) {
                             if((fmod(1, so.o_tfreq(i)) > limit)||(fmod(so.o_tfreq(i), sptr_thermomeca->Dn_inc) > 0.)) {
-                                cout << "The output tfreq is not compatible with the time of increments of the step)";
+                                cout << "The output tfreq is not compatible with the time of increments of the step)" << endl;
                                 break;
                             }
                         }
@@ -274,8 +272,8 @@ void check_path_output(const std::vector<block> &blocks, const solver_output &so
                 break;
             }
             default: {
-                cout << "The block type is incorrect. Please enter a valid block type (1) : Mechanical (2) Thermomechanical";
-                exit(0);
+                cout << "The block type is incorrect. Please enter a valid block type (1) : Mechanical (2) Thermomechanical" << endl;
+                break;
             }
         }
         
@@ -298,8 +296,7 @@ void read_path(std::vector<block> &blocks, double &T, const string &path_data, c
 	path.open(path_inputfile, ios::in);
 	if(!path)
 	{
-		cout << "Error: cannot open the file " << pathfile << " in the folder :" << path_data << endl;
-		exit(0);
+		cout << "Error: cannot open the file " << pathfile << " in the folder :" << path_data << "\n";
 	}
 
 	///temperature is initialized
@@ -312,7 +309,7 @@ void read_path(std::vector<block> &blocks, double &T, const string &path_data, c
         path >> buffer >> blocks[i].number >> buffer >> blocks[i].type >> buffer >> blocks[i].ncycle >> buffer >> blocks[i].nstep;
 
         if (blocks[i].number != i+1) {
-            cout << "The number of blocks could not be found. Please verify the blocks order in the path file" << endl;
+            cout << "The number of blocks could not be found. Please verify the blocks order in the path file";
         }
         
         blocks[i].generate();
@@ -348,7 +345,7 @@ void read_path(std::vector<block> &blocks, double &T, const string &path_data, c
                             path >> sptr_meca->BC_T;
                         }
                         else
-                            cout << "Error, This is a mechanical step, only temperature boundary condition is allowed here" << endl;
+                            cout << "Error, This is a mechanical step, only temperature boundary condition is allowed here\n";
 
                     }
                     else if (blocks[i].steps[j]->mode == 3) {
@@ -383,7 +380,7 @@ void read_path(std::vector<block> &blocks, double &T, const string &path_data, c
                         }
                     }
                     else {
-                        cout << "Please enter a suitable block mode (1 for linear, 2 for sinusoidal, 3 for user-input)" << endl;
+                        cout << "Please enter a suitable block mode (1 for linear, 2 for sinusoidal, 3 for user-input)";
                     }
                 }
                 break;
@@ -475,8 +472,8 @@ void read_path(std::vector<block> &blocks, double &T, const string &path_data, c
                 break;
             }
             default: {
-                cout << "Please enter a valid block type (1 for mechanical, 2 for thermomechanical)" << endl;
-                exit(0);
+                cout << "Please enter a valid block type (1 for mechanical, 2 for thermomechanical)\n";
+                break;
             }
             
         }
