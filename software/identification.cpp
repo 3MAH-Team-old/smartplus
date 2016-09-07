@@ -60,16 +60,20 @@ int main() {
 	double lambdaLM;
     //Read the identification control
     
-    string path_data = "data/";
-    string path_keys = "keys/";
-    string path_results = "results/";
+    string path_data = "data";
+    string path_keys = "keys";
+    string path_results = "results";
     string materialfile = "material.dat";
     string outputfile = "id_params.txt";
     string simulfile = "simul.txt";
+    
+    string file_essentials = "ident_essentials.inp";
+    string file_control = "ident_control.inp";
 
     string simul_type = "SOLVE";
-    
-    ident_control(n_param, n_consts, nfiles, ngen, aleaspace, apop, spop, ngboys, maxpop, probaMut, pertu, c, p0, lambdaLM);
+
+    ident_essentials(n_param, n_consts, nfiles, path_data, file_essentials);
+    ident_control(ngen, aleaspace, apop, spop, ngboys, maxpop, probaMut, pertu, c, p0, lambdaLM, path_data, file_control);
     run_identification_solver(simul_type,n_param, n_consts, nfiles, ngen, aleaspace, apop, spop, ngboys, maxpop, path_data, path_keys, path_results, materialfile, outputfile, simulfile, probaMut, pertu, c, p0, lambdaLM);
 
 }
