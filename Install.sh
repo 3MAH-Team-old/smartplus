@@ -29,7 +29,7 @@ echo ""
 cd ${current_dir}/build
 cmake ..
 echo ""
-make
+make -j4
 echo ""
 make test
 echo ""
