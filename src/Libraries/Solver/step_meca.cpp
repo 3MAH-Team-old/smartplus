@@ -108,8 +108,7 @@ void step_meca::generate(const double &mTime, const vec &mEtot, const vec &msigm
         pathinc.open(file, ios::in);
         if(!pathinc)
         {
-            cout << "Error: cannot open the file " << file << "\n Please check if the file is correct and is you have added the extension" << endl;
-            exit(0);
+            cout << "Error: cannot open the file " << file << "\n Please check if the file is correct and is you have added the extension\n";
         }
         //read the file to get the number of increments
         while (!pathinc.eof())
@@ -225,8 +224,7 @@ void step_meca::generate(const double &mTime, const vec &mEtot, const vec &msigm
         
 	}
 	else{
-		cout << "\nError: The mode of the step number " << number << " does not correspond to an existing loading mode." << endl;
-		exit(0);
+		cout << "\nError: The mode of the step number " << number << " does not correspond to an existing loading mode.\n";
 	}
     
 }
