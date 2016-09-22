@@ -47,7 +47,6 @@ void umat_elasticity_iso_T(const vec &Etot, const vec &DEtot, vec &sigma, double
     UNUSED(statev);
     UNUSED(T);
     UNUSED(Time);
-    UNUSED(DTime);
     UNUSED(nshr);
     UNUSED(tnew_dt);    
     

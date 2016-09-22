@@ -28,23 +28,24 @@
 #include <smartplus/Libraries/Continuum_Mechanics/contimech.hpp>
 #include <smartplus/Libraries/Continuum_Mechanics/constitutive.hpp>
 #include <smartplus/Libraries/Maths/rotation.hpp>
+#include <smartplus/Libraries/Maths/num_solve.hpp>
 
 using namespace std;
 using namespace arma;
 
 namespace smart {
+    
+///@brief The mechanical elastic-plastic UMAT with kinematic + isotropic hardening requires 7 constants:
 
-///@brief The elastic-plastic UMAT with isotropic hardening requires 6 constants:
+///@brief props[0] : Young modulus
+///@brief props[1] : Poisson ratio
+///@brief props[2] : CTE
+///@brief props[3] : J2 equivalent yield stress limit : sigmaY
+///@brief props[4] : hardening parameter k
+///@brief props[5] : exponent m
+///@brief props[6] : linear kinematical hardening h
 
-///@brief props[1] : Young modulus
-///@brief props[2] : Poisson ratio
-///@brief props[3] : CTE
-///@brief props[4] : J2 equivalent yield stress limit : sigmaY
-///@brief props[5] : hardening parameter k
-///@brief props[6] : exponent m
-///@brief props[7] : linear kinematical hardening h
-
-///@brief The elastic-plastic UMAT with isotropic hardening requires 14 statev:
+///@brief The elastic-plastic UMAT with kinematic + isotropic hardening requires 14 statev:
 ///@brief statev[0] : T_init : Initial temperature
 ///@brief statev[1] : Accumulative plastic parameter: p
 ///@brief statev[2] : Plastic strain 11: EP(0,0)
@@ -59,7 +60,7 @@ namespace smart {
 ///@brief statev[11] : Backstress 11: X(0,1)
 ///@brief statev[12] : Backstress 11: X(0,2)
 ///@brief statev[13] : Backstress 11: X(1,2)
-    
+
 
 void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT, const double &Time, const double &DTime, double &Wm, double &Wm_r, double &Wm_ir, double &Wm_d, const int &ndi, const int &nshr, const bool &start, double &tnew_dt)
 {
@@ -74,11 +75,14 @@ void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, 
     //From the props to the material properties
     double E = props(0);
     double nu= props(1);
-    double alpha = props(2);
+    double alpha_iso = props(2);
     double sigmaY = props(3);
-    double k = props(4);
-    double m = props(5);
+    double k=props(4);
+    double m=props(5);
     double kX = props(6);
+    
+    //definition of the CTE tensor
+    vec alpha = alpha_iso*Ith();
     
     // ######################  Elastic compliance and stiffness #################################
     //defines L
@@ -86,11 +90,10 @@ void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, 
     mat M = M_iso(E, nu, "Enu");
     
     ///@brief Temperature initialization
-    double Tinit = statev(0);
+    double T_init = statev(0);
     //From the statev to the internal variables
     double p = statev(1);
-    
-    vec EP = zeros(6);
+    vec EP(6);
     EP(0) = statev(2);
     EP(1) = statev(3);
     EP(2) = statev(4);
@@ -98,7 +101,7 @@ void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, 
     EP(4) = statev(6);
     EP(5) = statev(7);
     
-    ///@brief X is the backstress associated with reorientation
+    ///@brief a is the internal variable associated with kinematical hardening
     vec a = zeros(6);
     a(0) = statev(8);
     a(1) = statev(9);
@@ -109,186 +112,192 @@ void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, 
     
     //Rotation of internal variables (tensors)
     EP = rotate_strain(EP, DR);
-    a = rotate_stress(a, DR);
-    vec X = kX*(a%Ir05());
+    a = rotate_strain(a, DR);
     
     ///@brief Initialization
     if(start)
     {
-        Tinit = T;
+        T_init = T;
         vec vide = zeros(6);
         sigma = vide;
-        X = vide;
         EP = vide;
+        a = vide;
         p = 0.;
+        
+        Wm = 0.;
+        Wm_r = 0.;
+        Wm_ir = 0.;
+        Wm_d = 0.;
     }
-    vec sigma_start = sigma;
-    double p_temp = p;
-    double p_start = p;
-    vec EP_start = EP;
-    vec a_start = a;
-    vec X_start = X;
     
-    ///Elastic prediction - Accounting for the thermal prediction
-    vec DEel_start = DEtot - alpha*Ith()*DT;
-    
-    if (ndi == 1) {
-        sigma(0) = sigma_start(0) + E*(DEel_start(0));
-    }
-    else if (ndi == 2) {
-        sigma(0) = sigma_start(0) + E/(1. - (nu*nu))*(DEel_start(0)) + nu*(DEel_start(1));
-        sigma(1) = sigma_start(1) + E/(1. - (nu*nu))*(DEel_start(1)) + nu*(DEel_start(0));
-        sigma(3) = sigma_start(3) + E/(1.+nu)*0.5*DEel_start(3);
-    }
-    else
-    sigma = sigma_start + (L*DEel_start);
-    
-    //Compute the explicit flow direction
-    vec Lambdap = eta_stress(sigma - X);
-    vec lambdaa = -1.*eta_stress(sigma-X);
-    
-    //Define the plastic function and the stress
-    double Phi=0.;
-    double dPhi = 0.;
-    
-    double dPhidp=0.;
-    vec dPhidsigma = zeros(6);
-    vec dPhidEP = zeros(6);
-    vec dPhida = zeros(6);
+    //Additional parameters and variables
+    vec X = kX*(a%Ir05());
     
     double Hp=0.;
     double dHpdp=0.;
     
-    vec dEP(6);
-    
-    vec dsigmadp = zeros(6);
-    
-    if (p > 0.)
-    Hp = k*pow(p, m);
-    else
-    Hp = 0.;
-    double Hp_start = Hp;
-    
-    //Initialization of the function that defines the elastic domain
-    Phi = Mises_stress(sigma - X) - Hp - sigmaY;
-    vec Eel = zeros(6);
-    int compteur = 0;
-    
-    if(fabs(Phi)/sigmaY > precision_umat) {
-        for(compteur = 0 ; (compteur < maxiter_umat) && (fabs(Phi)/sigmaY > precision_umat) ; compteur++) {
-            
-            Lambdap = eta_stress(sigma - X);
-            lambdaa = eta_stress(sigma - X);
-            dPhidsigma = eta_stress(sigma - X);
-            
-            Hp = k*pow(p, m);
-            Phi = Mises_stress(sigma - X) - Hp - sigmaY;
-            
-            if (p > 1.E-12)	{
-                dHpdp = m*k*pow(p, m-1);
-                Hp = k*pow(p, m);
-            }
-            else {
-                dHpdp = 0.;
-                Hp = 0.;
-            }
-            
-            dPhidp = -dHpdp;
-            dPhida = -1.*kX*(eta_stress(sigma - X)%Ir05());
-            dPhi = sum((-1.*L*Lambdap)%dPhidsigma) + dPhidp + sum(dPhida%lambdaa);
-            
-            p_temp = p;
-            
-            if(fabs(dPhi) > 0.)
-            p = p - 1.*Phi/dPhi;
-            else {
-                //pnewdt = 0.1;
-                Phi = 0.;
-            }
-            
-            if (p < p_start) {
-                //Phi = 0.;
-                p = p_start+precision_umat;
-            }
-            
-            EP = EP + (p - p_temp)*Lambdap;
-            a = a + (p - p_temp)*lambdaa;
-            X = kX*(a%Ir05());
-            
-            //the stress is now computed using the relationship sigma = L(E-Ep)
-            Eel = Etot + DEtot - alpha*Ith()*(T + DT - Tinit) - EP;
-            
-            if(ndi == 1) {						// 1D
-                double Eeff = 1./M(0,0);
-                sigma(0) = Eeff*(Eel(0));
-            }
-            else if(ndi == 2){					// 2D Plane Stress
-                double Eeff = 1./M(0,0);
-                double nueff = -M(0,1)/M(0,0);
-                sigma(0) = Eeff/(1. - nueff*nueff)*(Eel(0)) + nueff*(Eel(1));
-                sigma(1) = Eeff/(1. - nueff*nueff)*(Eel(1)) + nueff*(Eel(0));
-                sigma(3) = Eeff/(1. - nueff*nueff)*(1. - nueff)*0.5*Eel(3);
-            }
-            else
-            sigma = (L*Eel); // 2D Generalized Plane Strain (Plane Strain, Axisymetric) && 3D
-            
-        }
-        
-        // Computation of the elastoplastic tangent moduli
-        if (p > precision_umat)
+    if (p > iota)	{
         dHpdp = m*k*pow(p, m-1);
-        else
-        dHpdp =  0.;
-        
-        if (p-p_start > 1.1*precision_umat) {
-            dPhidp = -dHpdp;
-            dPhida = -1.*kX*(eta_stress(sigma - X)%Ir05());
-            dPhi = dPhidp + sum(dPhida%lambdaa);
-            dPhidsigma = eta_stress(sigma - X);
-            
-            //Computation of the tangent modulus !
-            vec B1(6);
-            vec B2(6);
-            double At2;
-            
-            B1 = L*Lambdap;
-            B2 = L*dPhidsigma;
-            At2 = (dPhi - sum(dPhidsigma%B1));
-            
-            if (fabs(At2) > precision_umat) {
-                Lt = L + (B1*trans(B2))/At2;
-            }
-            else
-            Lt = L;
-            
-        }
-        else
-        Lt = L;
-        
+        Hp = k*pow(p, m);
     }
     else {
-        Eel = Etot + DEtot - alpha*Ith()*(T + DT - Tinit) - EP;
-        
-        if(ndi == 1){						// 1D
-            double Eeff = 1./M(0,0);
-            sigma(0) = Eeff*(Eel(0));
-        }
-        else if(ndi == 2){					// 2D Plane Stress
-            double Eeff = 1./M(0,0);
-            double nueff = -M(0,1)/M(0,0);
-            sigma(0) = Eeff/(1. - nueff*nueff)*(Eel(0)) + nueff*(Eel(1));
-            sigma(1) = Eeff/(1. - nueff*nueff)*(Eel(1)) + nueff*(Eel(0));
-            sigma(3) = Eeff/(1. - nueff*nueff)*(1. - nueff)*0.5*Eel(3);
-        }
-        else
-        sigma = (L*Eel); // 2D Generalized Plane Strain (Plane Strain, Axisymetric) && 3D
-        
-        Lt = L;
+        dHpdp = 0.;
+        Hp = 0.;
     }
     
+    //Variables values at the start of the increment
+    vec sigma_start = sigma;
+    vec EP_start = EP;
+    vec a_start = a;
+    vec X_start = X;
+    
+    double A_p_start = -Hp;
+    vec A_a_start = -X_start;
+    
+    //Variables required for the loop
+    vec s_j = zeros(1);
+    s_j(0) = p;
+    vec Ds_j = zeros(1);
+    vec ds_j = zeros(1);
+    
+    ///Elastic prediction - Accounting for the thermal prediction
+    vec Eel = Etot + DEtot - alpha*(T+DT-T_init) - EP;
+    if (ndi == 1) {
+        sigma(0) = E*Eel(0);
+    }
+    else if (ndi == 2) {
+        sigma(0) = E/(1. - (nu*nu))*(Eel(0)) + nu*(Eel(1));
+        sigma(1) = E/(1. - (nu*nu))*(Eel(1)) + nu*(Eel(0));
+        sigma(3) = E/(1.+nu)*0.5*Eel(3);
+    }
+    else
+        sigma = (L*Eel);
+    
+    //Define the plastic function and the stress
+    vec Phi = zeros(1);
+    mat B = zeros(1,1);
+    vec Y_crit = zeros(1);
+    
+    double dPhidp=0.;
+    vec dPhida = zeros(6);
+    vec dPhidsigma = zeros(6);
+    double dPhidtheta = 0.;
+    
+    //Compute the explicit flow direction
+    vec Lambdap = eta_stress(sigma-X);
+    vec Lambdaa = eta_stress(sigma-X);
+    std::vector<vec> kappa_j(1);
+    kappa_j[0] = L*Lambdap;
+    mat K = zeros(1,1);
+    
+    //Loop parameters
+    int compteur = 0;
+    double error = 1.;
+    
+    //Loop
+    for (compteur = 0; ((compteur < maxiter_umat) && (error > precision_umat)); compteur++) {
+        
+        p = s_j(0);
+        if (p > iota)	{
+            dHpdp = m*k*pow(p, m-1);
+            Hp = k*pow(p, m);
+        }
+        else {
+            dHpdp = 0.;
+            Hp = 0.;
+        }
+        dPhidsigma = eta_stress(sigma-X);
+        dPhidp = -1.*dHpdp;
+        dPhida = -1.*kX*(eta_stress(sigma - X)%Ir05());
+        
+        //compute Phi and the derivatives
+        Phi(0) = Mises_stress(sigma-X) - Hp - sigmaY;
+        
+        Lambdap = eta_stress(sigma-X);
+        Lambdaa = eta_stress(sigma-X);
+        kappa_j[0] = L*Lambdap;
+        
+        K(0,0) = dPhidp + sum(dPhida%Lambdaa);
+        B(0, 0) = -1.*sum(dPhidsigma%kappa_j[0]) + K(0,0);
+        Y_crit(0) = sigmaY;
+        
+        Fischer_Burmeister_m(Phi, Y_crit, B, Ds_j, ds_j, error);
+        
+        s_j(0) += ds_j(0);
+        EP = EP + ds_j(0)*Lambdap;
+        a = a + ds_j(0)*Lambdaa;
+        X = kX*(a%Ir05());
+        
+        //the stress is now computed using the relationship sigma = L(E-Ep)
+        Eel = Etot + DEtot - alpha*(T + DT - T_init) - EP;
+        
+        if(ndi == 1) {						// 1D
+            sigma(0) = E*(Eel(0));
+        }
+        else if(ndi == 2){					// 2D Plane Stress
+            sigma(0) = E/(1. - nu*nu)*(Eel(0)) + nu*(Eel(1));
+            sigma(1) = E/(1. - nu*nu)*(Eel(1)) + nu*(Eel(0));
+            sigma(3) = E/(1. - nu*nu)*(1. - nu)*0.5*Eel(3);
+        }
+        else
+            sigma = (L*Eel); // 2D Generalized Plane Strain (Plane Strain, Axisymetric) && 3D
+    }
+    
+    //Computation of the increments of variables
+    vec Dsigma = sigma - sigma_start;
+    vec DEP = EP - EP_start;
+    double Dp = Ds_j[0];
+    vec Da = a - a_start;
+    
+    //Computation of the tangent modulus
+    mat Bhat = zeros(1, 1);
+    Bhat(0, 0) = sum(dPhidsigma%kappa_j[0]) - K(0,0);
+    
+    vec op = zeros(1);
+    mat delta = eye(1,1);
+    
+    for (int i=0; i<1; i++) {
+        if(Ds_j[i] > iota)
+            op(i) = 1.;
+    }
+    
+    mat Bbar = zeros(1,1);
+    for (int i = 0; i < 1; i++) {
+        for (int j = 0; j < 1; j++) {
+            Bbar(i, j) = op(i)*op(j)*Bhat(i, j) + delta(i,j)*(1-op(i)*op(j));
+        }
+    }
+    
+    mat invBbar = zeros(1, 1);
+    mat invBhat = zeros(1, 1);
+    invBbar = inv(Bbar);
+    for (int i = 0; i < 1; i++) {
+        for (int j = 0; j < 1; j++) {
+            invBhat(i, j) = op(i)*op(j)*invBbar(i, j);
+        }
+    }
+    
+    std::vector<vec> P_epsilon(1);
+    P_epsilon[0] = invBhat(0, 0)*(L*dPhidsigma);
+    std::vector<double> P_theta(1);
+    P_theta[0] = dPhidtheta - sum(dPhidsigma%(L*alpha));
+    
+    Lt = L - (kappa_j[0]*P_epsilon[0].t());
+    
+    double A_p = -Hp;
+    vec A_a = -X;
+    
+    double Dgamma_loc = 0.5*sum((sigma_start+sigma)%DEP) + 0.5*(A_p_start + A_p)*Dp + 0.5*sum((A_a_start + A_a)%Da);
+    
+    //Computation of the mechanical and thermal work quantities
+    Wm += 0.5*sum((sigma_start+sigma)%DEtot);
+    Wm_r += 0.5*sum((sigma_start+sigma)%(DEtot-DEP)) - 0.5*sum((A_a_start + A_a)%Da);
+    Wm_ir += -0.5*(A_p_start + A_p)*Dp;
+    Wm_d += Dgamma_loc;
+            
     ///@brief statev evolving variables
     //statev
-    statev(0) = Tinit;
+    statev(0) = T_init;
     statev(1) = p;
     
     statev(2) = EP(0);
@@ -304,20 +313,6 @@ void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, 
     statev(11) = a(3);
     statev(12) = a(4);
     statev(13) = a(5);
-    
-    //Computation of the increments of variables
-    vec Dsigma = sigma - sigma_start;
-    vec DEP = EP - EP_start;
-    double Dp = p-p_start;
-    vec Da = a-a_start;
-    
-    double gamma_loc = 0.5*sum((sigma_start+sigma)%DEP) - 0.5*(Hp_start + Hp)*Dp - 0.5*sum((X_start+X)%Da);
-    
-    //Computation of the mechanical and thermal work quantities
-    Wm += 0.5*sum((sigma_start+sigma)%DEtot);
-    Wm_r += 0.5*sum((sigma_start+sigma)%(DEtot-DEP)) + 0.5*sum((X_start+X)%Da);
-    Wm_ir += 0.5*(Hp_start + Hp)*Dp;
-    Wm_d += gamma_loc;
 }
     
 } //namespace smart

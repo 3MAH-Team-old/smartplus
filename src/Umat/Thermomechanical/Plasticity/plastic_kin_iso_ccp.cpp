@@ -69,7 +69,6 @@ void umat_plasticity_kin_iso_CCP_T(const vec &Etot, const vec &DEtot, vec &sigma
     
     UNUSED(nprops);
     UNUSED(nstatev);
-    UNUSED(Time);
     UNUSED(DTime);
     UNUSED(nshr);
     UNUSED(tnew_dt);
