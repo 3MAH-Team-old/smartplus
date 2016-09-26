@@ -93,7 +93,7 @@ then
 	then
 		echo "${blue}libsmartplus.so${reset} installed in ${blue}${current_dir}/lib${reset}"
 	else
-		echo "${blue}libsmartplus.so${reset} not installed. Uncomment 'make install' line in ${0##*/} file if you want to."
+		echo "${blue}libsmartplus.so${reset} not installed."
 	fi
 	
 	echo "---------------------------"
