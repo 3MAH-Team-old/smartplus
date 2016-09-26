@@ -3,8 +3,15 @@ echo "\n----------------------------"
 echo "Start of SMART+ compilation."
 echo "---------------------------\n"
 
-#Find th current directory
+
+#Number of procs used to compil (+1 because if nproc=1 => 1/2=0)
+nproc_used=$(( ($(nproc)+1)/2 ))
+
+#Find the current directory
 current_dir=$(pwd)
+
+#Get the file of the bash file (possibly necessary)
+bashFileName=${0##*/}
 
 #Test if build exist and if it's necessary to erase it
 if [ ! -d "build" ]
@@ -24,16 +31,29 @@ else
 	done
 fi
 
+#Ask for installation of the SMART+ library
+while true; do
+	read -p "Do you want to install SMART+ library (necassary to use libsmartplus.so and simmit) ? " yn
+	case $yn in
+		[YyOo]* ) Install_check='OK'; break;;
+		[Nn]* ) Install_check='NO'; break;;
+		* ) echo "Please answer yes (y) or no (n).";;
+	esac
+done
+
 #Build SMART+
 echo ""
 cd ${current_dir}/build
 cmake ..
 echo ""
-make -j4
+make -j${nproc_used}
 echo ""
 make test
 echo ""
-make install && Install_check='OK'
+if [ "${Install_check}" = "OK" ]
+then
+	make install
+fi
 
 # Copy all important files
 if [ $? -eq 0 ]
@@ -54,7 +74,7 @@ then
 		echo "umat_singleT.o copied in ${current_dir}/build/bin"
 	fi
 	
-	#if debug existsn, copy of solver from Debug
+	#if debug exists, copy of solver from Debug
 	if [ -f ${current_dir}/build/bin/Debug/solver ]
 	then
 		cp ${current_dir}/build/bin/Debug/solver ${current_dir}/build/bin
@@ -62,7 +82,7 @@ then
 	cp ${current_dir}/build/bin/solver ${current_dir}/exec
 	echo "solver copied in ${current_dir}/exec"
 
-	#if debug existsn, copy of solver from Debug
+	#if debug exists, copy of solver from Debug
 	if [ -f ${current_dir}/build/bin/Debug/identification ]
 	then
 		cp ${current_dir}/build/bin/Debug/identification ${current_dir}/build/bin
@@ -70,7 +90,7 @@ then
 	cp ${current_dir}/build/bin/identification ${current_dir}/exec
 	echo "identification copied in ${current_dir}/exec"
 
-	#if debug existsn, copy of solver from Debug
+	#if debug exists, copy of solver from Debug
 	if [ -f ${current_dir}/build/bin/Debug/L_eff ]
 	then
 		cp ${current_dir}/build/bin/Debug/L_eff ${current_dir}/build/bin
@@ -78,7 +98,7 @@ then
 	cp ${current_dir}/build/bin/L_eff ${current_dir}/exec
 	echo "L_eff copied in ${current_dir}/exec"
 
-	#if debug existsn, copy of solver from Debug
+	#if debug exists, copy of solver from Debug
 	if [ -f ${current_dir}/build/bin/Debug/ODF ]
 	then
 		cp ${current_dir}/build/bin/Debug/ODF ${current_dir}/build/bin
