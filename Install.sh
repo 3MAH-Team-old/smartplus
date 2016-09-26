@@ -55,56 +55,39 @@ then
 	make install
 fi
 
-# Copy all important files
+#Create the list of the file to copy after compilation
+executableToCopy="solver identification L_eff ODF"
+objectToCopy="umat_single umat_singleT"
+
+# Copy all important files (+ final message)
 if [ $? -eq 0 ]
 then
 	echo "\n---------------------------"
 	
-	#Copy of umat_single.o
-	if [ -f ${current_dir}/build/CMakeFiles/umat.dir/software/umat_single.cpp.o ]
-	then 
-		cp ${current_dir}/build/CMakeFiles/umat.dir/software/umat_single.cpp.o ${current_dir}/build/bin/umat_single.o
-		echo "umat_single.o copied in ${current_dir}/build/bin"
-	fi
+	#Treatement of object files
+	for object in ${objectToCopy}
+	do
+		#Copy of the "object".o from build/CMakeFiles/umat.dir/software to build/bin
+		if [ -f ${current_dir}/build/CMakeFiles/umat.dir/software/${object}.cpp.o ]
+		then 
+			cp ${current_dir}/build/CMakeFiles/umat.dir/software/${object}.cpp.o ${current_dir}/build/bin/${object}.o
+			echo "${blue}${object}.o${reset} copied in ${blue}${current_dir}/build/bin${reset}"
+		fi
+	done
 	
-	#Copy of umat_singleT.o
-	if [ -f ${current_dir}/build/CMakeFiles/umatT.dir/software/umat_singleT.cpp.o ]
-	then 
-		cp ${current_dir}/build/CMakeFiles/umatT.dir/software/umat_singleT.cpp.o ${current_dir}/build/bin/umat_singleT.o
-		echo "umat_singleT.o copied in ${current_dir}/build/bin"
-	fi
-	
-	#if debug exists, copy of solver from Debug
-	if [ -f ${current_dir}/build/bin/Debug/solver ]
-	then
-		cp ${current_dir}/build/bin/Debug/solver ${current_dir}/build/bin
-	fi
-	cp ${current_dir}/build/bin/solver ${current_dir}/exec
-	echo "solver copied in ${current_dir}/exec"
-
-	#if debug exists, copy of solver from Debug
-	if [ -f ${current_dir}/build/bin/Debug/identification ]
-	then
-		cp ${current_dir}/build/bin/Debug/identification ${current_dir}/build/bin
-	fi
-	cp ${current_dir}/build/bin/identification ${current_dir}/exec
-	echo "identification copied in ${current_dir}/exec"
-
-	#if debug exists, copy of solver from Debug
-	if [ -f ${current_dir}/build/bin/Debug/L_eff ]
-	then
-		cp ${current_dir}/build/bin/Debug/L_eff ${current_dir}/build/bin
-	fi
-	cp ${current_dir}/build/bin/L_eff ${current_dir}/exec
-	echo "L_eff copied in ${current_dir}/exec"
-
-	#if debug exists, copy of solver from Debug
-	if [ -f ${current_dir}/build/bin/Debug/ODF ]
-	then
-		cp ${current_dir}/build/bin/Debug/ODF ${current_dir}/build/bin
-	fi
-	cp ${current_dir}/build/bin/ODF ${current_dir}/exec
-	echo "ODF copied in ${current_dir}/exec"
+	#Treatement of executable files
+	for file in ${executableToCopy}
+	do
+		#if debug exists, copy of the file from build/bin/Debug to build/bin
+		if [ -f ${current_dir}/build/bin/Debug/${file} ]
+		then
+			cp ${current_dir}/build/bin/Debug/${file} ${current_dir}/build/bin
+		fi
+		
+		#Copy the file from build/bin to exec
+		cp ${current_dir}/build/bin/${file} ${current_dir}/exec
+		echo "${blue}${file}${reset} copied in ${blue}${current_dir}/exec${reset}"
+	done
 	
 	if [ "${Install_check}" = "OK" ]
 	then
