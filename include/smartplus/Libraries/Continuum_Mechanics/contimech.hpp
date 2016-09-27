@@ -78,6 +78,9 @@ double sign(const double &);
 //Returns the normalized vector normal to an ellipsoid with semi-principal axes of length a1, a2, a3. The direction of the normalized vector is set by angles u
 arma::vec normal_ellipsoid(const double &, const double &, const double &, const double &, const double &);
 
+//Returns the curvature of an ellipsoid with semi-principal axes of length a1, a2, a3 at the angle u,v.
+double curvature_ellipsoid(const double &, const double &, const double &, const double &, const double &);
+
 //Returns the normal and tangent components of the stress vector in the normal direction n to an ellipsoid with axes a1, a2, a3. The direction of the normalized vector is set by angles u
 arma::vec sigma_int(const arma::vec &, const double &, const double &, const double &, const double &, const double &);
 
