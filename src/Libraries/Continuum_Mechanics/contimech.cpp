@@ -269,6 +269,14 @@ vec normal_ellipsoid(const double &u, const double &v, const double &a1, const d
 	return normal;
 }
 
+//-----------------------------------------------------------------------
+double curvature_ellipsoid(const double &u, const double &v, const double &a1, const double &a2, const double &a3)
+{
+	double curvature = (a1*a1*a2*a2*a3*a3)/(pow((a1*a1*a2*a2*cos(v)*cos(v) + a3*a3*sin(v)*sin(v) * (a2*a2*cos(u)*cos(u) + a1*a1*sin(u)*sin(u))),2));
+	
+	return curvature;
+}
+
 //Returns the normal and tangent components of the stress vector in the normal direction n to an ellipsoid with axes a1, a2, a3. The direction of the normalized vector is set by angles u
 vec sigma_int(const vec &sigma_in, const double &a1, const double &a2, const double &a3, const double &u, const double &v)
 //-----------------------------------------------------------------------
