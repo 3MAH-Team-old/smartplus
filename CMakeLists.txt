@@ -99,30 +99,23 @@ add_library(smartplus SHARED ${source_files})
 #link against armadillo
 target_link_libraries(smartplus ${Boost_LIBRARIES} ${ARMADILLO_LIBRARIES})
 
-#Add the solver executable
-add_executable(solver software/solver.cpp)
-
-#Link the solver executable with armadillo
-target_link_libraries(solver smartplus ${ARMADILLO_LIBRARIES})
-
-#Add the identification executable
-add_executable(identification software/identification.cpp)
-
-#Link the identification executable with armadillo
-target_link_libraries(identification smartplus ${ARMADILLO_LIBRARIES})
 
 
-#Add the L_eff executable
-add_executable(L_eff software/Leff.cpp)
+#Define list of executables for compilation
+set (All_exe_to_compile solver identification L_eff ODF)
 
-#Link the L_eff executable with smartplus and armadillo
-target_link_libraries(L_eff smartplus ${ARMADILLO_LIBRARIES})
+#Compile public executable
+foreach (Exe_to_compile ${All_exe_to_compile})
 
-#Add the ODF executable
-add_executable(ODF software/ODF.cpp)
+	#Add the solver executable
+	add_executable(${Exe_to_compile} software/${Exe_to_compile}.cpp)
 
-#Link the ODF executable with smartplus and armadillo
-target_link_libraries(ODF smartplus ${ARMADILLO_LIBRARIES})
+	#Link the solver executable with armadillo
+	target_link_libraries(${Exe_to_compile} smartplus ${ARMADILLO_LIBRARIES})
+
+endforeach (Exe_to_compile ${All_exe_to_compile})
+
+
 
 ##Testing
 #Test files are in a separate source directory called test
