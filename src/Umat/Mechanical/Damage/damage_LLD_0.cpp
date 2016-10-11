@@ -165,7 +165,7 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     
     double Phi_p_ts = 0.;
 
-    double dPhi_p_tsd_p = 0.;
+    double dPhip_tsdp_ts = 0.;
     vec dPhi_p_tsd_sigma = zeros(6);
     
     //Note : The sup function are not required here, since we utilize Kuhn-Tucker conditions instead (dD >= 0)
@@ -224,19 +224,19 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
         Phi_p_ts = Mises_stress(sigma_eff_ts) - Hp_ts - sigma_ts_0;
 
         //Compute the explicit flow direction
-        Lambdap_ts = Theta_ts*eta_stress(sigma_eff_ts);
+        Lambdap_ts = eta_stress(sigma_eff_ts);
         
         if (p_ts > iota)
-            dPhi_p_tsd_p = -1.*alpha_ts*beta_ts*pow(p_ts, alpha_ts-1.);
+            dPhip_tsdp_ts = -1.*alpha_ts*beta_ts*pow(p_ts, alpha_ts-1.);
         else
-            dPhi_p_tsd_p = 0.;
+            dPhip_tsdp_ts = 0.;
         
         dPhi_p_tsd_sigma = Theta_ts*eta_stress(sigma_eff_ts); //Here as well
         
         //compute Phi and the derivatives
         Phi_p(0) = Phi_p_ts;
         
-        denom_p(0, 0) = -1.*sum(dPhi_p_tsd_sigma % (L*Lambdap_ts)) + dPhi_p_tsd_p;
+        denom_p(0, 0) = -1.*sum(dPhi_p_tsd_sigma % (L*Lambdap_ts)) + dPhip_tsdp_ts;
         
         Y_pcrit(0) = sigma_ts_0;
         
@@ -500,6 +500,8 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     else
         sigma = L_tilde*Eel;
 
+    
+    //Tangent modulus
     mat B = L*inv(L_tilde);         //stress "localization factor" in damage
     
     //Compute the derivatives
@@ -560,29 +562,40 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
                         {0,0,0,0,G12_0/pow(G12,2.),0},
                         {0,0,0,0,0,0} };
     
-    Lambdap_ts = Theta_ts*eta_stress(sigma_eff_ts);
+    Lambdap_ts = eta_stress(sigma_eff_ts);
 
-    vec kappamat0 = zeros(6);
-    kappamat0 = (dStildedd22*sigma)%Ir05();
-
-    vec kappamat1 = zeros(6);
-    kappamat1 = (dStildedd12*sigma)%Ir05();
+    std::vector<vec> kappa_j(3);
+    kappa_j[0] = L_tilde*Lambdad_12;
+    kappa_j[1] = L_tilde*Lambdad_22;
+    kappa_j[2] = L_tilde*Lambdap_ts;
     
-    vec kappamat2 = zeros(6);
-    kappamat2 = (Lambdap_ts)%Ir05();
+    mat K = zeros(3,3);
+    K(0,0) = dPhi_d_12d_12;
+    K(0,1) = dPhi_d_12d_22;
+    K(0,2) = 0.;
+    
+    K(1,0) = dPhi_d_22d_12;
+    K(1,1) = dPhi_d_22d_12;
+    K(1,2) = 0.;
+    
+    K(2,0) = 0.;
+    K(2,1) = 0.;
+    K(2,2) = dPhip_tsdp_ts;
+
     
     mat Bhat = zeros(3, 3);
-    Bhat(0, 0) = -1.*sum(dPhi_d_22d_sigma % (L_tilde*kappamat0)) + dPhi_d_22d_22;
-    Bhat(0, 1) = -1.*sum(dPhi_d_22d_sigma % (L_tilde*kappamat1)) + dPhi_d_22d_12;
-    Bhat(0, 2) = -1.*sum(dPhi_d_22d_sigma % (L_tilde*kappamat2));
-
-    Bhat(1, 0) = -1.*sum(dPhi_d_12d_sigma % (L_tilde*kappamat0)) + dPhi_d_12d_22;
-    Bhat(1, 1) = -1.*sum(dPhi_d_12d_sigma % (L_tilde*kappamat1)) + dPhi_d_12d_12;
-    Bhat(1, 2) = -1.*sum(dPhi_d_12d_sigma % (L_tilde*kappamat2));
+    Bhat(0, 0) = sum(dPhi_d_12d_sigma % kappa_j[0]) - K(0,0);
+    Bhat(0, 1) = sum(dPhi_d_12d_sigma % kappa_j[1]) - K(0,1);
+    Bhat(0, 2) = sum(dPhi_d_12d_sigma % kappa_j[2]) - K(0,2);
     
-    Bhat(2, 0) = -1.*sum(dPhi_p_tsd_sigma % (L_tilde*kappamat0));
-    Bhat(2, 0) = -1.*sum(dPhi_p_tsd_sigma % (L_tilde*kappamat1));
-    Bhat(2, 1) = -1.*sum(dPhi_p_tsd_sigma % (L_tilde*kappamat2)) + dPhi_p_tsd_p;
+    Bhat(1, 0) = sum(dPhi_d_22d_sigma % kappa_j[0]) - K(1,0);
+    Bhat(2, 1) = sum(dPhi_d_22d_sigma % kappa_j[1]) - K(1,1);
+    Bhat(2, 2) = sum(dPhi_d_22d_sigma % kappa_j[2]) - K(1,2);
+
+    
+    Bhat(2, 0) = sum(dPhi_p_tsd_sigma % kappa_j[0]) - K(2,0);
+    Bhat(2, 0) = sum(dPhi_p_tsd_sigma % kappa_j[1]) - K(2,1);
+    Bhat(2, 1) = sum(dPhi_p_tsd_sigma % kappa_j[2]) - K(2,2);
     
     vec op = zeros(3);
     mat delta = eye(3,3);
@@ -610,19 +623,12 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
         }
     }
     
-    vec Pjay0 = zeros(6);
-    Pjay0 = L_tilde*(invBhat(0, 0)*dPhi_d_22d_sigma + invBhat(1, 0)*dPhi_d_12d_sigma + invBhat(2, 0)*dPhi_p_tsd_sigma);
-    vec Pjay1 = zeros(6);
-    Pjay1 = L_tilde*(invBhat(0, 1)*dPhi_d_22d_sigma + invBhat(1, 1)*dPhi_d_12d_sigma + invBhat(2, 1)*dPhi_p_tsd_sigma);
-    vec Pjay2 = zeros(6);
-    Pjay2 = L_tilde*(invBhat(0, 2)*dPhi_d_22d_sigma + invBhat(1, 2)*dPhi_d_12d_sigma + invBhat(2, 2)*dPhi_p_tsd_sigma);
+    std::vector<vec> P_epsilon(3);
+    P_epsilon[0] = invBhat(0, 0)*dPhi_d_12d_sigma + invBhat(1, 0)*dPhi_d_22d_sigma + invBhat(2, 0)*dPhi_p_tsd_sigma;
+    P_epsilon[1] = invBhat(0, 1)*dPhi_d_12d_sigma + invBhat(1, 1)*dPhi_d_22d_sigma + invBhat(2, 1)*dPhi_p_tsd_sigma;
+    P_epsilon[2] = invBhat(0, 2)*dPhi_d_12d_sigma + invBhat(1, 2)*dPhi_d_22d_sigma + invBhat(2, 2)*dPhi_p_tsd_sigma;
     
-    Lt = L_tilde + L_tilde*(kappamat0*trans(Pjay0) + kappamat1*trans(Pjay1) + kappamat2*trans(Pjay2));
-
-/*    if (Y_t > Y_22_u) {
-        Lt = L_iso(1, 0.3, "Enu");
-        sigma = Lt*Eel;
-    }*/
+    Lt = L_tilde - (kappa_j[0]*P_epsilon[0].t() + kappa_j[1]*P_epsilon[1].t() + kappa_j[2]*P_epsilon[2].t());
     
     statev(0) = Tinit;
     statev(1) = d_12;
