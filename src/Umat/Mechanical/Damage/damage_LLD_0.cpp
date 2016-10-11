@@ -317,6 +317,18 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
         }
         else
             sigma = L_tilde*Eel;
+            
+        
+        if (fabs(sigma(1)) < iota )
+            Yd_22 = 0.;
+        else
+            Yd_22 = 0.5*(pow(Macaulay_p(sigma(1)),2.)/(E2_0*pow(1.-d_22,2.)));
+
+        if (fabs(sigma(2)) < iota )
+            Yd_33 = 0.;
+        else
+            Yd_33 = 0.5*(pow(Macaulay_p(sigma(2)),2.)/(E2_0*pow(1.-d_22,2.)));
+            
         
         if (fabs(sigma(3)) < iota )
             Yd_12 = 0.;
@@ -328,15 +340,6 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
         else
             Yd_13 = 0.5*(pow(sigma(4),2.)/(G12_0*pow(1.-d_12,2.)));
         
-        if (fabs(sigma(1)) < iota )
-            Yd_22 = 0.;
-        else
-            Yd_22 = 0.5*(pow(Macaulay_p(sigma(1)),2.)/(E2_0*pow(1.-d_22,2.)));
-
-        if (fabs(sigma(2)) < iota )
-            Yd_33 = 0.;
-        else
-            Yd_33 = 0.5*(pow(Macaulay_p(sigma(2)),2.)/(E2_0*pow(1.-d_22,2.)));
         
         
         //Compute Y_t and Y_ts, which are used in the evolution equation of damage
@@ -347,6 +350,16 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
         lambda_22 = lagrange_pow_1(d_22, c_lambda, p0_lambda, n_lambda, alpha_lambda);
         
         //Preliminaries to compute damage the derivatives of Phi
+        if (fabs(sigma(1)) < iota )
+            dYd_22dd = 0.;
+        else
+            dYd_22dd = -0.25*(pow(Macaulay_p(sigma(1)),2.)/(E2_0*pow(1-d_22,3.)));
+
+        if (fabs(sigma(2)) < iota )
+            dYd_33dd = 0.;
+        else
+            dYd_33dd = -0.25*(pow(Macaulay_p(sigma(2)),2.)/(E2_0*pow(1-d_22,3.)));
+        
         if (fabs(sigma(3)) < iota )
             dYd_12dd = 0.;
         else
@@ -357,29 +370,19 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
         else
             dYd_13dd = -0.25*(pow(sigma(4),2.)/(G12_0*pow(1-d_12,3.)));
 
-                    
-        if (fabs(sigma(1)) < iota )
-            dYd_22dd = 0.;
-        else
-            dYd_22dd = -0.25*(pow(Macaulay_p(sigma(1)),2.)/(E2_0*pow(1-d_22,3.)));
-
-
-        if (fabs(sigma(2)) < iota )
-            dYd_33dd = 0.;
-        else
-            dYd_33dd = -0.25*(pow(Macaulay_p(sigma(2)),2.)/(E2_0*pow(1-d_22,3.)));
+        
         
         if (fabs(Yd_12 + Yd_13 + b*(Yd_22 + Yd_33)) < iota ) {
-            dY_tsdd_12 = 0.;
             dY_tsdd_22 = 0.;
+            dY_tsdd_12 = 0.;
         }
         else {
-            dY_tsdd_12 = 0.5*(dYd_12dd + dYd_13dd)*pow(Yd_12 + Yd_13+ b*(Yd_22+Yd_33),-0.5);
             dY_tsdd_22 = 0.5*(b*(dYd_22dd+dYd_22dd))*pow(Yd_12 + Yd_13+ b*(Yd_22+Yd_33),-0.5);
+            dY_tsdd_12 = 0.5*(dYd_12dd + dYd_13dd)*pow(Yd_12 + Yd_13+ b*(Yd_22+Yd_33),-0.5);
         }
                     
-        dlambda_12 = dlagrange_pow_1(d_12, c_lambda, p0_lambda, n_lambda, alpha_lambda);
         dlambda_22 = dlagrange_pow_1(d_22, c_lambda, p0_lambda, n_lambda, alpha_lambda);
+        dlambda_12 = dlagrange_pow_1(d_12, c_lambda, p0_lambda, n_lambda, alpha_lambda);
         
         //Compute the derivatives of sigma
         dPhi_d_22d_Yts = 1./Y_22_c;
@@ -440,9 +443,9 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
         
         denom_d(0, 0) = -1.*sum(dPhi_d_12d_sigma%Lambdad_12) + Macaulay_p(dY_tsdd_12)/Y_12_c - dlambda_12 - 1.;
         denom_d(0, 1) = -1.*sum(dPhi_d_12d_sigma%Lambdad_22) + Macaulay_p(dY_tsdd_22)/Y_12_c;
-        
         denom_d(1, 0) = -1.*sum(dPhi_d_22d_sigma%Lambdad_12) + Macaulay_p(dY_tsdd_12)/Y_22_c;
         denom_d(1, 1) = -1.*sum(dPhi_d_22d_sigma%Lambdad_22) + Macaulay_p(dY_tsdd_22)/Y_22_c - dlambda_22 - 1.;
+        
         
         Fischer_Burmeister_m(Phi_d, Y_dcrit, denom_d, Dd, dd, error);
         
@@ -451,8 +454,8 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
         
         //Transverse Damage term
         if (Y_t > Y_22_u) {
-            d_12 = 0.99;
             d_22 = 0.99;
+            d_12 = 0.99;
             error = 0.;
         }
         
@@ -502,7 +505,9 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
 
     
     //Tangent modulus
+    cout << "before B : \n L_tilde = \n" << L_tilde << endl;
     mat B = L*inv(L_tilde);         //stress "localization factor" in damage
+    cout << "after B" << endl;
     
     //Compute the derivatives
     dPhi_d_22d_Yts = 1./Y_22_c;
@@ -539,11 +544,12 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     dPhi_d_12d_sigma(4) = dPhi_d_12d_Yts*dYts_d_Y13*dY13_d_s13;
     dPhi_d_12d_sigma(5) = 0.;
     
+    dPhi_d_22d_12 = Macaulay_p(dY_tsdd_12)/Y_22_c;
+    dPhi_d_22d_22 = Macaulay_p(dY_tsdd_22)/Y_22_c - dlambda_22 - 1.;
+    
     dPhi_d_12d_12 = Macaulay_p(dY_tsdd_12)/Y_12_c - dlambda_12 - 1.;
     dPhi_d_12d_22 = Macaulay_p(dY_tsdd_22)/Y_12_c;
     
-    dPhi_d_22d_12 = Macaulay_p(dY_tsdd_12)/Y_22_c;
-    dPhi_d_22d_22 = Macaulay_p(dY_tsdd_22)/Y_22_c - dlambda_22 - 1.;
     
     dPhi_p_tsd_sigma = (B*Theta_ts*eta_stress(sigma_eff_ts))%Ir05();
     
@@ -575,7 +581,7 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     K(0,2) = 0.;
     
     K(1,0) = dPhi_d_22d_12;
-    K(1,1) = dPhi_d_22d_12;
+    K(1,1) = dPhi_d_22d_22;
     K(1,2) = 0.;
     
     K(2,0) = 0.;
@@ -589,13 +595,13 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     Bhat(0, 2) = sum(dPhi_d_12d_sigma % kappa_j[2]) - K(0,2);
     
     Bhat(1, 0) = sum(dPhi_d_22d_sigma % kappa_j[0]) - K(1,0);
-    Bhat(2, 1) = sum(dPhi_d_22d_sigma % kappa_j[1]) - K(1,1);
-    Bhat(2, 2) = sum(dPhi_d_22d_sigma % kappa_j[2]) - K(1,2);
+    Bhat(1, 1) = sum(dPhi_d_22d_sigma % kappa_j[1]) - K(1,1);
+    Bhat(1, 2) = sum(dPhi_d_22d_sigma % kappa_j[2]) - K(1,2);
 
     
     Bhat(2, 0) = sum(dPhi_p_tsd_sigma % kappa_j[0]) - K(2,0);
-    Bhat(2, 0) = sum(dPhi_p_tsd_sigma % kappa_j[1]) - K(2,1);
-    Bhat(2, 1) = sum(dPhi_p_tsd_sigma % kappa_j[2]) - K(2,2);
+    Bhat(2, 1) = sum(dPhi_p_tsd_sigma % kappa_j[1]) - K(2,1);
+    Bhat(2, 2) = sum(dPhi_p_tsd_sigma % kappa_j[2]) - K(2,2);
     
     vec op = zeros(3);
     mat delta = eye(3,3);
@@ -605,7 +611,11 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     if(Dd(1) > iota)
         op(1) = 1.;
     if(Dp(0) > iota)
-        op(0) = 1.;
+        op(2) = 1.;
+        
+    cout << "Dd = \n" << Dd << endl;
+    cout << "Dp = \n" << Dp << endl;
+    
     
     mat Bbar = zeros(3,3);
     for (int i = 0; i < 3; i++) {
@@ -616,7 +626,11 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     
     mat invBbar = zeros(3, 3);
     mat invBhat = zeros(3, 3);
+    cout << "before invBbar" << endl;
+    cout << "Bhat = \n" << Bhat << endl;
+    cout << "Bbar = \n" << Bbar << endl;
     invBbar = inv(Bbar);
+    cout << "after invBbar" << endl;
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             invBhat(i, j) = op(i)*op(j)*invBbar(i, j);
