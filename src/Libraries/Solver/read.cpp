@@ -150,7 +150,6 @@ void read_output(solver_output &so, const int &nblock, const int &nstatev, const
             so.o_wanted_statev.zeros(1);
             so.o_nw_statev = -1;
             so.o_wanted_statev(0) = -1;
-            cout << "All statev are required" << endl;
         }
         else if(atoi(buffer.c_str()) != 0){
             so.o_nw_statev = atoi(buffer.c_str());
