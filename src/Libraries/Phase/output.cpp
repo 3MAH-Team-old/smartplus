@@ -50,4 +50,4 @@ void output_moduli(const vector<mat> &list, const int &i0, vec &statev) {
 	
 }
 
-}
+} //namespace smart
