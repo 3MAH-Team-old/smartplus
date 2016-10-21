@@ -42,16 +42,6 @@ namespace smart {
 ///@param props(5) : lambdaD Damage evolution parameter lambda
 ///@param props(6) : deltaD Damage evolution parameter delta
 
-void output_modulii(const mat &L, const int &i0, vec &statev) {
-	int iterator =0 ;
-	for (unsigned int i = 0; i < L.n_rows; i++) {
-		for (unsigned int j = 0; j < L.n_cols; j++) {
-			statev(i0 + iterator) = L(i,j);
-            iterator += 1;
-		}
-	}
-}
-    
 void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT, const double &Time, const double &DTime, double &Wm, double &Wm_r, double &Wm_ir, double &Wm_d, const int &ndi, const int &nshr, const bool &start, double &tnew_dt) {
     
     UNUSED(nprops);
@@ -562,6 +552,7 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     dPhi_d_12d_12 = Macaulay_p(dY_tsdd_12)/Y_12_c - dlambda_12 - 1.;
     
     
+    // dPhi_p_tsd_sigma = (B*Theta_ts*eta_stress(sigma_eff_ts));
     dPhi_p_tsd_sigma = (Theta_ts*eta_stress(sigma_eff_ts));
     
     //Compute the explicit "damage direction" and flow direction
@@ -584,15 +575,14 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     Lambdap_ts = eta_stress(sigma_eff_ts);
 
     std::vector<vec> kappa_j(3);
+    std::vector<vec> kappa_tilde_j(3);
     kappa_j[0] = L_tilde*Lambdad_22;
     kappa_j[1] = L_tilde*Lambdad_12;
     kappa_j[2] = L_tilde*Lambdap_ts;
-    // kappa_j[0] = L*Lambdad_22;
-    // kappa_j[1] = L*Lambdad_12;
-    // kappa_j[2] = L*Lambdap_ts;
-    // kappa_j[0] = zeros(6);
-    // kappa_j[1] = zeros(6);
-    // kappa_j[2] = zeros(6);
+    
+    kappa_tilde_j[0] = L*Lambdad_22;
+    kappa_tilde_j[1] = L*Lambdad_12;
+    kappa_tilde_j[2] = L*Lambdap_ts;    
     
     mat K = zeros(3,3);
     K(0,0) = dPhi_d_22d_22;
@@ -617,9 +607,9 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     Bhat(1, 1) = sum(dPhi_d_12d_sigma % kappa_j[1]) - K(1,1);
     Bhat(1, 2) = sum(dPhi_d_12d_sigma % kappa_j[2]) - K(1,2);
     
-    Bhat(2, 0) = sum(dPhi_p_tsd_sigma % kappa_j[0]) - K(2,0);
-    Bhat(2, 1) = sum(dPhi_p_tsd_sigma % kappa_j[1]) - K(2,1);
-    Bhat(2, 2) = sum(dPhi_p_tsd_sigma % kappa_j[2]) - K(2,2);
+    Bhat(2, 0) = sum(dPhi_p_tsd_sigma % kappa_tilde_j[0]) - K(2,0);
+    Bhat(2, 1) = sum(dPhi_p_tsd_sigma % kappa_tilde_j[1]) - K(2,1);
+    Bhat(2, 2) = sum(dPhi_p_tsd_sigma % kappa_tilde_j[2]) - K(2,2);
     
     vec op = zeros(3);
     mat delta = eye(3,3);
@@ -646,7 +636,7 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
         for (int j = 0; j < 3; j++) {
             invBhat(i, j) = op(i)*op(j)*invBbar(i, j);
         }
-    }
+    } 
     
     std::vector<vec> P_epsilon(3);
     P_epsilon[0] = invBhat(0, 0)*dPhi_d_22d_sigma + invBhat(1, 0)*dPhi_d_12d_sigma + invBhat(2, 0)*dPhi_p_tsd_sigma;
@@ -679,41 +669,6 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     statev(10) = Y_t;
     statev(11) = Y_ts;
     statev(12) = Hp_ts;
-    
-    
-    // mat L0 = kappa_j[0]*P_epsilon[0].t();
-    // mat L1 = kappa_j[1]*P_epsilon[1].t();
-   //  mat L2 = kappa_j[2]*P_epsilon[2].t();
-     
-   //  vec eigval_Bbar;
-	// mat eigvec_Bbar;
-	// eig_sym(eigval_Bbar, eigvec_Bbar, Bbar);
-    
-    // mat Lambda_print = zeros(6,6);
-    // Lambda_print.row(0) = Lambdad_22.t();
-    // Lambda_print.row(1) = Lambdad_12.t();
-    // Lambda_print.row(2) = Lambdap_ts.t();
-    // Lambda_print.submat(4,0,4,2) = eigval_Bbar.t();
-    // Lambda_print.submat(row_ini,col_ini,row_end,col_end)
-	
-	
-    
-    // output_modulii(Lt,13 + 36*0, statev);
-    // output_modulii(B,13 + 36*1, statev);
-    // output_modulii(L_tilde,13 + 36*2, statev);
-    // output_modulii(L0,13 + 36*3, statev);
-    // output_modulii(L1,13 + 36*4, statev);
-    // output_modulii(L2,13 + 36*5, statev);
-    // output_modulii(Lambda_print,13 + 36*6, statev); 
-    // output_modulii(Bbar,13 + 36*7, statev); 
-    // output_modulii(invBbar,13 + 36*7 + 9*1, statev);
-    // output_modulii(invBhat,13 + 36*7 + 9*2, statev);
-    // output_modulii(K,13 + 36*7 + 9*3, statev);
-    // output_modulii(Bhat + K,13 + 36*7 + 9*4, statev);   
-    
-    
-    
-    
 }
 
 
