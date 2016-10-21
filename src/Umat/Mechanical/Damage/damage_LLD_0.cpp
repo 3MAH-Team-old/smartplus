@@ -562,7 +562,7 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     dPhi_d_12d_12 = Macaulay_p(dY_tsdd_12)/Y_12_c - dlambda_12 - 1.;
     
     
-    dPhi_p_tsd_sigma = (B*Theta_ts*eta_stress(sigma_eff_ts));
+    dPhi_p_tsd_sigma = (Theta_ts*eta_stress(sigma_eff_ts));
     
     //Compute the explicit "damage direction" and flow direction
     dStildedd22 = { {0.,0.,0.,0.,0.,0.},
@@ -681,35 +681,35 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     statev(12) = Hp_ts;
     
     
-    mat L0 = kappa_j[0]*P_epsilon[0].t();
-    mat L1 = kappa_j[1]*P_epsilon[1].t();
-    mat L2 = kappa_j[2]*P_epsilon[2].t();
+    // mat L0 = kappa_j[0]*P_epsilon[0].t();
+    // mat L1 = kappa_j[1]*P_epsilon[1].t();
+   //  mat L2 = kappa_j[2]*P_epsilon[2].t();
      
-    vec eigval_Bbar;
-	mat eigvec_Bbar;
-	eig_sym(eigval_Bbar, eigvec_Bbar, Bbar);
+   //  vec eigval_Bbar;
+	// mat eigvec_Bbar;
+	// eig_sym(eigval_Bbar, eigvec_Bbar, Bbar);
     
-    mat Lambda_print = zeros(6,6);
-    Lambda_print.row(0) = Lambdad_22.t();
-    Lambda_print.row(1) = Lambdad_12.t();
-    Lambda_print.row(2) = Lambdap_ts.t();
+    // mat Lambda_print = zeros(6,6);
+    // Lambda_print.row(0) = Lambdad_22.t();
+    // Lambda_print.row(1) = Lambdad_12.t();
+    // Lambda_print.row(2) = Lambdap_ts.t();
     // Lambda_print.submat(4,0,4,2) = eigval_Bbar.t();
     // Lambda_print.submat(row_ini,col_ini,row_end,col_end)
 	
 	
     
-    output_modulii(Lt,13 + 36*0, statev);
-    output_modulii(B,13 + 36*1, statev);
-    output_modulii(L_tilde,13 + 36*2, statev);
-    output_modulii(L0,13 + 36*3, statev);
-    output_modulii(L1,13 + 36*4, statev);
-    output_modulii(L2,13 + 36*5, statev);
-    output_modulii(Lambda_print,13 + 36*6, statev); 
-    output_modulii(Bbar,13 + 36*7, statev); 
-    output_modulii(invBbar,13 + 36*7 + 9*1, statev);
-    output_modulii(invBhat,13 + 36*7 + 9*2, statev);
-    output_modulii(K,13 + 36*7 + 9*3, statev);
-    output_modulii(Bhat + K,13 + 36*7 + 9*4, statev);   
+    // output_modulii(Lt,13 + 36*0, statev);
+    // output_modulii(B,13 + 36*1, statev);
+    // output_modulii(L_tilde,13 + 36*2, statev);
+    // output_modulii(L0,13 + 36*3, statev);
+    // output_modulii(L1,13 + 36*4, statev);
+    // output_modulii(L2,13 + 36*5, statev);
+    // output_modulii(Lambda_print,13 + 36*6, statev); 
+    // output_modulii(Bbar,13 + 36*7, statev); 
+    // output_modulii(invBbar,13 + 36*7 + 9*1, statev);
+    // output_modulii(invBhat,13 + 36*7 + 9*2, statev);
+    // output_modulii(K,13 + 36*7 + 9*3, statev);
+    // output_modulii(Bhat + K,13 + 36*7 + 9*4, statev);   
     
     
     
