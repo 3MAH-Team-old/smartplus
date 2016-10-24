@@ -114,10 +114,11 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     
     double E1 = EL;
     double E2_0 = ET;
+    double E3_0 = ET;
     double E2 = ET*(1-d_22);
     double E3 = ET*(1-d_22);
     double nu12 = nuTL*(E1/E2_0);
-    double nu13 = nuTL*(E1/E3);
+    double nu13 = nuTL*(E1/E3_0);
     double nu32 = nuTT;
     double nu23 = nu32;
     double G12_0 = GLT;
