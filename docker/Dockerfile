@@ -29,6 +29,7 @@ RUN pip install --no-cache-dir --upgrade\
 	numpy \
 	matplotlib \
 	scipy \
+	pandas \
         jupyter \
         && \
     npm install -g configurable-http-proxy && rm -rf ~/.npm
