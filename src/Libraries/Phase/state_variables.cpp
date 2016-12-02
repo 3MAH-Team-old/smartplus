@@ -162,7 +162,7 @@ state_variables& state_variables::operator = (const state_variables& sv)
 	return *this;
 }
 
-void state_variables::copy_fields(const state_variables& sv)
+state_variables& state_variables::copy_fields(const state_variables& sv)
 //-------------------------------------------------------------
 {
 	
