@@ -171,7 +171,7 @@ state_variables_T& state_variables_T::operator = (const state_variables_T& sv)
 }
 
 //----------------------------------------------------------------------
-void state_variables_T& state_variables_T::copy_fields_T (const state_variables_T& sv)
+state_variables_T& state_variables_T::copy_fields_T (const state_variables_T& sv)
 //----------------------------------------------------------------------
 {
     Etot = sv.Etot;
