@@ -58,15 +58,16 @@ namespace smart{
 		
 		virtual state_variables_T& operator = (const state_variables_T&);
 		
-        using state_variables::update;
-    virtual void update(const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const double &, const double &, const int &, const arma::vec &, const arma::vec &, const double &, const double &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::mat &, const arma::mat &, const arma::mat &, const arma::mat &, const arma::mat &);
+		virtual void state_variables_T& copy_fields_T (const state_variables_T&);
+		
+		using state_variables::update;
+		virtual void update(const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const double &, const double &, const int &, const arma::vec &, const arma::vec &, const double &, const double &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::mat &, const arma::mat &, const arma::mat &, const arma::mat &, const arma::mat &);
         virtual void to_start(); //Wm & Wt goes to Wm_start & Wt_start, respectively
         virtual void set_start(); //Wm_start & Wt_start goes to Wm & Wt, respectively
     
         using state_variables::rotate_l2g;
         virtual state_variables_T& rotate_l2g(const state_variables_T&, const double&, const double&, const double&);
-        using state_variables::rotate_g2l
-    ;
+        using state_variables::rotate_g2l;
         virtual state_variables_T& rotate_g2l(const state_variables_T&, const double&, const double&, const double&);
     
         friend std::ostream& operator << (std::ostream&, const state_variables_T&);
