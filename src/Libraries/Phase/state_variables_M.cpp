@@ -135,7 +135,7 @@ state_variables_M& state_variables_M::operator = (const state_variables_M& sv)
 }
 
 //----------------------------------------------------------------------
-void state_variables_M& state_variables_M::copy_fields_M(const state_variables_M& sv)
+state_variables_M& state_variables_M::copy_fields_M(const state_variables_M& sv)
 //----------------------------------------------------------------------
 {
 	Etot = sv.Etot;
