@@ -55,7 +55,7 @@ class state_variables
 		
 		virtual state_variables& operator = (const state_variables&);
 		
-		virtual void state_variables& copy_fields (const state_variables&);
+		virtual state_variables& copy_fields (const state_variables&);
 
 		virtual void resize();	//constructor - allocates memory for statev
 		virtual void resize(const int &, const bool& = true, const double& = 0.);	//constructor - allocates memory for statev
