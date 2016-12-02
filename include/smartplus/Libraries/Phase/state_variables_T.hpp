@@ -58,7 +58,7 @@ namespace smart{
 		
 		virtual state_variables_T& operator = (const state_variables_T&);
 		
-		virtual void state_variables_T& copy_fields_T (const state_variables_T&);
+		virtual state_variables_T& copy_fields_T (const state_variables_T&);
 		
 		using state_variables::update;
 		virtual void update(const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const double &, const double &, const int &, const arma::vec &, const arma::vec &, const double &, const double &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::mat &, const arma::mat &, const arma::mat &, const arma::mat &, const arma::mat &);
