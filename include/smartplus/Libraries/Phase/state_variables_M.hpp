@@ -50,7 +50,7 @@ class state_variables_M : public state_variables
 		
 		virtual state_variables_M& operator = (const state_variables_M&);
 		
-		virtual void state_variables_M& copy_fields_M (const state_variables_M&);
+		virtual state_variables_M& copy_fields_M (const state_variables_M&);
 		
         using state_variables::update;
         virtual void update(const arma::vec &, const arma::vec &, const arma::vec &, const arma::vec &, const double &, const double &, const arma::vec &, const arma::vec &, const int &, const arma::vec &, const arma::vec &, const arma::mat &, const arma::mat &); //Initialize with parameters
