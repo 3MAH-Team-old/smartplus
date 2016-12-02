@@ -125,6 +125,29 @@ state_variables_M& state_variables_M::operator = (const state_variables_M& sv)
     DT = sv.DT;
     Wm = sv.Wm;
     Wm_start = sv.Wm_start;
+    
+    nstatev = sv.nstatev;
+    statev = sv.statev;
+    statev_start = sv.statev_start;
+
+	return *this;
+
+}
+
+//----------------------------------------------------------------------
+void state_variables_M& state_variables_M::copy_fields_M(const state_variables_M& sv)
+//----------------------------------------------------------------------
+{
+	Etot = sv.Etot;
+	DEtot = sv.DEtot;
+	sigma = sv.sigma;
+	sigma_start = sv.sigma_start;
+	L = sv.L;
+	Lt = sv.Lt;
+    T = sv.T;
+    DT = sv.DT;
+    Wm = sv.Wm;
+    Wm_start = sv.Wm_start;
 
 	return *this;
 
