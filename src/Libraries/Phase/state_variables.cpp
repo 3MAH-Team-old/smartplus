@@ -162,6 +162,20 @@ state_variables& state_variables::operator = (const state_variables& sv)
 	return *this;
 }
 
+void state_variables::copy_fields(const state_variables& sv)
+//-------------------------------------------------------------
+{
+	
+	Etot = sv.Etot;
+	DEtot = sv.DEtot;
+	sigma = sv.sigma;
+	sigma_start = sv.sigma_start;
+    T = sv.T;
+    DT = sv.DT;
+    
+    return *this;
+}
+
     
 //-------------------------------------------------------------
 void state_variables::resize()
