@@ -12,7 +12,6 @@
  
  You should have received a copy of the GNU General Public License
  along with SMART+.  If not, see <http://www.gnu.org/licenses/>.
- 
  */
 
 ///@file rotation.cpp
@@ -28,6 +27,14 @@ using namespace std;
 using namespace arma;
 
 namespace smart{
+
+vec rotate_vec(const vec &v, const mat &DR) {
+    return DR*v;
+}
+
+vec rotate_mat(const mat &m, const mat &DR) {
+    return t(DR)*m*R;
+}
 
 mat fillR(const double &alpha, const int &axis) {
     
@@ -52,6 +59,18 @@ mat fillR(const double &alpha, const int &axis) {
             cout << "Please choose the axis 1,2 or 3\n";
         }
     }
+    return R;
+}
+    
+mat fillR(const double &psi, const double &theta, const double &phi) {
+    
+    mat R = zeros(3,3);
+    
+    mat R1 = fillR(psi, axis_psi);
+    mat R2 = fillR(theta, axis_theta);
+    mat R3 = fillR(phi, axis_phi);
+    
+    R = R3*R2*R1;
     return R;
 }
     
@@ -518,7 +537,7 @@ vec rotate_strain(const vec &V, const mat &DR) {
 }
     
 
-//To rotate from local to global a strain tensor (6)
+//To rotate from local to global a strain tensor (6) using Euler angles
 mat rotate_l2g_strain(const vec &E, const double &psi, const double &theta, const double &phi) {
     
     mat E_temp = E;
@@ -535,7 +554,7 @@ mat rotate_l2g_strain(const vec &E, const double &psi, const double &theta, cons
     return E_temp;
 }
     
-//To rotate from global to local a strain tensor (6)
+//To rotate from global to local a strain tensor (6) using Euler angles
 mat rotate_g2l_strain(const vec &E, const double &psi, const double &theta, const double &phi) {
     
     mat E_temp = E;
@@ -620,6 +639,39 @@ mat rotate_g2l_L(const mat &Lt, const double &psi, const double &theta, const do
 	return Lt_temp;
 }
 
+//To rotate from local to global a  localisation matrix (6,6)
+mat rotate_l2g_M(const mat &M, const double &psi, const double &theta, const double &phi) {
+    
+    mat M_temp = M;
+    if(fabs(phi) > iota) {
+        M_temp = rotateM(M_temp, -phi, axis_phi);
+    }
+    if(fabs(theta) > iota) {
+        M_temp = rotateM(M_temp, -theta, axis_theta);
+    }
+    if(fabs(psi) > iota) {
+        M_temp = rotateM(M_temp, -psi, axis_psi);
+    }
+    
+    return M_temp;
+}
+
+//To rotate from global to local a localisation matrix (6,6)
+mat rotate_g2l_M(const mat &M, const double &psi, const double &theta, const double &phi) {
+    
+    mat M_temp = M;
+    if(fabs(psi) > iota) {
+        M_temp = rotateM(M_temp, psi, axis_psi);
+    }
+    if(fabs(theta) > iota) {
+        M_temp = rotateM(M_temp, theta, axis_theta);
+    }
+    if(fabs(phi) > iota) {
+        M_temp = rotateM(M_temp, phi, axis_phi);
+    }
+    
+    return M_temp;
+}
 
 //To rotate from local to global a strain localisation matrix (6,6)
 mat rotate_l2g_A(const mat &A, const double &psi, const double &theta, const double &phi) {
@@ -687,40 +739,6 @@ mat rotate_g2l_B(const mat &B, const double &psi, const double &theta, const dou
     }
     
 	return B_temp;
-}
-
-//To rotate from local to global a  localisation matrix (6,6)
-mat rotate_l2g_M(const mat &M, const double &psi, const double &theta, const double &phi) {
-    
-    mat M_temp = M;
-    if(fabs(phi) > iota) {
-        M_temp = rotateM(M_temp, -phi, axis_phi);
-    }
-    if(fabs(theta) > iota) {
-        M_temp = rotateM(M_temp, -theta, axis_theta);
-    }
-    if(fabs(psi) > iota) {
-        M_temp = rotateM(M_temp, -psi, axis_psi);
-    }
-    
-    return M_temp;
-}
-
-//To rotate from global to local a localisation matrix (6,6)
-mat rotate_g2l_M(const mat &M, const double &psi, const double &theta, const double &phi) {
-    
-    mat M_temp = M;
-    if(fabs(psi) > iota) {
-        M_temp = rotateM(M_temp, psi, axis_psi);
-    }
-    if(fabs(theta) > iota) {
-        M_temp = rotateM(M_temp, theta, axis_theta);
-    }
-    if(fabs(phi) > iota) {
-        M_temp = rotateM(M_temp, phi, axis_phi);
-    }
-    
-    return M_temp;
 }
     
 } //namespace smart
