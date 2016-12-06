@@ -722,7 +722,7 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
     
     Wt += (T+0.5*DT)*Deta;
     Wt_r += (T+0.5*DT)*Deta_r;
-    Wt_ir = (T+0.5*DT)*Deta_ir;
+    Wt_ir += (T+0.5*DT)*Deta_ir;
     
     ///@brief statev evolving variables
     statev(0) = T_init;
