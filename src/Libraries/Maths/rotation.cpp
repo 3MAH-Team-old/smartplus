@@ -33,7 +33,7 @@ vec rotate_vec(const vec &v, const mat &DR) {
 }
 
 vec rotate_mat(const mat &m, const mat &DR) {
-    return t(DR)*m*R;
+    return trans(DR)*m*DR;
 }
 
 mat fillR(const double &alpha, const int &axis) {
