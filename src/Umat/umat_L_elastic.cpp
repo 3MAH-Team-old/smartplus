@@ -47,7 +47,7 @@ void get_L_elastic(phase_characteristics &rve)
     string inputfile; //file # that stores the microstructure properties
     
     std::map<string, int> list_umat;
-    list_umat = {{"ELISO",1},{"ELIST",2},{"ELORT",3},{"MIHEN",100},{"MIMTN",101},{"MISCN",102},{"MIPCW",103},{"MIPLN",104}};
+    list_umat = {{"ELISO",1},{"ELIST",2},{"ELORT",3},{"MIHEN",100},{"MIMTN",101},{"MISCN",102},{"MISCM",103},{"MIPLN",104}};
     
     int method = list_umat[rve.sptr_matprops->umat_name];
     
@@ -145,6 +145,33 @@ void get_L_elastic(phase_characteristics &rve)
                     get_L_elastic(r);
                 }
                 Lt_Self_Consistent(rve, n_matrix, false, 1);
+                umat_M->Lt = zeros(6,6);
+                for (auto r : rve.sub_phases) {
+                    umat_sub_phases_M = std::dynamic_pointer_cast<state_variables_M>(r.sptr_sv_global);
+                    umat_M->Lt += r.sptr_shape->concentration*(umat_sub_phases_M->Lt*r.sptr_multi->A);
+                }
+                error = norm(umat_M->Lt - Lt_n,2.);
+                nbiter++;
+            }
+            break;
+        }
+        case 103: {
+            for (auto r : rve.sub_phases) {
+                get_L_elastic(r);
+            }
+            int n_matrix = rve.sptr_matprops->props(4);
+            Lt_Self_Consistent_m(rve, n_matrix, true, 1);
+            
+            mat Lt_n = zeros(6,6);
+            int nbiter=0;
+            double error = 1.;
+            
+            while ((error > precision_micro)&&(nbiter <= maxiter_micro)) {
+                Lt_n = umat_M->Lt;
+                for (auto r : rve.sub_phases) {
+                    get_L_elastic(r);
+                }
+                Lt_Self_Consistent_m(rve, n_matrix, false, 1);
                 umat_M->Lt = zeros(6,6);
                 for (auto r : rve.sub_phases) {
                     umat_sub_phases_M = std::dynamic_pointer_cast<state_variables_M>(r.sptr_sv_global);

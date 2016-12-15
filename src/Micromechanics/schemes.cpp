@@ -164,13 +164,16 @@ void Lt_Self_Consistent(phase_characteristics &phase, const int &n_matrix, const
         
         //Compute the effective tensor from the previous strain localization tensors
         mat Lt_eff = zeros(6,6);
-        for(auto r : phase.sub_phases) {
-            sv_r = std::dynamic_pointer_cast<state_variables_M>(r.sptr_sv_global);
-            Lt_eff += r.sptr_shape->concentration*r.sptr_multi->A*sv_r->Lt;
+        for(unsigned int i=0; i<phase.sub_phases.size(); i++) {
+            elli_multi = std::dynamic_pointer_cast<ellipsoid_multi>(phase.sub_phases[i].sptr_multi);
+            elli = std::dynamic_pointer_cast<ellipsoid>(phase.sub_phases[i].sptr_shape);
+            sv_r = std::dynamic_pointer_cast<state_variables_M>(phase.sub_phases[i].sptr_sv_global);
+            Lt_eff += elli->concentration*elli_multi->A*sv_r->Lt;
         }
         sv_eff->Lt = Lt_eff;
     }
     
+    mat sumA = zeros(6,6);
     //Compute the Eshelby tensor and the interaction tensor for each phase
     for(unsigned int i=0; i<phase.sub_phases.size(); i++) {
         elli_multi = std::dynamic_pointer_cast<ellipsoid_multi>(phase.sub_phases[i].sptr_multi);
@@ -180,13 +183,84 @@ void Lt_Self_Consistent(phase_characteristics &phase, const int &n_matrix, const
         //Note The tangent modulus are turned in the coordinate system of the ellipspoid in the fillT function
         if (phase.sub_phases[i].sptr_matprops->number == n_matrix)
             elli_multi->T = eye(6,6);
-        else
+        else {
             elli_multi->fillT(sv_eff->Lt, sv_r->Lt, *elli);
-        
-        //Compute the strain concentration tensor A
-        elli_multi->A = elli_multi->T;
+            sumA += elli->concentration*elli_multi->T;
+        }
+
     }
     
+    for(unsigned int i=0; i<phase.sub_phases.size(); i++) {
+        //Note The tangent modulus are turned in the coordinate system of the ellipspoid in the fillT function
+        elli_multi = std::dynamic_pointer_cast<ellipsoid_multi>(phase.sub_phases[i].sptr_multi);
+        elli = std::dynamic_pointer_cast<ellipsoid>(phase.sub_phases[i].sptr_shape);
+        sv_r = std::dynamic_pointer_cast<state_variables_M>(phase.sub_phases[i].sptr_sv_global);
+        if (phase.sub_phases[i].sptr_matprops->number == n_matrix)
+            elli_multi->A = (eye(6,6) - sumA)*(1./elli->concentration);
+        else {
+            elli_multi->A = elli_multi->T;
+        }
+    }
+}
+
+void Lt_Self_Consistent_m(phase_characteristics &phase, const int &n_matrix, const bool &start, const int &option_start) {
+    
+    std::shared_ptr<ellipsoid_multi> elli_multi;
+    std::shared_ptr<ellipsoid> elli;
+    //ptr on the matrix properties
+    std::shared_ptr<state_variables_M> sv_r;
+    std::shared_ptr<state_variables_M> sv_eff = std::dynamic_pointer_cast<state_variables_M>(phase.sptr_sv_local);
+    
+    //In the self_consistent scheme we need to have the effective tangent modulus first, based on some guessed initial concentration tensor.
+    if(start) {
+        //ensure that the Lt of phase is actually 0
+        if(option_start == 0)
+            Lt_Homogeneous_E(phase);
+        else if(option_start == 1)
+            Lt_Mori_Tanaka(phase, n_matrix);
+        else {
+            cout << "error , option is not valid for the start option of Self-Consistent scheme (0 : MT, 1 : h_E)";
+        }
+        
+        //Compute the effective tensor from the previous strain localization tensors
+        mat Lt_eff = zeros(6,6);
+        for(unsigned int i=0; i<phase.sub_phases.size(); i++) {
+            elli_multi = std::dynamic_pointer_cast<ellipsoid_multi>(phase.sub_phases[i].sptr_multi);
+            elli = std::dynamic_pointer_cast<ellipsoid>(phase.sub_phases[i].sptr_shape);
+            sv_r = std::dynamic_pointer_cast<state_variables_M>(phase.sub_phases[i].sptr_sv_global);
+            Lt_eff += elli->concentration*elli_multi->A*sv_r->Lt;
+        }
+        sv_eff->Lt = Lt_eff;
+    }
+    
+    mat sumA = zeros(6,6);
+    //Compute the Eshelby tensor and the interaction tensor for each phase
+    for(unsigned int i=0; i<phase.sub_phases.size(); i++) {
+        elli_multi = std::dynamic_pointer_cast<ellipsoid_multi>(phase.sub_phases[i].sptr_multi);
+        elli = std::dynamic_pointer_cast<ellipsoid>(phase.sub_phases[i].sptr_shape);
+        sv_r = std::dynamic_pointer_cast<state_variables_M>(phase.sub_phases[i].sptr_sv_global);
+        
+        //Note The tangent modulus are turned in the coordinate system of the ellipspoid in the fillT function
+        if (phase.sub_phases[i].sptr_matprops->number == n_matrix)
+            elli_multi->T = eye(6,6);
+        else {
+            elli_multi->fillT(sv_eff->Lt, sv_r->Lt, *elli);
+            sumA += elli->concentration*inv(sv_eff->Lt)*sv_r->Lt*elli_multi->T;
+        }
+        
+    }
+    
+    for(unsigned int i=0; i<phase.sub_phases.size(); i++) {
+        //Note The tangent modulus are turned in the coordinate system of the ellipspoid in the fillT function
+        elli_multi = std::dynamic_pointer_cast<ellipsoid_multi>(phase.sub_phases[i].sptr_multi);
+        elli = std::dynamic_pointer_cast<ellipsoid>(phase.sub_phases[i].sptr_shape);
+        sv_r = std::dynamic_pointer_cast<state_variables_M>(phase.sub_phases[i].sptr_sv_global);
+        if (phase.sub_phases[i].sptr_matprops->number == n_matrix)
+            elli_multi->A = (eye(6,6) - sumA)*(1./elli->concentration);
+        else {
+            elli_multi->A = inv(sv_eff->Lt)*sv_r->Lt*elli_multi->T;
+        }
+    }
 }
     
 void DE_Self_Consistent(phase_characteristics &phase, const int &n_matrix, const bool &start, const int &option_start) {
@@ -217,6 +291,7 @@ void DE_Self_Consistent(phase_characteristics &phase, const int &n_matrix, const
         sv_eff->Lt = Lt_eff;
     }
     
+    mat sumA = zeros(6,6);
     //Compute the Eshelby tensor and the interaction tensor for each phase
     for(unsigned int i=0; i<phase.sub_phases.size(); i++) {
         elli_multi = std::dynamic_pointer_cast<ellipsoid_multi>(phase.sub_phases[i].sptr_multi);
@@ -226,14 +301,26 @@ void DE_Self_Consistent(phase_characteristics &phase, const int &n_matrix, const
         //Note The tangent modulus are turned in the coordinate system of the ellipspoid in the fillT function
         if (phase.sub_phases[i].sptr_matprops->number == n_matrix)
             elli_multi->T = eye(6,6);
-        else
+        else {
             elli_multi->fillT(sv_eff->Lt, sv_r->Lt, *elli);
+            sumA += elli->concentration*elli_multi->T;
+        }
         
-        //Compute the strain concentration tensor A
-        elli_multi->A = elli_multi->T;
+    }
+    
+    for(unsigned int i=0; i<phase.sub_phases.size(); i++) {
+        //Note The tangent modulus are turned in the coordinate system of the ellipspoid in the fillT function
+        elli_multi = std::dynamic_pointer_cast<ellipsoid_multi>(phase.sub_phases[i].sptr_multi);
+        elli = std::dynamic_pointer_cast<ellipsoid>(phase.sub_phases[i].sptr_shape);
+        sv_r = std::dynamic_pointer_cast<state_variables_M>(phase.sub_phases[i].sptr_sv_global);
+        if (phase.sub_phases[i].sptr_matprops->number == n_matrix)
+            elli_multi->A = (eye(6,6) - sumA)*(1./elli->concentration);
+        else {
+            elli_multi->A = elli_multi->T;
+        }
+
         sv_r->DEtot = elli_multi->A*sv_eff->DEtot; //Recall that the global coordinates of subphases is the local coordinates of the generic phase
     }
-
 }
     
 void dE_Periodic_Layer(phase_characteristics &phase, const int &nbiter) {
