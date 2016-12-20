@@ -25,6 +25,7 @@
 #include <smartplus/Libraries/Continuum_Mechanics/contimech.hpp>
 #include <smartplus/Libraries/Continuum_Mechanics/constitutive.hpp>
 #include <smartplus/Libraries/Maths/num_solve.hpp>
+#include <smartplus/Libraries/Phase/output.hpp>
 
 #include <smartplus/Umat/Mechanical/Damage/damage_LLD_0.hpp>
 
@@ -82,29 +83,30 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     vec sigma_start = sigma;
     vec EP_start = EP;
     
-    double EL = props(0);
-    double ET = props(1);
-    double nuTL = props(2);
-    double nuTT = props(3);
-    double GLT = props(4);
-    double alphaL = props(5);
-    double alphaT = props(6);
-    
-    //Transverse damage
-    double Y_22_0 = props(9);
-    double Y_22_c = props(10);
-    double Y_22_u = props(11);
-    double b = props(12);
+    double axis = props(0);
+    double EL = props(1);
+    double ET = props(2);
+    double nuTL = props(3);
+    double nuTT = props(4);
+    double GLT = props(5);
+    double alphaL = props(6);
+    double alphaT = props(7);
     
     //Shear damage
-    double Y_12_0 = props(7);
-    double Y_12_c = props(8);
+    double Y_12_0 = props(8);
+    double Y_12_c = props(9);
+    
+    //Transverse damage
+    double Y_22_0 = props(10);
+    double Y_22_c = props(11);
+    double Y_22_u = props(12);
+    double b = props(13);
     
     //Coupled transverse-shear yield & plasticity
-    double A_ts = props(13);
-    double sigma_ts_0 = props(14);
-    double alpha_ts = props(15);
-    double beta_ts = props(16);
+    double A_ts = props(14);
+    double sigma_ts_0 = props(15);
+    double alpha_ts = props(16);
+    double beta_ts = props(17);
     
     //Set the Lagrange multipliers coefficients
     double c_lambda = 1.E-2;
@@ -131,6 +133,8 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     mat L = L_isotrans(EL, ET, nuTL, nuTT, GLT, 1);
     
     // cout << "EL = " << EL << "/ ET = " << ET << "/ nuTL = " << nuTL << "/ nuTT = " << nuTT << "/ GLT = " << GLT << endl;
+    // 
+    // cout << "L Iso T = " << L << endl; 
     
     //definition of the CTE tensor
     vec alpha = zeros(6);
@@ -295,6 +299,12 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     for (compteur = 0; ((compteur < maxiter_umat) && (error > precision_umat)); compteur++) {
         
         mat L_tilde = L_ortho(E1,E2,E3,nu12,nu13,nu23,G12,G13,G23, "EnuG");
+        
+        // cout << "d22 = " << d_22 << "/ d12 = " << d_12 << endl;
+        // 
+		// cout << "E1 = " << E1 << "/ E2 = " << E2 << "/ E3 = " << E3 << "/ nu12 = " << nu12 << "/ nu13 = " << nu13 << "/ nu23 = " << nu23 << "/ G12 = " << G12 << "/ G13 = " << G13 << "/ G23 = " << G23 << endl;
+    // 
+		// cout << "L ortho = " << L_tilde << endl;
         
         //damaged modulus
         //Compute the elastic strain and the related stress
@@ -670,6 +680,15 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     statev(10) = Y_t;
     statev(11) = Y_ts;
     statev(12) = Hp_ts;
+	
+	
+    vector<mat> moduli_outputed;
+    moduli_outputed = {Lt, L, L_tilde, B};
+    // moduli_outputed = {L};
+    output_moduli(moduli_outputed,13, statev);
+    
+    
+    // cout << "************************************" << endl;
 }
 
 
