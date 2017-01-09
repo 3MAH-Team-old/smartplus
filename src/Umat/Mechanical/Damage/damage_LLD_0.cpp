@@ -51,7 +51,6 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     UNUSED(DTime);
     UNUSED(nshr);
     UNUSED(tnew_dt);
-    // UNUSED(dYd_33dd);
     
     double Tinit = statev(0);
     double d_22 = statev(1);
@@ -91,6 +90,7 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     double GLT = props(5);
     double alphaL = props(6);
     double alphaT = props(7);
+    UNUSED(axis);  //Hide a warning
     
     //Shear damage
     double Y_12_0 = props(8);
@@ -194,6 +194,7 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     double dYd_33dd = 0.;
     double dYd_12dd = 0.;
     double dYd_13dd = 0.;
+    UNUSED(dYd_33dd);  //Hide a warning
     
     double dY_tsdd_22 = 0.;
     double dY_tsdd_12 = 0.;
