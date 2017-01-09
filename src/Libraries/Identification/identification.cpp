@@ -223,6 +223,7 @@ void run_identification_solver(const std::string &simul_type, const int &n_param
         Dp_gb_n[i] = zeros(n_param);
     }
     bool bad_des = false;
+    UNUSED(bad_des);  //Hide a warning
     int compt_des = 0;
     
     while((g<ngen)&&(compt_des < 6)) {
