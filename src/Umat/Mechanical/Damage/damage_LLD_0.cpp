@@ -683,10 +683,10 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
     statev(12) = Hp_ts;
 	
 	
-    vector<mat> moduli_outputed;
-    moduli_outputed = {Lt, L, L_tilde, B};
+    // vector<mat> moduli_outputed;
+    // moduli_outputed = {Lt, L, L_tilde, B};
     // moduli_outputed = {L};
-    output_moduli(moduli_outputed,13, statev);
+    // output_moduli(moduli_outputed,13, statev);
     
     
     // cout << "************************************" << endl;
