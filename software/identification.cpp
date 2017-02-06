@@ -53,6 +53,7 @@ int main() {
 	int spop;
 	int ngboys;
 	int maxpop;
+    int station_nb;
     double probaMut;
     double pertu;
     double c;	///Lagrange penalty parameters
@@ -70,10 +71,10 @@ int main() {
     string file_essentials = "ident_essentials.inp";
     string file_control = "ident_control.inp";
 
-    string simul_type = "SOLVE";
+    string simul_type = "ODF";
 
     ident_essentials(n_param, n_consts, nfiles, path_data, file_essentials);
-    ident_control(ngen, aleaspace, apop, spop, ngboys, maxpop, probaMut, pertu, c, p0, lambdaLM, path_data, file_control);
-    run_identification_solver(simul_type,n_param, n_consts, nfiles, ngen, aleaspace, apop, spop, ngboys, maxpop, path_data, path_keys, path_results, materialfile, outputfile, simulfile, probaMut, pertu, c, p0, lambdaLM);
+    ident_control(ngen, aleaspace, apop, spop, ngboys, maxpop, station_nb, probaMut, pertu, c, p0, lambdaLM, path_data, file_control);
+    run_identification(simul_type,n_param, n_consts, nfiles, ngen, aleaspace, apop, spop, ngboys, maxpop, station_nb, path_data, path_keys, path_results, materialfile, outputfile, simulfile, probaMut, pertu, c, p0, lambdaLM);
 
 }
