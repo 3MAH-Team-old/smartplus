@@ -146,9 +146,14 @@ void read_data_exp(const int &nfiles, vector<opti_data> &datas) {
     for(int i=0; i<nfiles;i++) {
         for(int j=0; j<datas[i].ninfo;j++) {
             paraminit >> datas[i].c_data(j);
-            assert(datas[i].c_data(j)>0);
+            assert(datas[i].c_data(j)>=0);
             assert(datas[i].c_data(j)<= datas[i].ncolumns);
         }
+    }
+    
+    paraminit >> buffer;
+    for(int i=0; i<nfiles;i++) {
+        paraminit >> datas[i].skiplines;
     }
     paraminit.close();
 }
@@ -169,7 +174,8 @@ void read_data_weights(const int &nfiles, Col<int> &weight_types, vec &weights_f
         weights[i].number = data_exp[i].number;
         weights[i].ndata = data_exp[i].ndata;
         weights[i].ninfo = data_exp[i].ninfo;
-        weights[i].ncolumns = data_exp[i].ncolumns;        
+        weights[i].ncolumns = data_exp[i].ncolumns;
+        weights[i].skiplines = data_exp[i].skiplines;
         weights[i].constructc_data();
     }
     
@@ -259,6 +265,11 @@ void read_data_num(const int &nfiles, const vector<opti_data> &data_exp, vector<
             assert(data_num[i].c_data(j)<=data_num[i].ncolumns);
         }
     }
+    
+    paraminit >> buffer;
+    for(int i=0; i<nfiles;i++) {
+        paraminit >> data_num[i].skiplines;
+    }
     paraminit.close();
 }
 
@@ -283,7 +294,7 @@ void ident_essentials(int &n_param, int &n_consts, int &n_files, const string &p
     
 }
     
-void ident_control(int &ngen, int &aleaspace, int &apop, int &spop, int &ngboys, int &maxpop, double &probaMut, double &pertu, double &c, double &p0, double &lambdaLM, const string &path, const string &filename) {
+void ident_control(int &ngen, int &aleaspace, int &apop, int &spop, int &ngboys, int &maxpop, int &station_nb, double &probaMut, double &pertu, double &c, double &p0, double &lambdaLM, const string &path, const string &filename) {
     
     string pathfile = path + "/" + filename;
     ifstream param_control;
@@ -311,6 +322,7 @@ void ident_control(int &ngen, int &aleaspace, int &apop, int &spop, int &ngboys,
     param_control >> buffer >> ngboys;
     param_control >> buffer >> maxpop;
     
+    param_control >> buffer >> station_nb;    
     param_control >> buffer >> probaMut;
     param_control >> buffer >> pertu;
     
