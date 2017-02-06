@@ -46,7 +46,7 @@ using namespace arma;
 
 namespace smart{
         
-void run_identification_solver(const std::string &simul_type, const int &n_param, const int &n_consts, const int &nfiles, const int &ngen, const int &aleaspace, int &apop, int &spop, const int &ngboys, const int &maxpop, const std::string &path_data, const std::string &path_keys, const std::string &path_results, const std::string &materialfile, const std::string &outputfile, const std::string &data_num_name, const double &probaMut, const double &pertu, const double &c, const double &p0, const double &lambdaLM) {
+void run_identification(const std::string &simul_type, const int &n_param, const int &n_consts, const int &nfiles, const int &ngen, const int &aleaspace, int &apop, int &spop, const int &ngboys, const int &maxpop, const int &stationnarity_nb, const std::string &path_data, const std::string &path_keys, const std::string &path_results, const std::string &materialfile, const std::string &outputfile, const std::string &data_num_name, const double &probaMut, const double &pertu, const double &c, const double &p0, const double &lambdaLM) {
 
     std::string data_num_ext = data_num_name.substr(data_num_name.length()-4,data_num_name.length());
     std::string data_num_name_root = data_num_name.substr(0,data_num_name.length()-4); //to remove the extension
@@ -119,7 +119,6 @@ void run_identification_solver(const std::string &simul_type, const int &n_param
         sizev += data_exp[i].ndata * data_exp[i].ninfo;
     }
     vec vexp = calcV(data_exp, data_exp, nfiles, sizev);
-    
     
     //Get the weight data and build the weight vector
     vector<opti_data> data_weight(nfiles);
@@ -223,10 +222,9 @@ void run_identification_solver(const std::string &simul_type, const int &n_param
         Dp_gb_n[i] = zeros(n_param);
     }
     bool bad_des = false;
-    UNUSED(bad_des);  //Hide a warning
     int compt_des = 0;
     
-    while((g<ngen)&&(compt_des < 6)) {
+    while((g<ngen)&&(compt_des < stationnarity_nb)) {
 //    while(g<ngen) {
         
         costnm1 = gen[g].pop[0].cout;
