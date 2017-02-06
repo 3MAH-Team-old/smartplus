@@ -33,9 +33,21 @@ arma::vec dev(const arma::vec &);
 //This function determines the Mises equivalent of a stress tensor, according to the Voigt convention for stress 
 double Mises_stress(const arma::vec &);
 
-//This function determines the strain flow (direction) from a stress tensor, according to the Voigt convention for strains
+//This function determines the strain flow (direction) from a stress tensor (Mises convention), according to the Voigt convention for strains
 arma::vec eta_stress(const arma::vec &);
+    
+//This function determines the strain flow (direction) from a stress tensor, according to the Voigt convention for strains
+arma::vec eta_norm_stress(const arma::vec &);
 
+//This function determines the strain flow (direction) from a strain tensor, according to the Voigt convention for strains
+arma::vec eta_norm_strain(const arma::vec &);
+    
+//This function determines the norm of a stress tensor
+double norm_stress(const arma::vec &);
+
+//This function determines the norm of a strain tensor
+double norm_strain(const arma::vec &);
+    
 //This function determines the Mises equivalent of a strain tensor, according to the Voigt convention for strains 
 double Mises_strain(const arma::vec &);
 
