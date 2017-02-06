@@ -298,7 +298,7 @@ vec calcDp(const mat &S, const vec &vexp, const vec &vnum, const vec &W, const v
     vec L_max = dbound_max(sizepb, p, params, c, p0);
     vec dL_min = bound_min(sizepb, p, params, c, p0);
     vec dL_max = dbound_max(sizepb, p, params, c, p0);
-
+    
     mat S_reduced;
     mat H;
     vec G;
@@ -311,9 +311,9 @@ vec calcDp(const mat &S, const vec &vexp, const vec &vnum, const vec &W, const v
         H = Hessian(S, W);
         G = G_cost(S, W, Dv, L_min, L_max);
     }
-
+    
     mat LM = LevMarq(H, lambdaLM, dL_min, dL_max);
-        
+    
     Dp = inv(LM)*G;
     
     int z = 0;
