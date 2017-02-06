@@ -24,6 +24,7 @@
 #include <string>
 #include <assert.h>
 #include <armadillo>
+#include <smartplus/Libraries/Phase/phase_characteristics.hpp>
 #include <smartplus/Libraries/Abaqus/section_characteristics.hpp>
 #include <smartplus/Libraries/Abaqus/materials.hpp>
 #include <smartplus/Libraries/Abaqus/steps.hpp>

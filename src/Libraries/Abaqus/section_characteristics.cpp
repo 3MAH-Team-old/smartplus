@@ -15,7 +15,7 @@
  
  */
 
-///@file phase_characteristics.cpp
+///@file section_characteristics.cpp
 ///@brief Characteristics of a phase, which hereditates from:
 ///- material_characteristics
 ///@version 1.0
@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <armadillo>
 #include <memory>
+#include <smartplus/Libraries/Phase/phase_characteristics.hpp>
 #include <smartplus/Libraries/Abaqus/section_characteristics.hpp>
 #include <smartplus/Libraries/Abaqus/materials.hpp>
 
@@ -34,9 +35,9 @@ using namespace arma;
 
 namespace smart{
 
-//=====Private methods for phase_characteristics===================================
+//=====Private methods for section_characteristics===================================
 
-//=====Public methods for phase_characteristics============================================
+//=====Public methods for section_characteristics============================================
 
 /*!
   \brief default constructor
@@ -66,7 +67,7 @@ section_characteristics::section_characteristics(const std::string &melset_name,
     
 /*!
   \brief Copy constructor
-  \param s phase_characteristics object to duplicate
+  \param s section_characteristics object to duplicate
 */
     
 //------------------------------------------------------
@@ -84,7 +85,7 @@ section_characteristics::section_characteristics(const section_characteristics& 
 /*!
   \brief Destructor
 
-  Deletes phase_characteristics, the shared ptr related object will be detroyed automatically if they is no pointer to it.
+  Deletes section_characteristics, the shared ptr related object will be detroyed automatically if they is no pointer to it.
 */
 
 //-------------------------------------
@@ -92,7 +93,7 @@ section_characteristics::~section_characteristics() {}
 //-------------------------------------
 
 /*!
-  \brief Standard operator = for phase_characteristics
+  \brief Standard operator = for section_characteristics
 */
   
     

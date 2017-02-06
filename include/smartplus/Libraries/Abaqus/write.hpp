@@ -23,6 +23,7 @@
 #include <armadillo>
 #include <string>
 #include "materials.hpp"
+#include "../Phase/phase_characteristics.hpp"
 #include "section_characteristics.hpp"
 #include "steps.hpp"
 #include "../Solver/block.hpp"
