@@ -241,15 +241,22 @@ step_meca& step_meca::operator = (const step_meca& stm)
 //	assert(stm.mode>0);
     
 	number = stm.number;
+    Dn_init = stm.Dn_init;
+    Dn_mini = stm.Dn_mini;
+    Dn_inc = stm.Dn_inc;
 	ninc = stm.ninc;
 	mode = stm.mode;
     
     BC_Time = stm.BC_Time;
-    
+    times = stm.times;
+    file = stm.file;
+
     cBC_meca = stm.cBC_meca;
     BC_meca = stm.BC_meca;
+    mecas = stm.mecas;
     BC_T = stm.BC_T;
     cBC_T = stm.cBC_T;
+    Ts = stm.Ts;
     
 	return *this;
 }
