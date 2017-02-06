@@ -42,10 +42,11 @@ class opti_data
 		int ncolumns;
         arma::Col<int> c_data;
         arma::mat data;
+        int skiplines;
 		
 		opti_data(); 	//default constructor
 		opti_data(int, int);	//constructor - allocates memory for statev
-        opti_data(std::string, int, int, int, int); //Constructor with parameters
+        opti_data(std::string, int, int, int, int, int); //Constructor with parameters
 		opti_data(const opti_data &);	//Copy constructor
 		~opti_data();
 		
