@@ -182,9 +182,11 @@ step& step::operator = (const step& st)
 //	assert(st.mode>0);
     
 	number = st.number;
-	ninc = st.ninc;
+    Dn_init = st.Dn_init;
+    Dn_mini = st.Dn_mini;
+    Dn_inc = st.Dn_inc;
+    ninc = st.ninc;
 	mode = st.mode;
-    
     
     times = st.times;
     BC_Time = st.BC_Time;
