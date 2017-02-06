@@ -49,6 +49,7 @@ opti_data::opti_data()
 	ninfo=0;
 	ndata=0;
 	ncolumns=0;
+    skiplines = 0;
 }
 
 /*!
@@ -69,6 +70,7 @@ opti_data::opti_data(int n, int m)
 	ndata = n;
 	ninfo = m;
 	ncolumns=0;
+    skiplines = 0;
 	
 	c_data.zeros(m);
 	data = zeros(n,m);
@@ -82,7 +84,7 @@ opti_data::opti_data(int n, int m)
 */
 
 //-------------------------------------------------------------
-opti_data::opti_data(string mname, int mnumber, int mninfo, int mndata, int mncolumns)
+opti_data::opti_data(string mname, int mnumber, int mninfo, int mndata, int mncolumns, int mskiplines)
 //-------------------------------------------------------------
 {	
 	assert(mndata>0);
@@ -92,7 +94,8 @@ opti_data::opti_data(string mname, int mnumber, int mninfo, int mndata, int mnco
 	number = mnumber;
 	ndata = mndata;
 	ninfo = mninfo;
-	ncolumns = mncolumns;	
+	ncolumns = mncolumns;
+    skiplines = mskiplines;
 		
 	c_data.zeros(mninfo);
 	data = zeros(mndata,mninfo);
@@ -115,6 +118,7 @@ opti_data::opti_data(const opti_data& ed)
 	ndata = ed.ndata;
 	ninfo = ed.ninfo;
 	ncolumns = ed.ncolumns;
+    skiplines = ed.skiplines;
 
 	c_data = ed.c_data;
 	data = ed.data;
@@ -159,7 +163,7 @@ void opti_data::import(string folder, int nexp)
     ifstream ifdata;
     string buffer;
     
-    double temp = 0.;
+    string temp_string;
     string path = folder + "/" + name;
     
     ifdata.open(path, ios::in);
@@ -170,20 +174,24 @@ void opti_data::import(string folder, int nexp)
             ndata++;
         }
     }
+    ndata -= skiplines;
     
     ifdata.close();
     
     ifdata.open(path, ios::in);
-    temp = 0.;
+    
+    for (int i=0; i<skiplines; i++) {
+        getline (ifdata,buffer);
+    }
     
     if ((nexp == 0)||(ndata < nexp)) {
         constructdata();
         for (int i = 0; i < ndata; i++) {
             for (int j = 0; j < ncolumns; j++) {
-                ifdata >> temp;
+                ifdata >> temp_string;
                 for(int k=0; k<ninfo; k++) {
                     if((j)==c_data(k)) {
-                        data(i, k)=temp;
+                        data(i, k)=stod(temp_string);
                     }
                 }				
             }
@@ -192,10 +200,10 @@ void opti_data::import(string folder, int nexp)
     else if (ndata > nexp) {
         for (int i = 0; i < nexp; i++) {
             for (int j = 0; j < ncolumns; j++) {
-                ifdata >> temp;
+                ifdata >> temp_string;
                 for(int k=0; k<ninfo; k++) {
                     if((j)==c_data(k)) {
-                        data(i, k)=temp;
+                        data(i, k)=stod(temp_string);
                     }
                 }
             }
@@ -240,8 +248,10 @@ ostream& operator << (ostream& s, const opti_data& ed)
 	s << "Name of the experimental data file: " << ed.name << "\n";
 	s << "Number of the experimental data file: " << ed.number << "\n";
 	s << "Number of data points: " << ed.ndata << "\n";
-	s << "Number of informations per data point: " << ed.ninfo << "\n";	
-
+	s << "Number of informations per data point: " << ed.ninfo << "\n";
+	s << "Number of columns in the file: " << ed.ncolumns << "\n";
+	s << "Number of lines skipped at the beginning of the file: " << ed.skiplines << "\n";
+    
 /*	for (int i=1; i<=ed.ndata; i++) {
 	  
 		s << i;
