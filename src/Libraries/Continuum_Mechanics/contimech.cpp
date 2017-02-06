@@ -68,7 +68,7 @@ double Mises_stress(const vec &v) {
 	return sqrt(3./2.*sum(vdev%vdev2));
 }
 
-//This function determines the strain flow (direction) from a stress tensor, according to the Voigt convention for strains
+//This function determines the strain flow (direction) from a stress tensor (Mises convention), according to the Voigt convention for strains
 vec eta_stress(const vec &v) {
 	assert(v.size()==6);
 	
@@ -86,6 +86,64 @@ vec eta_stress(const vec &v) {
 		return zeros(6);
 	}
 
+}
+    
+//This function determines the strain flow (direction) from a stress tensor, according to the Voigt convention for strains
+vec eta_norm_stress(const vec &v) {
+    assert(v.size()==6);
+    
+    vec v2 = v;
+    for (int i=3; i<6; i++)
+    v2(i) = 2.*v2(i);
+    
+    double n = sqrt(sum(v%v2));
+    
+    if (n > 0.) {
+        return v2*(1./n);
+    }
+    else {
+        return zeros(6);
+    }
+}
+
+//This function determines the strain flow (direction) from a stress tensor, according to the Voigt convention for strains
+vec eta_norm_strain(const vec &v) {
+    assert(v.size()==6);
+    
+    vec v2 = v;
+    for (int i=3; i<6; i++)
+        v2(i) = 0.5*v2(i);
+    
+    double n = sqrt(sum(v%v2));
+    
+    if (n > 0.) {
+        return v*(1./n);
+    }
+    else {
+        return zeros(6);
+    }
+}
+    
+double norm_stress(const vec &v) {
+    
+    assert(v.size()==6);
+    
+    vec v2 = v;
+    for (int i=3; i<6; i++)
+    v2(i) = 2.*v2(i);
+    
+    return sqrt(sum(v%v2));
+}
+
+double norm_strain(const vec &v) {
+    
+    assert(v.size()==6);
+    
+    vec v2 = v;
+    for (int i=3; i<6; i++)
+        v2(i) = 0.5*v2(i);
+    
+    return sqrt(sum(v%v2));
 }
 
 //This function determines the Mises equivalent of a strain tensor, according to the Voigt convention for strains 
@@ -119,7 +177,7 @@ vec eta_strain(const vec &v) {
 	}
 
 }
-
+    
 //This function transforms the strain Voigt vector into a 3*3 strain matrix
 mat v2t_strain(const vec &v) {
 	assert(v.size()==6);
