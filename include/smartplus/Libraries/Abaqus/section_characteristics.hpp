@@ -24,6 +24,7 @@
 
 #include <iostream>
 #include <string>
+#include <memory>
 #include <armadillo>
 #include "../Phase/phase_characteristics.hpp"
 #include "materials.hpp"

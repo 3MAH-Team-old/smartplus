@@ -24,6 +24,7 @@
 
 #include <iostream>
 #include <string>
+#include <memory>
 #include <armadillo>
 #include "../Geometry/geometry.hpp"
 #include "../Homogenization/phase_multi.hpp"
