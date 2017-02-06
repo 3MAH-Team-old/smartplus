@@ -48,7 +48,7 @@ block::block()
 	number=0;
 	nstep=0;
 	ncycle=0;
-    type=0.;
+    type=0;
 }
 
 /*!
