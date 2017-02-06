@@ -4,14 +4,34 @@ echo "Start of SMART+ compilation."
 echo "---------------------------\n"
 
 
-#Number of procs used to compil (+1 because if nproc=1 => 1/2=0)
-nproc_used=$(( ($(nproc)+1)/2 ))
-
 #Find the current directory
 current_dir=$(pwd)
 
 #Get the file of the bash file (possibly necessary)
 bashFileName=${0##*/}
+
+# Detect the platform (similar to $OSTYPE)
+OS="`uname`"
+case $OS in
+'Linux')
+OS='Linux'
+alias finder='find'
+alias nprocs='nproc'
+;;
+'Darwin')
+OS='Mac'
+alias finder='gfind'
+alias nprocs='sysctl -n hw.ncpu'
+;;
+'WindowsNT')
+OS='Windows'
+echo 'No equivalent function known to be equivalent to "find or gfind" : Please search for one and replace this "echo" command in ${bashFileName} and replace it by an "alias"'
+;;
+*) ;;
+esac
+
+#Number of procs used to compil (+1 because if nproc=1 => 1/2=0)
+nproc_used=$(( ($(nprocs)+1)/2 ))
 
 #Test if build exist and if it's necessary to erase it
 if [ ! -d "build" ]
@@ -48,12 +68,11 @@ cmake ..
 echo ""
 make -j${nproc_used}
 echo ""
-make test
-echo ""
 if [ "${Install_check}" = "OK" ]
 then
 	make install
 fi
+make test
 
 #Create the list of the file to copy after compilation
 executableToCopy="solver identification L_eff ODF"
