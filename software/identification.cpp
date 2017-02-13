@@ -71,7 +71,7 @@ int main() {
     string file_essentials = "ident_essentials.inp";
     string file_control = "ident_control.inp";
 
-    string simul_type = "ODF";
+    string simul_type = "SOLVE";
 
     ident_essentials(n_param, n_consts, nfiles, path_data, file_essentials);
     ident_control(ngen, aleaspace, apop, spop, ngboys, maxpop, station_nb, probaMut, pertu, c, p0, lambdaLM, path_data, file_control);
