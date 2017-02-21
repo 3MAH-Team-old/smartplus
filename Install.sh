@@ -75,7 +75,7 @@ fi
 make test
 
 #Create the list of the file to copy after compilation
-executableToCopy="solver identification L_eff ODF"
+executableToCopy="solver identification L_eff Elastic_props ODF"
 objectToCopy="umat_single umat_singleT"
 
 # Copy all important files (+ final message)
