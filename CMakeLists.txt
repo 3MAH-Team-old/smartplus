@@ -102,7 +102,7 @@ target_link_libraries(smartplus ${Boost_LIBRARIES} ${ARMADILLO_LIBRARIES})
 
 
 #Define list of executables for compilation
-set (All_exe_to_compile solver identification L_eff ODF)
+set (All_exe_to_compile solver identification L_eff Elastic_props ODF)
 
 #Compile public executable
 foreach (Exe_to_compile ${All_exe_to_compile})
