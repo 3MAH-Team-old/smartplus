@@ -41,6 +41,10 @@ sh Install.sh
 
 5 - Enjoy
 
+##
+If you start from an Ubuntu 16.04, you can also use the script "install-smartplus.sh"
+It contains all the commands to install the smartplus dependancies
+Just run "install-smartplus.sh" on a terminal, with the su privileges
 
 How to use smartplus
 --------------------
