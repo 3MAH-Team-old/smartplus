@@ -312,10 +312,10 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
     vec Dalpha_sig = (Dalpha%sigma_start);
     
     //Set the thermo forces
-    double A_xiF = rhoDs0*(T+DT) - rhoDE0 + 0.5*sum(sigma%DM_sig) + sum(sigma%Dalpha)*(T+DT) - HfF;
-    double A_xiF_start = rhoDs0*(T) - rhoDE0 + 0.5*sum(sigma_start%DM_sig) + sum(sigma_start%Dalpha)*T - HfF;
-    double A_xiR = -1.*rhoDs0*(T+DT) + rhoDE0 - 0.5*sum(sigma%DM_sig) - sum(sigma%Dalpha)*(T+DT) + HfR;
-    double A_xiR_start = -1.*rhoDs0*(T) + rhoDE0 - 0.5*sum(sigma_start%DM_sig) - sum(sigma_start%Dalpha)*T + HfR;
+    double A_xiF = rhoDs0*(T+DT) - rhoDE0 + 0.5*sum(sigma%DM_sig) + sum(sigma%Dalpha)*(T+DT-T_init) - HfF;
+    double A_xiF_start = rhoDs0*(T) - rhoDE0 + 0.5*sum(sigma_start%DM_sig) + sum(sigma_start%Dalpha)*(T-T_init) - HfF;
+    double A_xiR = -1.*rhoDs0*(T+DT) + rhoDE0 - 0.5*sum(sigma%DM_sig) - sum(sigma%Dalpha)*(T+DT-T_init) + HfR;
+    double A_xiR_start = -1.*rhoDs0*(T) + rhoDE0 - 0.5*sum(sigma_start%DM_sig) - sum(sigma_start%Dalpha)*(T-T_init) + HfR;
     
     //Transformation criteria
     double PhihatF = Hcur*Prager_stress(sigma, prager_b, prager_n);
@@ -472,14 +472,14 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
         
         //Forward transformation thermodynamic force
         PhihatF = Hcur*Prager_stress(sigma, prager_b, prager_n);
-        A_xiF = rhoDs0*(T + DT) - rhoDE0 + 0.5*sum(sigma%DM_sig) + sum(sigma%Dalpha)*(T + DT) - HfF;
+        A_xiF = rhoDs0*(T + DT) - rhoDE0 + 0.5*sum(sigma%DM_sig) + sum(sigma%Dalpha)*(T + DT - T_init) - HfF;
         lambda1 = lagrange_pow_1(xi, c_lambda, p0_lambda, n_lambda, alpha_lambda);
         YtF = Y0t + D*Hcur*Mises_stress(sigma);
         Phi(0) = PhihatF + A_xiF - lambda1 - YtF;
         
         //Reverse transformation thermodynamic force
         PhihatR = sum(sigma%ETMean);
-        A_xiR = -1.*rhoDs0*(T + DT) + rhoDE0 - 0.5*sum(sigma%DM_sig) - sum(sigma%Dalpha)*(T + DT) + HfR;
+        A_xiR = -1.*rhoDs0*(T + DT) + rhoDE0 - 0.5*sum(sigma%DM_sig) - sum(sigma%Dalpha)*(T + DT - T_init) + HfR;
         lambda0 = -1.*lagrange_pow_0(xi, c_lambda, p0_lambda, n_lambda, alpha_lambda);
         YtR = Y0t + D*sum(sigma%ETMean);
         Phi(1) = -1.*PhihatR + A_xiR + lambda0 - YtR;  // PhiR < 0.
