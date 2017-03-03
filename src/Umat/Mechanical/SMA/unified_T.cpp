@@ -30,7 +30,6 @@
 #include <smartplus/Libraries/Continuum_Mechanics/contimech.hpp>
 #include <smartplus/Libraries/Continuum_Mechanics/constitutive.hpp>
 #include <smartplus/Libraries/Continuum_Mechanics/recovery_props.hpp>
-
 #include <smartplus/Libraries/Maths/num_solve.hpp>
 #include <smartplus/Libraries/Continuum_Mechanics/criteria.hpp>
 
@@ -72,10 +71,14 @@ void umat_sma_unified_T(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, 
     ///@brief props[19]: n3 : Austenite start smooth exponent
     ///@brief props[20]: n4 : Austenite finish smooth exponent
 
-    ///@brief props[21]: c_lambda : penalty function exponent start point
-    ///@brief props[22]: p0_lambda : penalty function exponent limit penalty value
-    ///@brief props[23]: n_lambda : penalty function power law exponent
-    ///@brief props[24]: alpha_lambda : penalty function power law parameter
+    ///@brief props[21]: sigmacaliber : Stress at which the slopes CA and CM are identified
+    ///@brief props[22]: prager_b : Tension-compression asymmetry parameter
+    ///@brief props[23]: prager_n : Tension-compression asymmetry exponent
+    
+    ///@brief props[24]: c_lambda : penalty function exponent start point
+    ///@brief props[25]: p0_lambda : penalty function exponent limit penalty value
+    ///@brief props[26]: n_lambda : penalty function power law exponent
+    ///@brief props[27]: alpha_lambda : penalty function power law parameter
     
     ///@brief The elastic-plastic UMAT with isotropic hardening requires 14 statev:
     ///@brief statev[0] : T_init : Initial temperature
@@ -89,9 +92,9 @@ void umat_sma_unified_T(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, 
     
     ///@brief statev[8] : xiF : forward MVF
     ///@brief statev[9] : xiR : reverse MVF
-    ///@brief statev[10] : rhoDs0 difference in entropy for the phases (M - A)
-    ///@brief statev[11] : rhoDs0 difference in internal energy for the phases (M - A)
-    ///@brief statev[12] : parameter for the stress dependance of transformation limits
+    ///@brief statev[10] : rhoDs0 : difference in entropy for the phases (M - A)
+    ///@brief statev[11] : rhoDE0 : difference in internal energy for the phases (M - A)
+    ///@brief statev[12] : D : parameter for the stress dependance of transformation limits
     ///@brief statev[13] : a1 : forward hardening parameter
     ///@brief statev[14] : a2 : reverse hardening parameter
     ///@brief statev[15] : a3 : Equilibrium hardening parameter
@@ -103,8 +106,8 @@ void umat_sma_unified_T(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, 
     double E_M = props(2);
     double nu_A = props(3);
     double nu_M= props(4);
-    double alphaA_iso = props(5);
-    double alphaM_iso = props(6);
+    double alphaA_iso = props(8);
+    double alphaM_iso = props(9);
     //parameters for Hcur
     double Hmin = props(7);
     double Hmax = props(8);
@@ -305,10 +308,10 @@ void umat_sma_unified_T(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, 
     vec Dalpha_sig = (Dalpha%sigma_start);
     
     //Set the thermo forces
-    double A_xiF = rhoDs0*(T+DT) - rhoDE0 + 0.5*sum(sigma%DM_sig) + sum(sigma%Dalpha)*(T+DT) - HfF;
-    double A_xiF_start = rhoDs0*(T) - rhoDE0 + 0.5*sum(sigma_start%DM_sig) + sum(sigma_start%Dalpha)*T - HfF;
-    double A_xiR = -1.*rhoDs0*(T+DT) + rhoDE0 - 0.5*sum(sigma%DM_sig) - sum(sigma%Dalpha)*(T+DT) + HfR;
-    double A_xiR_start = -1.*rhoDs0*(T) + rhoDE0 - 0.5*sum(sigma_start%DM_sig) - sum(sigma_start%Dalpha)*T + HfR;
+    double A_xiF = rhoDs0*(T+DT) - rhoDE0 + 0.5*sum(sigma%DM_sig) + sum(sigma%Dalpha)*(T+DT-T_init) - HfF;
+    double A_xiF_start = rhoDs0*(T) - rhoDE0 + 0.5*sum(sigma_start%DM_sig) + sum(sigma_start%Dalpha)*(T-T_init) - HfF;
+    double A_xiR = -1.*rhoDs0*(T+DT) + rhoDE0 - 0.5*sum(sigma%DM_sig) - sum(sigma%Dalpha)*(T+DT-T_init) + HfR;
+    double A_xiR_start = -1.*rhoDs0*(T) + rhoDE0 - 0.5*sum(sigma_start%DM_sig) - sum(sigma_start%Dalpha)*(T-T_init) + HfR;
     
     //Transformation criteria
     double PhihatF = Hcur*Prager_stress(sigma, prager_b, prager_n);
@@ -464,14 +467,14 @@ void umat_sma_unified_T(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, 
         
         //Forward transformation thermodynamic force
         PhihatF = Hcur*Prager_stress(sigma, prager_b, prager_n);
-        A_xiF = rhoDs0*(T + DT) - rhoDE0 + 0.5*sum(sigma%DM_sig) + sum(sigma%Dalpha)*(T + DT) - HfF;
+        A_xiF = rhoDs0*(T + DT) - rhoDE0 + 0.5*sum(sigma%DM_sig) + sum(sigma%Dalpha)*(T + DT - T_init) - HfF;
         lambda1 = lagrange_pow_1(xi, c_lambda, p0_lambda, n_lambda, alpha_lambda);
         YtF = Y0t + D*Hcur*Mises_stress(sigma);
         Phi(0) = PhihatF + A_xiF - lambda1 - YtF;
         
         //Reverse transformation thermodynamic force
         PhihatR = sum(sigma%ETMean);
-        A_xiR = -1.*rhoDs0*(T + DT) + rhoDE0 - 0.5*sum(sigma%DM_sig) - sum(sigma%Dalpha)*(T + DT) + HfR;
+        A_xiR = -1.*rhoDs0*(T + DT) + rhoDE0 - 0.5*sum(sigma%DM_sig) - sum(sigma%Dalpha)*(T + DT - T_init) + HfR;
         lambda0 = -1.*lagrange_pow_0(xi, c_lambda, p0_lambda, n_lambda, alpha_lambda);
         YtR = Y0t + D*sum(sigma%ETMean);
         Phi(1) = -1.*PhihatR + A_xiR + lambda0 - YtR;  // PhiR < 0.
@@ -552,7 +555,7 @@ void umat_sma_unified_T(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, 
         dPhiRdxiF = -1.*dPhihatRdxiF + dA_xiRdxiF + dlambda0dxiF - dYtRdxiF;
         dPhiRdxiR = -1.*dPhihatRdxiR + dA_xiRdxiR + dlambda0dxiR - dYtRdxiR;
         dPhiRdETF = -1.*dPhihatRdETF - dYtRdETF;
-        dPhiRdETR = -1.*dPhihatRdETF - dYtRdETF;
+        dPhiRdETR = -1.*dPhihatRdETR - dYtRdETF;
     
         K(0,0) = dPhiFdxiF;
         K(0,1) = dPhiFdxiR;
