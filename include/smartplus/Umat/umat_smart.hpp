@@ -47,8 +47,10 @@ namespace smart{
 ///@param kstep step number
 ///@param kinc increment number    
     
-void abaqus2smart(double *, double *, const double *, const double *, const double *, const double &, const double &, const double &, const int &,const double *, const int &, double *, const double &, const int &, const int &, const double *, arma::vec &, arma::mat &, arma::vec &, arma::vec &, double &, double &, double &, double &, arma::vec &, arma::vec &, double &, arma::mat &, bool &);
+void abaqus2smart_M(double *, double *, const double *, const double *, const double *, const double &, const double &, const double &, const int &,const double *, const int &, double *, const int &, const int &, const double *, arma::vec &, arma::mat &, arma::vec &, arma::vec &, double &, double &, double &, double &, arma::vec &, arma::vec &, arma::vec &, arma::mat &, bool &);
 
+void abaqus2smart_T(double *, double *, double *, double *, double &, const double *, const double *, const double *, const double &, const double &, const double &, const int &,const double *, const int &, double *, const int &, const int &, const double *, arma::vec &, arma::mat &, arma::mat &, arma::mat &, arma::mat &, arma::vec &, arma::vec &, double &, double &, double &, double &, arma::vec &, arma::vec &, arma::vec &, arma::vec &, arma::mat &, bool &);
+    
 void select_umat_T(phase_characteristics &, const arma::mat &, const double &, const double &, const int &, const int &, const bool &, double &);
     
 void select_umat_M(phase_characteristics &, const arma::mat &, const double &, const double &, const int &, const int &, const bool &, double &);
@@ -57,6 +59,8 @@ void run_umat_T(phase_characteristics &, const arma::mat &, const double &, cons
 
 void run_umat_M(phase_characteristics &, const arma::mat &, const double &, const double &, const int &, const int &, bool &, double &);
 
-void smart2abaqus(double *, double *, double *, const int &, const int &, const arma::vec &, const arma::mat &, const arma::vec &, double &, const double &);
-    
+void smart2abaqus_M(double *, double *, double *, const int &, const int &, const arma::vec &, const arma::vec &, const arma::vec &, const arma::mat &);
+
+void smart2abaqus_T(double *, double *, double *, double *, double &, double &, double *, const int &, const int &, const arma::vec &, const arma::vec &, const double &, const arma::vec &, const arma::vec &, const arma::mat &, const arma::mat &, const arma::mat &, const arma::mat &);
+        
 } //namespace smart
