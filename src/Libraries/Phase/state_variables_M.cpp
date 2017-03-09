@@ -59,7 +59,7 @@ state_variables_M::state_variables_M() : state_variables(), Wm(4), Wm_start(4), 
 */
 
 //-------------------------------------------------------------
-state_variables_M::state_variables_M(const vec &mEtot, const vec &mDEtot, const vec &msigma, const vec &msigma_start, const double &mT, const double &mDT, const vec &mWm, const vec& mWm_start, const int &mnstatev, const vec &mstatev, const vec &mstatev_start, const mat &mL, const mat &mLt) : state_variables(mEtot, mDEtot, msigma, msigma_start, mT, mDT, mnstatev, mstatev, mstatev_start), L(6,6), Lt(6,6)
+state_variables_M::state_variables_M(const vec &mEtot, const vec &mDEtot, const vec &msigma, const vec &msigma_start, const double &mT, const double &mDT, const int &mnstatev, const vec &mstatev, const vec &mstatev_start, const vec &mWm, const vec& mWm_start, const mat &mL, const mat &mLt) : state_variables(mEtot, mDEtot, msigma, msigma_start, mT, mDT, mnstatev, mstatev, mstatev_start), L(6,6), Lt(6,6)
 //-------------------------------------------------------------
 {
 
@@ -154,7 +154,7 @@ state_variables_M& state_variables_M::copy_fields_M(const state_variables_M& sv)
 }
 
 //-------------------------------------------------------------
-void state_variables_M::update(const vec &mEtot, const vec &mDEtot, const vec &msigma, const vec &msigma_start, const double &mT, const double &mDT, const vec &mWm, const vec &mWm_start,  const int &mnstatev, const vec &mstatev, const vec &mstatev_start,  const mat &mL, const mat &mLt)
+void state_variables_M::update(const vec &mEtot, const vec &mDEtot, const vec &msigma, const vec &msigma_start, const double &mT, const double &mDT, const int &mnstatev, const vec &mstatev, const vec &mstatev_start,  const vec &mWm, const vec &mWm_start, const mat &mL, const mat &mLt)
 //-------------------------------------------------------------
 {
     state_variables::update(mEtot, mDEtot, msigma, msigma_start, mT, mDT, mnstatev, mstatev, mstatev_start);
