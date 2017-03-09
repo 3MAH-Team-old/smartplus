@@ -15,7 +15,7 @@
  
  */
 
-///@file umat_single.cpp
+///@file umat_singleT.cpp
 ///@brief umat template to run smart subroutines using Abaqus
 ///@brief Implemented in 1D-2D-3D
 ///@author Chemisky & Despringre
@@ -28,14 +28,10 @@
 #include <string.h>
 #include <armadillo>
 
-#include "../src/Umat/umat_smart.cpp"
-
-#include "../src/Umat/Thermomechanical/Elasticity/elastic_isotropic.cpp"
-
-#include "../src/Libraries/Continuum_Mechanics/contimech.cpp"
-#include "../src/Libraries/Continuum_Mechanics/constitutive.cpp"
-#include "../src/Libraries/Maths/rotation.cpp"
-#include "../src/Libraries/Maths/lagrange.cpp"
+#include <smartplus/parameter.hpp>
+#include <smartplus/Libraries/Phase/phase_characteristics.hpp>
+#include <smartplus/Libraries/Phase/state_variables_T.hpp>
+#include <smartplus/Umat/umat_smart.hpp>
 
 ///@param stress array containing the components of the stress tensor (dimension ntens)
 ///@param statev array containing the evolution variables (dimension nstatev)
@@ -81,44 +77,63 @@ using namespace smart;
 
 extern "C" void umat_(double *stress, double *statev, double *ddsdde, double &sse, double &spd, double &scd, double &rpl, double *ddsddt, double *drplde, double &drpldt, const double *stran, const double *dstran, const double *time, const double &dtime, const double &temperature, const double &Dtemperature, const double &predef, const double &dpred, char *cmname, const int &ndi, const int &nshr, const int &ntens, const int &nstatev, const double *props, const int &nprops, const double &coords, const double *drot, double &pnewdt, const double &celent, const double *dfgrd0, const double *dfgrd1, const int &noel, const int &npt, const double &layer, const int &kspt, const int &kstep, const int &kinc)
 {
-	UNUSED(scd);
-	UNUSED(predef);
-	UNUSED(dpred);
-	UNUSED(ntens);
-	UNUSED(coords);
-	UNUSED(celent);
-	UNUSED(dfgrd0);
-	UNUSED(dfgrd1);
-	UNUSED(noel);
-	UNUSED(npt);
-	UNUSED(layer);
-	UNUSED(kspt);
-	UNUSED(kstep);
-	UNUSED(kinc);
-	
-	bool start = false;
-	double Time = 0.;
-	double DTime = 0.;
-	double T = 0.;
-	double DT = 0.;
-	double tnew_dt = 0.;
-	
-	vec props_smart = zeros(nprops);
-	vec statev_smart = zeros(nstatev);
+    UNUSED(sse);
+    UNUSED(spd);
+    UNUSED(scd);
+    UNUSED(rpl);
+    UNUSED(ddsddt);
+    UNUSED(drplde);
+    UNUSED(drpldt);
+    UNUSED(predef);
+    UNUSED(dpred);
+    UNUSED(ntens);
+    UNUSED(coords);
+    UNUSED(celent);
+    UNUSED(dfgrd0);
+    UNUSED(dfgrd1);
+    UNUSED(noel);
+    UNUSED(npt);
+    UNUSED(layer);
+    UNUSED(kspt);
+    UNUSED(kstep);
+    UNUSED(kinc);
     
-	vec sigma = zeros(6);
-	vec Etot = zeros(6);
-	vec DEtot = zeros(6);
-	mat dSdE = zeros(6,6);
-	mat dSdT = zeros(1,6);
-	mat drpldE = zeros(6,1);
-	mat drpldT = zeros(1,1);
-	mat DR = zeros(3,3);
-	
-	string umat_name(cmname);
-	umat_name = umat_name.substr(0, 5);
-	    
-	abaqus2smartT(stress, ddsdde, ddsddt, drplde, drpldt, stran, dstran, time, dtime, temperature, Dtemperature, nprops,props, nstatev, statev, pnewdt, ndi, nshr, drot, sigma, dSdE, dSdT, drpldE, drpldT, Etot, DEtot, T, DT, Time, DTime, props_smart, statev_smart, tnew_dt, DR, start);
-	select_umat_T(umat_name, Etot, DEtot, sigma, rpl, dSdE, dSdT, drpldE, drpldT, DR, nprops, props_smart, nstatev, statev_smart, T, DT, Time, DTime, sse, spd, ndi, nshr, start, tnew_dt);
-	smart2abaqusT(stress, ddsdde, ddsddt, drplde, drpldt, statev, ndi, nshr, sigma, dSdE, dSdT, drpldE, drpldT, statev_smart, pnewdt, tnew_dt);
+    bool start = false;
+    double Time = 0.;
+    double DTime = 0.;
+    
+    int nstatev_smart = nstatev-7;
+    vec props_smart = zeros(nprops);
+    vec statev_smart = zeros(nstatev_smart);
+    
+    vec sigma = zeros(6);
+    vec Etot = zeros(6);
+    vec DEtot = zeros(6);
+    mat dSdE = zeros(6,6);
+    mat dSdT = zeros(1,6);
+    mat drpldE = zeros(6,1);
+    mat drpldT = zeros(1,1);
+    mat DR = zeros(3,3);
+    vec Wm = zeros(4);
+    vec Wt = zeros(3);
+    
+    string umat_name(cmname);
+    umat_name = umat_name.substr(0, 5);
+	   
+    phase_characteristics rve;
+    rve.construct(0,2);
+    auto rve_sv_T = std::dynamic_pointer_cast<state_variables_T>(rve.sptr_sv_global);
+    rve_sv_T->resize(nstatev_smart);
+    rve.sptr_matprops->resize(nprops);
+
+    
+    abaqus2smart_T(stress, ddsdde, ddsddt, drplde, drpldt, stran, dstran, time, dtime, temperature, Dtemperature, nprops, props, nstatev, statev, ndi, nshr, drot, rve_sv_T->sigma, rve_sv_T->dSdE, rve_sv_T->dSdT, rve_sv_T->drdE, rve_sv_T->drdT, rve_sv_T->Etot, rve_sv_T->DEtot, rve_sv_T->T, rve_sv_T->DT, Time, DTime, props_smart, rve_sv_T->Wm, rve_sv_T->Wt, rve_sv_T->statev, DR, start);
+    rve.construct(0,1);
+
+    rve.sptr_matprops->update(0, umat_name, 1., 0., 0., 0., nprops, props_smart);
+    select_umat_M(rve, DR, Time, DTime, ndi, nshr, start, pnewdt);
+
+    smart2abaqus_T(stress, ddsdde, ddsddt, drplde, drpldt, rpl, statev, ndi, nshr, rve_sv_T->sigma, rve_sv_T->statev, rve_sv_T->r, rve_sv_T->Wm, rve_sv_T->Wt, rve_sv_T->dSdE, rve_sv_T->dSdT, rve_sv_T->drdE, rve_sv_T->drdT);
+    
+    
 }
