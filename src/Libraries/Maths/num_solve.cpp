@@ -34,7 +34,7 @@ void Newton_Raphon(const vec &Phi, const vec &Y_crit, const mat &denom, vec &Dp,
     int n=Phi.n_elem;
     
     for (int i=0; i<n; i++) {
-        assert(fabs(Y_crit(n)) > 0);
+        assert(fabs(Y_crit(i)) > 0.);
     }
     
     if (fabs(det(denom)) > limit) {
