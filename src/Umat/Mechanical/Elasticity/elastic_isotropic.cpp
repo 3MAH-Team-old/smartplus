@@ -67,17 +67,7 @@ void umat_elasticity_iso(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt,
 	
 	//Compute the elastic strain and the related stress	
 	vec DEel = DEtot - alpha*Ith()*DT;
-
-	if (ndi == 1) {
-        sigma(0) = sigma_start(0) + E*(DEel(0));
-    }
-	else if (ndi == 2) {
-        sigma(0) = sigma_start(0) + E/(1. - (nu*nu))*(DEel(0)) + nu*(DEel(1));
-        sigma(1) = sigma_start(1) + E/(1. - (nu*nu))*(DEel(1)) + nu*(DEel(0));
-        sigma(3) = sigma_start(3) + E/(1.+nu)*0.5*DEel(3);
-    }
-    else
-        sigma = sigma_start + (Lt*DEel);
+    sigma = el_pred(sigma_start, Lt, DEel, ndi);
     
     //Computation of the mechanical and thermal work quantities
     Wm += 0.5*sum((sigma_start+sigma)%DEtot);
