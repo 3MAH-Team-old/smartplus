@@ -104,28 +104,7 @@ void umat_elasticity_ortho_T(const vec &Etot, const vec &DEtot, vec &sigma, doub
     
     //Compute the elastic strain and the related stress
     vec Eel = Etot + DEtot - alpha*(T+DT-T_init);
-    
-    if (ndi == 1) {
-        sigma(0) = Ex*Eel(0);
-    }
-    else if (ndi == 2) {
-
-        double Q11 = dSdE(0,0)-dSdE(0,2)*dSdE(2,0)/dSdE(2,2);
-        double Q12 = dSdE(0,1)-dSdE(0,2)*dSdE(2,1)/dSdE(2,2);
-        double Q14 = dSdE(0,3)-dSdE(0,2)*dSdE(2,3)/dSdE(2,2);
-        double Q21 = dSdE(1,0)-dSdE(1,2)*dSdE(2,0)/dSdE(2,2);
-        double Q22 = dSdE(1,1)-dSdE(1,2)*dSdE(2,1)/dSdE(2,2);
-        double Q24 = dSdE(1,3)-dSdE(1,2)*dSdE(2,3)/dSdE(2,2);
-        double Q41 = dSdE(3,0)-dSdE(3,2)*dSdE(2,0)/dSdE(2,2);
-        double Q42 = dSdE(3,1)-dSdE(3,2)*dSdE(2,1)/dSdE(2,2);
-        double Q44 = dSdE(3,3)-dSdE(3,2)*dSdE(2,3)/dSdE(2,2);
-        
-        sigma(0) = Q11*Eel(0) + Q12*Eel(1) + Q14*Eel(3);
-        sigma(1) = Q21*Eel(0) + Q22*Eel(1) + Q24*Eel(3);
-        sigma(3) = Q41*Eel(0) + Q42*Eel(1) + Q44*Eel(3);
-    }
-    else
-    sigma = dSdE*Eel;
+    sigma = el_pred(dSdE, Eel, ndi);
     
     //Computation of the increments of variables
     vec Dsigma = sigma - sigma_start;
