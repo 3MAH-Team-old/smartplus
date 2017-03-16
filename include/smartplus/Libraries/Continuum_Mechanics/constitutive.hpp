@@ -90,4 +90,10 @@ arma::mat M_isotrans(const double &, const double &, const double &, const doubl
 //The two first arguments are a couple of viscous coefficients (the first is bulk, the second is shear).
 arma::mat H_iso(const double &, const double &);
 
+//Update the elastic prediction, providing the stiffness tensor and the trial elastic strain
+arma::vec el_pred(const arma::vec &, const arma::mat &, const arma::vec &, const int & = 3);
+    
+//Return the elastic prediction stress, providing the stiffness tensor and the trial elastic strain
+arma::vec el_pred(const arma::mat &, const arma::vec &, const int &ndi = 3);
+
 } //namespace smart
