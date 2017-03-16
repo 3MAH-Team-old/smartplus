@@ -160,16 +160,7 @@ void umat_plasticity_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, mat 
     
     ///Elastic prediction - Accounting for the thermal prediction
     vec Eel = Etot + DEtot - alpha*(T+DT-T_init) - EP;
-    if (ndi == 1) {
-        sigma(0) = E*Eel(0);
-    }
-    else if (ndi == 2) {
-        sigma(0) = E/(1. - (nu*nu))*(Eel(0)) + nu*(Eel(1));
-        sigma(1) = E/(1. - (nu*nu))*(Eel(1)) + nu*(Eel(0));
-        sigma(3) = E/(1.+nu)*0.5*Eel(3);
-    }
-    else
-        sigma = (L*Eel);
+    sigma = el_pred(L, Eel, ndi);
     
     //Define the plastic function and the stress
     vec Phi = zeros(1);
@@ -222,17 +213,7 @@ void umat_plasticity_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, mat 
         
         //the stress is now computed using the relationship sigma = L(E-Ep)
         Eel = Etot + DEtot - alpha*(T + DT - T_init) - EP;
-        
-        if(ndi == 1) {						// 1D
-            sigma(0) = E*(Eel(0));
-        }
-        else if(ndi == 2){					// 2D Plane Stress
-            sigma(0) = E/(1. - nu*nu)*(Eel(0)) + nu*(Eel(1));
-            sigma(1) = E/(1. - nu*nu)*(Eel(1)) + nu*(Eel(0));
-            sigma(3) = E/(1. - nu*nu)*(1. - nu)*0.5*Eel(3);
-        }
-        else
-            sigma = (L*Eel); // 2D Generalized Plane Strain (Plane Strain, Axisymetric) && 3D
+        sigma = el_pred(L, Eel, ndi);
     }
     
     //Computation of the increments of variables
