@@ -72,11 +72,13 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
     ///@brief props[20]: n2 : Martensite finish smooth exponent
     ///@brief props[21]: n3 : Austenite start smooth exponent
     ///@brief props[22]: n4 : Austenite finish smooth exponent
-
-    ///@brief props[23]: c_lambda : penalty function exponent start point
-    ///@brief props[24]: p0_lambda : penalty function exponent limit penalty value
-    ///@brief props[25]: n_lambda : penalty function power law exponent
-    ///@brief props[26]: alpha_lambda : penalty function power law parameter
+    ///@brief props[23]: sigmacaliber : Stress at which the slopes CA and CM are identified
+    ///@brief props[24]: prager_b : Tension-compression asymmetry parameter
+    ///@brief props[25]: prager_n : Tension-compression asymmetry exponent
+    ///@brief props[26]: c_lambda : penalty function exponent start point
+    ///@brief props[27]: p0_lambda : penalty function exponent limit penalty value
+    ///@brief props[28]: n_lambda : penalty function power law exponent
+    ///@brief props[29]: alpha_lambda : penalty function power law parameter
     
     ///@brief The elastic-plastic UMAT with isotropic hardening requires 14 statev:
     ///@brief statev[0] : T_init : Initial temperature
@@ -87,11 +89,10 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
     ///@brief statev[5] : Transformation strain 12: ET(0,1) (*2)
     ///@brief statev[6] : Transformation strain 13: ET(0,2) (*2)
     ///@brief statev[7] : Transformation strain 23: ET(1,2) (*2)
-    
     ///@brief statev[8] : xiF : forward MVF
     ///@brief statev[9] : xiR : reverse MVF
-    ///@brief statev[10] : rhoDs0 difference in entropy for the phases (M - A)
-    ///@brief statev[11] : rhoDs0 difference in internal energy for the phases (M - A)
+    ///@brief statev[10] : rhoDs0 : difference in entropy for the phases (M - A)
+    ///@brief statev[11] : rhoDE0 : difference in internal energy for the phases (M - A)
     ///@brief statev[12] : parameter for the stress dependance of transformation limits
     ///@brief statev[13] : a1 : forward hardening parameter
     ///@brief statev[14] : a2 : reverse hardening parameter
@@ -182,11 +183,7 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
     mat M_A = M_iso(K_A, mu_A, "Kmu");
     mat M_M = M_iso(K_M, mu_M, "Kmu");
     mat M = M_iso(K_eff, mu_eff, "Kmu");
-    mat L = L_iso(K_eff, mu_eff, "Kmu");
-    vec el_props = L_iso_props(L);
-    double E = el_props(0);
-    double nu = el_props(1);
-    
+    mat L = L_iso(K_eff, mu_eff, "Kmu");    
     mat DM = M_M - M_A;
     
     //definition of the CTE tensor
@@ -330,16 +327,7 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
 
     ///Elastic prediction - Accounting for the thermal prediction
     vec Eel = Etot + DEtot - alpha*(T+DT-T_init) - ET;
-    if (ndi == 1) {
-        sigma(0) = E*Eel(0);
-    }
-    else if (ndi == 2) {
-        sigma(0) = E/(1. - (nu*nu))*(Eel(0)) + nu*(Eel(1));
-        sigma(1) = E/(1. - (nu*nu))*(Eel(1)) + nu*(Eel(0));
-        sigma(3) = E/(1.+nu)*0.5*Eel(3);
-    }
-    else
-        sigma = (L*Eel);
+    sigma = el_pred(L, Eel, ndi);
     
     //Define the functions for the system to solve
     vec Phi = zeros(2);
@@ -588,17 +576,7 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
         
         //the stress is now computed using the relationship sigma = L(E-Ep)
         Eel = Etot + DEtot - alpha*(T + DT - T_init) - ET;
-        
-        if(ndi == 1) {						// 1D
-            sigma(0) = E*(Eel(0));
-        }
-        else if(ndi == 2){					// 2D Plane Stress
-            sigma(0) = E/(1. - nu*nu)*(Eel(0)) + nu*(Eel(1));
-            sigma(1) = E/(1. - nu*nu)*(Eel(1)) + nu*(Eel(0));
-            sigma(3) = E/(1. - nu*nu)*(1. - nu)*0.5*Eel(3);
-        }
-        else
-            sigma = (L*Eel); // 2D Generalized Plane Strain (Plane Strain, Axisymetric) && 3D
+        sigma = el_pred(L, Eel, ndi);
     }
 
     //Computation of the increments of variables
