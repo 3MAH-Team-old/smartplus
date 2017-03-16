@@ -226,7 +226,7 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, c
             Hp_ts = iota;
         
         //effective stress
-        sigma_eff = L*Eel;
+        sigma_eff = el_pred(L,Eel,ndi);
         sigma_eff_ts = Theta_ts*sigma_eff;
         
         //Determine the Phi functions and their derivatives
