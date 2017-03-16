@@ -548,5 +548,65 @@ mat H_iso(const double &etaB, const double &etaS) {
 		
 	return 3.*etaB*Ivol() + 2.*etaS*Idev();
 }
+
+vec el_pred(const vec &sigma_start, const mat &L, const vec &DE_el, const int &ndi) {
+    
+    vec sigma = zeros(6);
+    if (ndi == 1) {
+        
+        ///WARNING : This needs to be fixed
+        sigma(0) = sigma_start(0) + L(0,0)*DE_el(0);
+    }
+    else if (ndi == 2) {
+        
+        double Q11 = L(0,0)-L(0,2)*L(2,0)/L(2,2);
+        double Q12 = L(0,1)-L(0,2)*L(2,1)/L(2,2);
+        double Q14 = L(0,3)-L(0,2)*L(2,3)/L(2,2);
+        double Q21 = L(1,0)-L(1,2)*L(2,0)/L(2,2);
+        double Q22 = L(1,1)-L(1,2)*L(2,1)/L(2,2);
+        double Q24 = L(1,3)-L(1,2)*L(2,3)/L(2,2);
+        double Q41 = L(3,0)-L(3,2)*L(2,0)/L(2,2);
+        double Q42 = L(3,1)-L(3,2)*L(2,1)/L(2,2);
+        double Q44 = L(3,3)-L(3,2)*L(2,3)/L(2,2);
+        
+        sigma(0) = sigma_start(0) + Q11*DE_el(0) + Q12*DE_el(1) + Q14*DE_el(3);
+        sigma(1) = sigma_start(1) + Q21*DE_el(0) + Q22*DE_el(1) + Q24*DE_el(3);
+        sigma(3) = sigma_start(3) + Q41*DE_el(0) + Q42*DE_el(1) + Q44*DE_el(3);
+    }
+    else
+        sigma = sigma_start + L*DE_el;
+    
+    return sigma;
+}
+    
+//Provides the elastic prediction, providing the stiffness tensor and the trial elastic strain
+vec el_pred(const mat &L, const vec &E_el, const int &ndi) {
+    
+    vec sigma = zeros(6);
+    if (ndi == 1) {
+        ///WARNING : This needs to be fixed        
+        sigma(0) = L(0,0)*(E_el(0));
+    }
+    else if (ndi == 2) {
+        
+        double Q11 = L(0,0)-L(0,2)*L(2,0)/L(2,2);
+        double Q12 = L(0,1)-L(0,2)*L(2,1)/L(2,2);
+        double Q14 = L(0,3)-L(0,2)*L(2,3)/L(2,2);
+        double Q21 = L(1,0)-L(1,2)*L(2,0)/L(2,2);
+        double Q22 = L(1,1)-L(1,2)*L(2,1)/L(2,2);
+        double Q24 = L(1,3)-L(1,2)*L(2,3)/L(2,2);
+        double Q41 = L(3,0)-L(3,2)*L(2,0)/L(2,2);
+        double Q42 = L(3,1)-L(3,2)*L(2,1)/L(2,2);
+        double Q44 = L(3,3)-L(3,2)*L(2,3)/L(2,2);
+        
+        sigma(0) = Q11*E_el(0) + Q12*E_el(1) + Q14*E_el(3);
+        sigma(1) = Q21*E_el(0) + Q22*E_el(1) + Q24*E_el(3);
+        sigma(3) = Q41*E_el(0) + Q42*E_el(1) + Q44*E_el(3);
+    }
+    else
+        sigma = L*E_el;
+    
+    return sigma;
+}
     
 } //namespace smart
