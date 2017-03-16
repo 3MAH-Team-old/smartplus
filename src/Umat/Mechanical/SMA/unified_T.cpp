@@ -70,11 +70,9 @@ void umat_sma_unified_T(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, 
     ///@brief props[18]: n2 : Martensite finish smooth exponent
     ///@brief props[19]: n3 : Austenite start smooth exponent
     ///@brief props[20]: n4 : Austenite finish smooth exponent
-
     ///@brief props[21]: sigmacaliber : Stress at which the slopes CA and CM are identified
     ///@brief props[22]: prager_b : Tension-compression asymmetry parameter
     ///@brief props[23]: prager_n : Tension-compression asymmetry exponent
-    
     ///@brief props[24]: c_lambda : penalty function exponent start point
     ///@brief props[25]: p0_lambda : penalty function exponent limit penalty value
     ///@brief props[26]: n_lambda : penalty function power law exponent
@@ -89,7 +87,6 @@ void umat_sma_unified_T(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, 
     ///@brief statev[5] : Transformation strain 12: ET(0,1) (*2)
     ///@brief statev[6] : Transformation strain 13: ET(0,2) (*2)
     ///@brief statev[7] : Transformation strain 23: ET(1,2) (*2)
-    
     ///@brief statev[8] : xiF : forward MVF
     ///@brief statev[9] : xiR : reverse MVF
     ///@brief statev[10] : rhoDs0 : difference in entropy for the phases (M - A)
@@ -106,8 +103,8 @@ void umat_sma_unified_T(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, 
     double E_M = props(2);
     double nu_A = props(3);
     double nu_M= props(4);
-    double alphaA_iso = props(8);
-    double alphaM_iso = props(9);
+    double alphaA_iso = props(5);
+    double alphaM_iso = props(6);
     //parameters for Hcur
     double Hmin = props(7);
     double Hmax = props(8);
@@ -181,11 +178,7 @@ void umat_sma_unified_T(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, 
     mat M_A = M_iso(K_A, mu_A, "Kmu");
     mat M_M = M_iso(K_M, mu_M, "Kmu");
     mat M = M_iso(K_eff, mu_eff, "Kmu");
-    mat L = L_iso(K_eff, mu_eff, "Kmu");
-    vec el_props = L_iso_props(L);
-    double E = el_props(0);
-    double nu = el_props(1);
-    
+    mat L = L_iso(K_eff, mu_eff, "Kmu");    
     mat DM = M_M - M_A;
     
     //definition of the CTE tensor
@@ -304,10 +297,10 @@ void umat_sma_unified_T(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, 
     
     //Define the value of DM_sig
     vec DM_sig = (DM*sigma_start);
-    //Define the value of DM_sig
+    //Define the value of Dalpha_sig
     vec Dalpha_sig = (Dalpha%sigma_start);
     
-    //Set the thermo forces
+    //Set the thermo forces    
     double A_xiF = rhoDs0*(T+DT) - rhoDE0 + 0.5*sum(sigma%DM_sig) + sum(sigma%Dalpha)*(T+DT-T_init) - HfF;
     double A_xiF_start = rhoDs0*(T) - rhoDE0 + 0.5*sum(sigma_start%DM_sig) + sum(sigma_start%Dalpha)*(T-T_init) - HfF;
     double A_xiR = -1.*rhoDs0*(T+DT) + rhoDE0 - 0.5*sum(sigma%DM_sig) - sum(sigma%Dalpha)*(T+DT-T_init) + HfR;
@@ -326,16 +319,7 @@ void umat_sma_unified_T(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, 
 
     ///Elastic prediction - Accounting for the thermal prediction
     vec Eel = Etot + DEtot - alpha*(T+DT-T_init) - ET;
-    if (ndi == 1) {
-        sigma(0) = E*Eel(0);
-    }
-    else if (ndi == 2) {
-        sigma(0) = E/(1. - (nu*nu))*(Eel(0)) + nu*(Eel(1));
-        sigma(1) = E/(1. - (nu*nu))*(Eel(1)) + nu*(Eel(0));
-        sigma(3) = E/(1.+nu)*0.5*Eel(3);
-    }
-    else
-        sigma = (L*Eel);
+    sigma = el_pred(L, Eel, ndi);
     
     //Define the functions for the system to solve
     vec Phi = zeros(2);
@@ -555,7 +539,7 @@ void umat_sma_unified_T(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, 
         dPhiRdxiF = -1.*dPhihatRdxiF + dA_xiRdxiF + dlambda0dxiF - dYtRdxiF;
         dPhiRdxiR = -1.*dPhihatRdxiR + dA_xiRdxiR + dlambda0dxiR - dYtRdxiR;
         dPhiRdETF = -1.*dPhihatRdETF - dYtRdETF;
-        dPhiRdETR = -1.*dPhihatRdETR - dYtRdETF;
+        dPhiRdETR = -1.*dPhihatRdETR - dYtRdETR;
     
         K(0,0) = dPhiFdxiF;
         K(0,1) = dPhiFdxiR;
@@ -583,17 +567,7 @@ void umat_sma_unified_T(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, 
         
         //the stress is now computed using the relationship sigma = L(E-Ep)
         Eel = Etot + DEtot - alpha*(T + DT - T_init) - ET;
-        
-        if(ndi == 1) {						// 1D
-            sigma(0) = E*(Eel(0));
-        }
-        else if(ndi == 2){					// 2D Plane Stress
-            sigma(0) = E/(1. - nu*nu)*(Eel(0)) + nu*(Eel(1));
-            sigma(1) = E/(1. - nu*nu)*(Eel(1)) + nu*(Eel(0));
-            sigma(3) = E/(1. - nu*nu)*(1. - nu)*0.5*Eel(3);
-        }
-        else
-            sigma = (L*Eel); // 2D Generalized Plane Strain (Plane Strain, Axisymetric) && 3D
+        sigma = el_pred(L, Eel, ndi);
     }
 
     //Computation of the increments of variables
