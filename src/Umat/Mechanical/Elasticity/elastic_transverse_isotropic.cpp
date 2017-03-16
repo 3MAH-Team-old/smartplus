@@ -73,7 +73,6 @@ void umat_elasticity_trans_iso(const vec &Etot, const vec &DEtot, vec &sigma, ma
 	if(start) { //Initialization
 		sigma = zeros(6);
 	}	
-	
 	vec sigma_start = sigma;
 
 	//definition of the CTE tensor
@@ -85,28 +84,7 @@ void umat_elasticity_trans_iso(const vec &Etot, const vec &DEtot, vec &sigma, ma
 
 	//Compute the elastic strain and the related stress	
 	vec DEel = DEtot - alpha*DT;
-
-	if (ndi == 1) {
-        sigma(0) = sigma_start(0) + Lt(0,0)*(DEel(0));
-    }
-	else if (ndi == 2) {
-		
-		double Q11 = Lt(0,0)-Lt(0,2)*Lt(2,0)/Lt(2,2);
-		double Q12 = Lt(0,1)-Lt(0,2)*Lt(2,1)/Lt(2,2);
-		double Q14 = Lt(0,3)-Lt(0,2)*Lt(2,3)/Lt(2,2);
-		double Q21 = Lt(1,0)-Lt(1,2)*Lt(2,0)/Lt(2,2);
-		double Q22 = Lt(1,1)-Lt(1,2)*Lt(2,1)/Lt(2,2);
-		double Q24 = Lt(1,3)-Lt(1,2)*Lt(2,3)/Lt(2,2);	
-		double Q41 = Lt(3,0)-Lt(3,2)*Lt(2,0)/Lt(2,2);
-		double Q42 = Lt(3,1)-Lt(3,2)*Lt(2,1)/Lt(2,2);
-		double Q44 = Lt(3,3)-Lt(3,2)*Lt(2,3)/Lt(2,2);		
-		
-        sigma(0) = sigma_start(0) + Q11*DEel(0) + Q12*DEel(1) + Q14*DEel(3);
-        sigma(1) = sigma_start(1) + Q21*DEel(0) + Q22*DEel(1) + Q24*DEel(3);
-        sigma(3) = sigma_start(3) + Q41*DEel(0) + Q42*DEel(1) + Q44*DEel(3);
-    }
-    else
-        sigma = sigma_start + (Lt*DEel);
+    sigma = el_pred(sigma_start, Lt, DEel, ndi);
     
     //Computation of the mechanical and thermal work quantities
     Wm += 0.5*sum((sigma_start+sigma)%DEtot);
