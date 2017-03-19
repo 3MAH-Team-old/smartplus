@@ -42,7 +42,17 @@ The Constitutive Library
 .. function:: mat Idev()
 
     Provides the deviatoric of the identity tensor :math:`I_{real}` written in the SMART+ formalism. So :
-
+    
+     .. math:: 
+     
+     	I_{dev} = I_{real} - I_{vol} = \left( \begin{array}{ccc}
+        2/3 & -1/3 & -1/3 & 0 & 0 & 0 \\
+        -1/3 & 2/3 & -1/3 & 0 & 0 & 0 \\
+        -1/3 & -1/3 & 2/3 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 0.5 & 0 & 0 \\
+        0 & 0 & 0 & 0 & 0.5 & 0 \\
+        0 & 0 & 0 & 0 & 0 & 0.5 \end{array} \right)
+        
 .. function:: mat Ireal2()
 
     Provides the fourth order identity tensor :math:`\widehat{I}` written in the form. So :
@@ -245,3 +255,24 @@ The Constitutive Library
         mat Misotrans = M_isotrans(EL, ET, nuTL, nuTT, GLT, axis);
 
 .. function:: mat H_iso(const double &etaB, const double &etaS)
+
+    Provides the viscoelastic tensor H, providing Bulk viscosity etaB and shear viscosity etaS. 
+    It actually returns :
+    
+    .. math::
+
+        H_iso = \left( \begin{array}{ccc}
+        \eta_B & \eta_B & \eta_B & 0 & 0 & 0 \\
+        \eta_B & \eta_B & \eta_B & 0 & 0 & 0 \\
+        \eta_B & \eta_B & \eta_B & 0 & 0 & 0 \\
+        0 & 0 & 0 & 2 & 0 & 0 \\
+        0 & 0 & 0 & 0 & 2 & 0 \\
+        0 & 0 & 0 & 0 & 0 & 2 \end{array} \right)
+    
+    
+    .. code-block:: cpp
+
+        double etaB = (double)rand();
+        double etaS = (double)rand();
+        mat Hiso = H_iso(etaB, etaS);
+    
