@@ -23,7 +23,7 @@ The Constitutive Library
 
 .. function:: mat Ivol()
 
-    Provides the volumic of the identity tensor :math:`I_{real}` written in the SMART+ formalism. So :
+    Provides the volumic of the identity tensor :math:`I_{vol}` written in the SMART+ formalism. So :
 
     .. math::
 
@@ -41,7 +41,7 @@ The Constitutive Library
 
 .. function:: mat Idev()
 
-    Provides the deviatoric of the identity tensor :math:`I_{real}` written in the SMART+ formalism. So :
+    Provides the deviatoric of the identity tensor :math:`I_{dev}` written in the SMART+ formalism. So :
     
      .. math:: 
      
@@ -275,4 +275,32 @@ The Constitutive Library
         double etaB = (double)rand();
         double etaS = (double)rand();
         mat Hiso = H_iso(etaB, etaS);
-    
+
+.. function:: void el_pred
+
+    Provides the stress tensor from an elastic prediction
+    There are two possible ways:
+
+    1. From the elastic stiffness tensor and the trial elastic strain:
+    parameters : L : Stiffness matrix; Eel ; elastic strain vector, ndi (optional, default = 3): number of dimensions
+
+    .. code-block:: cpp
+        
+        mat L = L_iso(70000, 0.3,"Enu");
+        vec Eel;
+        Eel.randu(6);
+        int ndi = 3;
+        vec sigma =  el_pred(L, Eel, ndi);
+
+    2. From the previous stress increment, providing the elastic stiffness tensor and the trial elastic strain increment:
+    parameters : sigma_start: The previous stress, L : Stiffness matrix; Eel : elastic strain vector, ndi (optional, default = 3): number of dimensions
+
+    .. code-block:: cpp
+        
+        vec sigma_start = zeros(6);
+        sigma_start.randu(6);
+        mat L = L_iso(70000, 0.3,"Enu");
+        vec Eel;
+        Eel.randu(6);
+        int ndi = 3;
+        vec sigma =  el_pred(sigma_start,L, Eel, ndi);
