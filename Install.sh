@@ -53,7 +53,7 @@ fi
 
 #Ask for installation of the SMART+ library
 while true; do
-	read -p "Do you want to install SMART+ library (necassary to use libsmartplus.so and simmit) ? " yn
+	read -p "Do you want to install SMART+ library (necessary to use libsmartplus.so and simmit) ? " yn
 	case $yn in
 		[YyOo]* ) Install_check='OK'; break;;
 		[Nn]* ) Install_check='NO'; break;;
@@ -72,6 +72,7 @@ if [ "${Install_check}" = "OK" ]
 then
 	make install
 fi
+echo ""
 make test
 
 #Create the list of the file to copy after compilation
