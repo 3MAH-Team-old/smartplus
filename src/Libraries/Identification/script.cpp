@@ -45,9 +45,8 @@
 #include <smartplus/Libraries/Material/read.hpp>
 #include <smartplus/Libraries/Material/ODF2Nphases.hpp>
 
-#include <smartplus_priv/Libraries/Continuum_Mechanics/p_cumulative_priv.hpp>
-#include <smartplus_priv/Libraries/Continuum_Mechanics/func_N.hpp>
-#include <smartplus_priv/Libraries/Continuum_Mechanics/read.hpp>
+#include <smartplus/Libraries/Continuum_Mechanics/func_N.hpp>
+#include <smartplus/Libraries/Continuum_Mechanics/read.hpp>
 
 using namespace std;
 using namespace arma;
