@@ -83,6 +83,27 @@ void update_sections(section_characteristics &section_rve, const int &nsections,
     section_rve.update(umat_name_macro, id, rve);
 }
 
+void write_section(section_characteristics &section_rve, const string &path_data, const string &outputfile) {
+    
+    std::string filename = path_data + "/" + outputfile;
+    std::ofstream param_mats;
+    
+    param_mats.open(filename, ios::out);
+    param_mats << "** ==================\n";
+    param_mats << "** MATERIALS\n";
+    param_mats << "** ==================\n";
+    param_mats << "**" << endl;
+    param_mats.close();
+    
+    section_rve.abamat.write(path_data,outputfile,true);
+    
+    param_mats.open(filename, ios::app);
+    
+    param_mats << "*Solid Section, ElSet=" << section_rve.elset_name << ", Material=" << section_rve.abamat.umat_name << "-" << section_rve.abamat.id << endl;
+    param_mats.close();
+}
+    
+    
 void write_sections(section_characteristics &section_rve, const string &path_data, const string &outputfile) {
     
     std::string filename = path_data + "/" + outputfile;
