@@ -116,21 +116,11 @@ aba_material::aba_material(const int &mnumber, const int &mid, const string &mum
 */
 
 //------------------------------------------------------
-aba_material::aba_material(const aba_material& sv)
+aba_material::aba_material(const aba_material& sv) : material_characteristics(sv)
 //------------------------------------------------------
 {
-	number = sv.number;
-	id = sv.id;
-	umat_name = sv.umat_name;
-    save = sv.save;
-
-    psi_mat = sv.psi_mat;
-	theta_mat = sv.theta_mat;
-	phi_mat = sv.phi_mat;
-    
-	nprops = sv.nprops;
+    id = sv.id;
 	nstatev = sv.nstatev;
-	props = sv.props;
 }
 
 /*!
