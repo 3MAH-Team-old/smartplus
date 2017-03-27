@@ -45,6 +45,10 @@
 #include <smartplus/Libraries/Material/read.hpp>
 #include <smartplus/Libraries/Material/ODF2Nphases.hpp>
 
+#include <smartplus_priv/Libraries/Continuum_Mechanics/p_cumulative_priv.hpp>
+#include <smartplus_priv/Libraries/Continuum_Mechanics/func_N.hpp>
+#include <smartplus_priv/Libraries/Continuum_Mechanics/read.hpp>
+
 using namespace std;
 using namespace arma;
 using namespace arma;
@@ -305,6 +309,49 @@ void launch_odf(const individual &ind, vector<parameters> &params, const string 
     boost::filesystem::copy_file(outputfile,simulfile,boost::filesystem::copy_option::overwrite_if_exists);
 }
     
+void launch_func_N(const individual &ind, const int &nfiles, vector<parameters> &params, vector<constants> &consts, const string &path_results, const string &name, const string &path_data, const string &path_keys, const string &materialfile)
+{
+
+    string outputfile;
+    string simulfile;
+    string pathfile;
+    
+    string name_ext = name.substr(name.length()-4,name.length());
+    string name_root = name.substr(0,name.length()-4); //to remove the extension
+    
+    for (int i = 0; i<nfiles; i++) {
+        ///Creating the right path & output filenames
+        
+        outputfile = name_root + "_" + to_string(ind.id) + "_" + to_string(i+1) + name_ext;
+        pathfile = "path_id_" + to_string(i+1) + ".txt";
+        
+        //Replace the constants
+        for (unsigned int k=0; k<consts.size(); k++) {
+            consts[k].value = consts[k].input_values(i);
+        }
+        //Replace the parameters
+        for (unsigned int k=0; k<params.size(); k++) {
+            params[k].value = ind.p(k);
+        }
+        
+        copy_constants(consts, path_keys, path_data);
+        copy_parameters(params, path_keys, path_data);
+        
+        apply_constants(consts, path_data);
+        apply_parameters(params, path_data);
+        
+        vec props;
+        vec variables;
+        string N_file;
+        read_func_N(props, variables, N_file, path_data, materialfile);
+        func_N(props, variables, pathfile, outputfile, path_data, path_results);
+        
+        //Get the simulation files according to the proper name
+        //simulfile = path_results + "/" + name_root + "_" + to_string(ind.id)  + "_" + to_string(i+1) + name_ext;
+        //boost::filesystem::copy_file(outputfile,simulfile,boost::filesystem::copy_option::overwrite_if_exists);
+    }
+}
+    
 void run_simulation(const string &simul_type, const individual &ind, const int &nfiles, vector<parameters> &params, vector<constants> &consts, vector<opti_data> &data_num, const string &folder, const string &name, const string &path_data, const string &path_keys, const string &inputdatafile) {
     
     //In the simulation run, make sure that we remove all the temporary files
@@ -314,7 +361,7 @@ void run_simulation(const string &simul_type, const individual &ind, const int &
     }
     
     std::map<std::string, int> list_simul;
-    list_simul = {{"SOLVE",1},{"ODF",2}};
+    list_simul = {{"SOLVE",1},{"ODF",2},{"FUNCN",3}};
     
     switch (list_simul[simul_type]) {
             
@@ -326,6 +373,11 @@ void run_simulation(const string &simul_type, const individual &ind, const int &
             launch_odf(ind, params, folder, name, path_data, path_keys, inputdatafile);
             break;
         }
+        case 3: {
+            launch_func_N(ind, nfiles, params, consts, folder, name, path_data, path_keys, inputdatafile);
+            break;
+        }
+            
             
         default: {
             cout << "\n\nError in run_simulation : The specified solver (" << simul_type << ") does not exist.\n";
