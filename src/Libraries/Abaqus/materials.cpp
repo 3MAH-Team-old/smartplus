@@ -112,7 +112,7 @@ aba_material::aba_material(const int &mnumber, const int &mid, const string &mum
 
 /*!
   \brief Copy constructor
-  \param s phase_characteristics object to duplicate
+  \param sv aba_material object to duplicate
 */
 
 //------------------------------------------------------
@@ -136,7 +136,7 @@ aba_material::aba_material(const aba_material& sv)
 /*!
   \brief Destructor
 
-  Deletes statev_variables, the vectors and matrix, and table statev if nstatev is not null.
+  Deletes aba_material, the vectors and matrix.
 */
 
 //-------------------------------------
