@@ -305,8 +305,8 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
     
     //Define the value of DM_sig
     vec DM_sig = (DM*sigma_start);
-    //Define the value of DM_sig
-    vec Dalpha_sig = (Dalpha%sigma_start);
+    //Define the value of Dalpha_T
+    vec Dalpha_T = Dalpha*(T+DT);
     
     //Set the thermo forces
     double A_xiF = rhoDs0*(T+DT) - rhoDE0 + 0.5*sum(sigma%DM_sig) + sum(sigma%Dalpha)*(T+DT-T_init) - HfF;
@@ -397,32 +397,19 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
     //Loop
     for (compteur = 0; ((compteur < maxiter_umat) && (error > precision_umat)); compteur++) {
 
-        xiF = s_j(0);
-        xiR = s_j(1);
-        xi = xiF - xiR;
-        
-        if((Mises_strain(ET) > precision_umat)&&(xi > precision_umat))
-        {
-            ETMean = dev(ET) / (xi);
-        }
-        else {
-            ETMean = 0.*Ith();
-        }
-        
         K_eff = (K_A*K_M) / (xi*K_A + (1. - xi)*K_M);
         mu_eff = (mu_A*mu_M) / (xi*mu_A + (1. - xi)*mu_M);
         L = L_iso(K_eff, mu_eff, "Kmu");
         M = M_iso(K_eff, mu_eff, "Kmu");
-        alpha = (alphaM_iso*xi + alphaA_iso*(1.-xi))*Ith();
         
         DM_sig = DM*sigma;
-        Dalpha_sig = Dalpha%sigma;
+        Dalpha_T = Dalpha*(T+DT);
         
         lambdaTF = Hcur * dPrager_stress(sigma, prager_b, prager_n);
         lambdaTR = -1. * ETMean;
         
-        kappa_j[0] = L*(lambdaTF + DM_sig + Dalpha_sig);
-        kappa_j[1] = L*(lambdaTR - DM_sig - Dalpha_sig); //derivative w/ xiR is minus derivative w/ xi
+        kappa_j[0] = L*(lambdaTF + DM_sig + Dalpha_T);
+        kappa_j[1] = L*(lambdaTR - DM_sig - Dalpha_T); //derivative w/ xiR is minus derivative w/ xi
         
         //Hardening function definition (Smooth hardening functions)
         if ((xi > 0.) && ((1. - xi) > 0.)) {
@@ -501,7 +488,7 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
         }
         
         dHcurdsigma = k1*(Hmax - Hmin)*exp(-1.*k1*sigmastar)*eta_stress(sigma);
-
+        
         //Related to forward transformation
         dPhihatFdsigma = dHcurdsigma * Prager_stress(sigma, prager_b, prager_n) + Hcur * dPrager_stress(sigma, prager_b, prager_n);
         dPhihatFdxiF = 0.;
@@ -525,12 +512,12 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
         
         //Relative to reverse transformation
         dPhihatRdsigma = ETMean;
-        dPhihatRdxiF = (-1./xi)*sum(sigma%ETMean); //Need to add the derivative with respect to
+        dPhihatRdxiF = (-1./xi)*sum(sigma%ETMean);
         dPhihatRdxiR = (1./xi)*sum(sigma%ETMean);
         dPhihatRdETF = sigma/xi;
         dPhihatRdETR = sigma/xi;
         
-        dA_xiRdsigma = DM_sig + Dalpha*(T+DT);
+        dA_xiRdsigma = -1.*DM_sig -1.*Dalpha*(T+DT-T_init);
         dA_xiRdxiF = dHfR;
         dA_xiRdxiR = -dHfR;
         
@@ -538,7 +525,7 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
         dlambda0dxiF = -1.*dlagrange_pow_0(xi, c_lambda, p0_lambda, n_lambda, alpha_lambda);
         dlambda0dxiR = dlagrange_pow_0(xi, c_lambda, p0_lambda, n_lambda, alpha_lambda);
         
-        dYtRdsigma = zeros(6);
+        dYtRdsigma = 1.*D*ETMean;
         dYtRdxiF = (-D/xi)*sum(sigma%ETMean);
         dYtRdxiR = (D/xi)*sum(sigma%ETMean);
         dYtRdETF = D*sigma/xi;
@@ -548,8 +535,8 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
         dPhiRdxiF = -1.*dPhihatRdxiF + dA_xiRdxiF + dlambda0dxiF - dYtRdxiF;
         dPhiRdxiR = -1.*dPhihatRdxiR + dA_xiRdxiR + dlambda0dxiR - dYtRdxiR;
         dPhiRdETF = -1.*dPhihatRdETF - dYtRdETF;
-        dPhiRdETR = -1.*dPhihatRdETF - dYtRdETF;
-    
+        dPhiRdETR = -1.*dPhihatRdETR - dYtRdETR;
+        
         K(0,0) = dPhiFdxiF;
         K(0,1) = dPhiFdxiR;
         K(1,0) = dPhiRdxiF + sum(dPhiRdETF%lambdaTF);
@@ -559,20 +546,31 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
         B(0,1) = -1.*sum(dPhiFdsigma%kappa_j[1]) + K(0,1);
         B(1,0) = -1.*sum(dPhiRdsigma%kappa_j[0]) + K(1,0);
         B(1,1) = -1.*sum(dPhiRdsigma%kappa_j[1]) + K(1,1);
-
+        
         Y_crit(0) = YtF;
         Y_crit(1) = YtR;
         
         Fischer_Burmeister_m(Phi, Y_crit, B, Ds_j, ds_j, error);
-
+        
         s_j(0) += ds_j(0);
         s_j(1) += ds_j(1);
-
+        
         ET = ET + ds_j(0)*lambdaTF + ds_j(1)*lambdaTR;
+        
+        xiF = s_j(0);
+        xiR = s_j(1);
         xi = xi + ds_j(0) - 1.*ds_j(1);
         
         DETF += ds_j(0)*lambdaTF;
         DETR += -1.*ds_j(1)*lambdaTR;
+        
+        if((Mises_strain(ET) > precision_umat)&&(xi > precision_umat))
+        {
+            ETMean = dev(ET) / (xi);
+        }
+        else {
+            ETMean = 0.*Ith();
+        }
         
         //the stress is now computed using the relationship sigma = L(E-Ep)
         Eel = Etot + DEtot - alpha*(T + DT - T_init) - ET;
@@ -623,11 +621,12 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
     }
     
     std::vector<vec> P_epsilon(2);
-    P_epsilon[0] = invBhat(0, 0)*(L*dPhiFdsigma) + invBhat(0, 1)*(L*dPhiRdsigma);
-    P_epsilon[1] = invBhat(1, 0)*(L*dPhiFdsigma) + invBhat(1, 1)*(L*dPhiRdsigma);
+    P_epsilon[0] = invBhat(0, 0)*(L*dPhiFdsigma) + invBhat(1, 0)*(L*dPhiRdsigma);
+    P_epsilon[1] = invBhat(0, 1)*(L*dPhiFdsigma) + invBhat(1, 1)*(L*dPhiRdsigma);
+    
     std::vector<double> P_theta(2);
-    P_theta[0] = invBhat(0, 0)*(dPhiFdtheta - sum(dPhiFdsigma%(L*alpha))) + invBhat(0, 1)*(dPhiRdtheta - sum(dPhiRdsigma%(L*alpha)));
-    P_theta[1] = invBhat(1, 0)*(dPhiFdtheta - sum(dPhiFdsigma%(L*alpha))) + invBhat(1, 1)*(dPhiRdtheta - sum(dPhiRdsigma%(L*alpha)));
+    P_theta[0] = invBhat(0, 0)*(dPhiFdtheta - sum(dPhiFdsigma%(L*alpha))) + invBhat(1, 0)*(dPhiRdtheta - sum(dPhiRdsigma%(L*alpha)));
+    P_theta[1] = invBhat(0, 1)*(dPhiFdtheta - sum(dPhiFdsigma%(L*alpha))) + invBhat(1, 1)*(dPhiRdtheta - sum(dPhiRdsigma%(L*alpha)));
 
     dSdE = L - (kappa_j[0]*P_epsilon[0].t() + kappa_j[1]*P_epsilon[1].t());
     dSdT = -1.*L*alpha - (kappa_j[0]*P_theta[0] + kappa_j[1]*P_theta[1]);
