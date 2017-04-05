@@ -70,15 +70,17 @@ cd ${current_dir}/build
 cmake ..
 echo ""
 make -j${nproc_used}
-echo ""
-if [ "${Install_check}" = "OK" ]
-then
-	make install
-fi
 Install_OK=$?
-
+echo ""
 if [ $Install_OK -eq 0 ]
 then
+
+	if [ "${Install_check}" = "OK" ]
+	then
+		make install
+		
+	fi
+
 	make test
 	Test_OK=$?
 
