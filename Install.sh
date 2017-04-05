@@ -80,9 +80,7 @@ Install_OK=$?
 if [ $Install_OK -eq 0 ]
 then
 	make test
-
 	Test_OK=$?
-
 
 	#Create the list of the file to copy after compilation
 	executableToCopy="solver identification L_eff Elastic_props ODF"
@@ -129,12 +127,12 @@ then
 		echo "SMART+ compilation done.\n"
 	else
 		echo "\n---------------------------"
-		echo "${red} SMART+ tests failed.\n"
+		echo "${red} SMART+ tests failed.\n${reset}"
 	fi
 
 else
 
 	echo "\n---------------------------"
-	echo "${red} SMART+ compilation failed"
+	echo "${red} SMART+ compilation failed.\n${reset}"
 
 fi
