@@ -3,6 +3,9 @@ echo "\n----------------------------"
 echo "Start of SMART+ compilation."
 echo "---------------------------\n"
 
+blue=`tput setaf 4`
+red=`tput setaf 1`
+reset=`tput sgr0`
 
 #Find the current directory
 current_dir=$(pwd)
@@ -53,7 +56,7 @@ fi
 
 #Ask for installation of the SMART+ library
 while true; do
-	read -p "Do you want to install SMART+ library (necessary to use libsmartplus.so and simmit) ? " yn
+	read -p "Do you want to install SMART+ library (necassary to use libsmartplus.so and simmit) ? " yn
 	case $yn in
 		[YyOo]* ) Install_check='OK'; break;;
 		[Nn]* ) Install_check='NO'; break;;
@@ -72,53 +75,66 @@ if [ "${Install_check}" = "OK" ]
 then
 	make install
 fi
-echo ""
-make test
+Install_OK=$?
 
-#Create the list of the file to copy after compilation
-executableToCopy="solver identification L_eff Elastic_props ODF"
-objectToCopy="umat_single umat_singleT"
-
-# Copy all important files (+ final message)
-if [ $? -eq 0 ]
+if [ $Install_OK -eq 0 ]
 then
-	echo "\n---------------------------"
-	
-	#Treatement of object files
-	for object in ${objectToCopy}
-	do
-		#Copy of the "object".o from build/CMakeFiles/umat.dir/software to build/bin
-		if [ -f ${current_dir}/build/CMakeFiles/umat.dir/software/${object}.cpp.o ]
-		then 
-			cp ${current_dir}/build/CMakeFiles/umat.dir/software/${object}.cpp.o ${current_dir}/build/bin/${object}.o
-			echo "${blue}${object}.o${reset} copied in ${blue}${current_dir}/build/bin${reset}"
-		fi
-	done
-	
-	#Treatement of executable files
-	for file in ${executableToCopy}
-	do
-		#if debug exists, copy of the file from build/bin/Debug to build/bin
-		if [ -f ${current_dir}/build/bin/Debug/${file} ]
+	make test
+
+	Test_OK=$?
+
+
+	#Create the list of the file to copy after compilation
+	executableToCopy="solver identification L_eff Elastic_props ODF"
+	objectToCopy="umat_single umat_singleT"
+
+	# Copy all important files (+ final message)
+	if [ $Test_OK -eq 0 ]
+	then
+		echo "\n---------------------------"
+		
+		#Treatement of object files
+		for object in ${objectToCopy}
+		do
+			#Copy of the "object".o from build/CMakeFiles/umat.dir/software to build/bin
+			if [ -f ${current_dir}/build/CMakeFiles/umat.dir/software/${object}.cpp.o ]
+			then 
+				cp ${current_dir}/build/CMakeFiles/umat.dir/software/${object}.cpp.o ${current_dir}/build/bin/${object}.o
+				echo "${blue}${object}.o${reset} copied in ${blue}${current_dir}/build/bin${reset}"
+			fi
+		done
+		
+		#Treatement of executable files
+		for file in ${executableToCopy}
+		do
+			#if debug exists, copy of the file from build/bin/Debug to build/bin
+			if [ -f ${current_dir}/build/bin/Debug/${file} ]
+			then
+				cp ${current_dir}/build/bin/Debug/${file} ${current_dir}/build/bin
+			fi
+			
+			#Copy the file from build/bin to exec
+			cp ${current_dir}/build/bin/${file} ${current_dir}/exec
+			echo "${blue}${file}${reset} copied in ${blue}${current_dir}/exec${reset}"
+		done
+		
+		if [ "${Install_check}" = "OK" ]
 		then
-			cp ${current_dir}/build/bin/Debug/${file} ${current_dir}/build/bin
+			echo "${blue}libsmartplus.so${reset} installed in ${blue}${current_dir}/lib${reset}"
+		else
+			echo "${blue}libsmartplus.so${reset} not installed."
 		fi
 		
-		#Copy the file from build/bin to exec
-		cp ${current_dir}/build/bin/${file} ${current_dir}/exec
-		echo "${blue}${file}${reset} copied in ${blue}${current_dir}/exec${reset}"
-	done
-	
-	if [ "${Install_check}" = "OK" ]
-	then
-		echo "${blue}libsmartplus.so${reset} installed in ${blue}${current_dir}/lib${reset}"
+		echo "---------------------------"
+		echo "SMART+ compilation done.\n"
 	else
-		echo "${blue}libsmartplus.so${reset} not installed."
+		echo "\n---------------------------"
+		echo "${red} SMART+ tests failed.\n"
 	fi
-	
-	echo "---------------------------"
-	echo "SMART+ compilation done.\n"
+
 else
+
 	echo "\n---------------------------"
-	echo "SMART+ compilation failed.\n"
+	echo "${red} SMART+ compilation failed"
+
 fi
