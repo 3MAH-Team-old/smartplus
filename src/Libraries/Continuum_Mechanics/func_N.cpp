@@ -18,8 +18,7 @@
 #include <assert.h>
 #include <math.h>
 #include <armadillo>
-#include <smartplus/Libraries/Maths/stats.hpp>
-#include <smartplus/Libraries/Continuum_Mechanics/contimech.hpp>
+#include <smartplus/Libraries/Continuum_Mechanics/func_N.hpp>
 #include <smartplus/parameter.hpp>
 
 //Add the header of the cumulative function you want
