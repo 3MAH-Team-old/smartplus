@@ -354,7 +354,6 @@ void read_path(std::vector<block> &blocks, double &T, const string &path_data, c
                         shared_ptr<step_meca> sptr_meca = std::dynamic_pointer_cast<step_meca>(blocks[i].steps[j]);                        
                         
                         path >> buffer >> pathfile_inc >> buffer >> sptr_meca->Dn_init >> buffer >> sptr_meca->Dn_mini >> buffer;
-                        
                         sptr_meca->file = path_data + "/" + pathfile_inc;
                         
                         for(int k = 0 ; k < 6 ; k++) {
@@ -432,6 +431,7 @@ void read_path(std::vector<block> &blocks, double &T, const string &path_data, c
                         shared_ptr<step_thermomeca> sptr_thermomeca = std::dynamic_pointer_cast<step_thermomeca>(blocks[i].steps[j]);
                         
                         path >> buffer >> sptr_thermomeca->file >> buffer >> sptr_thermomeca->Dn_init >> buffer >> sptr_thermomeca->Dn_mini >> buffer;
+                        sptr_thermomeca->file = path_data + "/" + pathfile_inc;
                         
                         for(int k = 0 ; k < 6 ; k++) {
                             path >> bufferchar;
