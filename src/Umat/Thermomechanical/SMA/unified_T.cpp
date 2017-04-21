@@ -155,7 +155,7 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
     vec DETF = zeros(6);
     vec DETR = zeros(6);
     vec ETMean = zeros(6);
-
+    
     double xiF = statev(8);
     double xiR = statev(9);
     
@@ -183,13 +183,13 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
     mat M_A = M_iso(K_A, mu_A, "Kmu");
     mat M_M = M_iso(K_M, mu_M, "Kmu");
     mat M = M_iso(K_eff, mu_eff, "Kmu");
-    mat L = L_iso(K_eff, mu_eff, "Kmu");    
+    mat L = L_iso(K_eff, mu_eff, "Kmu");
     mat DM = M_M - M_A;
     
     //definition of the CTE tensor
     vec alpha = (alphaM_iso*xi + alphaA_iso*(1.-xi))*Ith();
     vec Dalpha = (alphaM_iso - alphaA_iso)*Ith();
-
+    
     ///@brief Initialization
     if(start) {
         
@@ -199,6 +199,7 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
         ET = zeros(6);
         xiF = limit;
         xiR = 0.;
+        xi = xiF;
         
         Wm = 0.;
         Wm_r = 0.;
@@ -246,7 +247,7 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
     
     //Rotation of internal variables (tensors)
     rotate_strain(ET, DR);
-
+    
     //Variables values at the start of the increment
     vec	sigma_start = sigma;
     vec ET_start = ET;
@@ -258,8 +259,7 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
         sigmastar = Mises_stress(sigma) - sigmacrit;
     else
         sigmastar = 0.;
-
-    //Additional parameters and variables
+    
     double Hcur = Hmin + (Hmax - Hmin)*(1. - exp(-1.*k1*sigmastar));
     
     //definition of Lambdas associated to transformation
@@ -280,7 +280,7 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
     
     double HfF = 0.;
     double HfR = 0.;
-
+    
     //Hardening function definition (Smooth hardening functions)
     if ((xi > 0.)&&((1. - xi) > 0.)) {
         HfF = 0.5*a1*(1. + pow(xi,n1) - pow(1. - xi,n2)) + a3;
@@ -324,7 +324,7 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
     s_j(1) = xiR;
     vec Ds_j = zeros(2);
     vec ds_j = zeros(2);
-
+    
     ///Elastic prediction - Accounting for the thermal prediction
     vec Eel = Etot + DEtot - alpha*(T+DT-T_init) - ET;
     sigma = el_pred(L, Eel, ndi);
@@ -342,15 +342,15 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
     vec dPhihatFdsigma = zeros(6);
     double dPhihatFdxiF = 0.;
     double dPhihatFdxiR = 0.;
-
+    
     vec dA_xiFdsigma = zeros(6);
     double dA_xiFdxiF = 0.;
     double dA_xiFdxiR = 0.;
-
+    
     vec dlambda1dsigma = zeros(6);
     double dlambda1dxiF = 0.;
     double dlambda1dxiR = 0.;
-
+    
     vec dYtFdsigma = zeros(6);
     double dYtFdxiF = 0.;
     double dYtFdxiR = 0.;
@@ -396,7 +396,7 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
     
     //Loop
     for (compteur = 0; ((compteur < maxiter_umat) && (error > precision_umat)); compteur++) {
-
+        
         K_eff = (K_A*K_M) / (xi*K_A + (1. - xi)*K_M);
         mu_eff = (mu_A*mu_M) / (xi*mu_A + (1. - xi)*mu_M);
         L = L_iso(K_eff, mu_eff, "Kmu");
@@ -569,14 +569,14 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
             ETMean = dev(ET) / (xi);
         }
         else {
-            ETMean = 0.*Ith();
+            ETMean = lambdaTF;
         }
         
         //the stress is now computed using the relationship sigma = L(E-Ep)
         Eel = Etot + DEtot - alpha*(T + DT - T_init) - ET;
         sigma = el_pred(L, Eel, ndi);
     }
-
+    
     //Computation of the increments of variables
     vec Dsigma = sigma - sigma_start;
     vec DET = ET - ET_start;
@@ -588,6 +588,7 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
     
     double dPhiFdtheta = dA_xiFdtheta;
     double dPhiRdtheta = dA_xiRdtheta;
+    
     
     //Computation of the tangent modulus
     mat Bhat = zeros(2, 2);
@@ -629,7 +630,7 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
     P_theta[1] = invBhat(0, 1)*(dPhiFdtheta - sum(dPhiFdsigma%(L*alpha))) + invBhat(1, 1)*(dPhiRdtheta - sum(dPhiRdsigma%(L*alpha)));
 
     dSdE = L - (kappa_j[0]*P_epsilon[0].t() + kappa_j[1]*P_epsilon[1].t());
-    dSdT = -1.*L*alpha - (kappa_j[0]*P_theta[0] + kappa_j[1]*P_theta[1]);
+    dSdT = -1.*L*alpha - 1.*(kappa_j[0]*P_theta[0] + kappa_j[1]*P_theta[1]);
 
     //Preliminaries for the computation of mechanical and thermal work
     double c_0A = rho*c_pA;
