@@ -562,7 +562,7 @@ void umat_sma_unified_T(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, 
             ETMean = dev(ET) / (xi);
         }
         else {
-            ETMean = 0.*Ith();
+            ETMean = lambdaTF;
         }
         
         //the stress is now computed using the relationship sigma = L(E-Ep)
