@@ -34,7 +34,7 @@ set(EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})
 set(LIBRARY_OUTPUT_PATH lib/${CMAKE_BUILD_TYPE})
 
 #Inclusion of Boost
-find_package(Boost 1.57.0 COMPONENTS system filesystem unit_test_framework REQUIRED)
+find_package(Boost 1.55.0 COMPONENTS system filesystem unit_test_framework REQUIRED)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 #Inclusion of Armadillo
