@@ -97,13 +97,33 @@ void generation::classify()
 	double mini = -1.;
 	int posmini = 0;
 	individual temp;
+    unsigned int number_not_NaN = pop.size();
 	
-	for(unsigned int i=0; i < pop.size()-1; i++) {
+    for(unsigned int i=0; i < number_not_NaN; i++) {
+        int check_nan = 0;
+        if (std::isnan(pop[i].cout)) {
+            check_nan++;
+        }
+        
+        if(check_nan > 0) {
+            temp = pop[i];
+            pop.erase(pop.begin() + i);
+            pop.push_back(temp);
+            number_not_NaN--;
+            i--;
+        }
+    }
+    
+    for(unsigned int i=0; i < pop.size(); i++) {
+        pop[i].rank=i+1;
+    }
+    
+	for(unsigned int i=0; i < number_not_NaN-1; i++) {
 		mini=pop[i].cout;
 		posmini=i;
 		
-		for(unsigned int j=i; j < pop.size(); j++) {
-			if(pop[j].cout < mini) {
+		for(unsigned int j=i; j < number_not_NaN; j++) {
+            if(pop[j].cout < mini) {
 				mini=pop[j].cout;
 				posmini=j;
 			}
@@ -113,7 +133,7 @@ void generation::classify()
 		pop[i]=temp;
 	} 	
 
-	for(unsigned int i=0; i < pop.size(); i++) {
+	for(unsigned int i=0; i < number_not_NaN; i++) {
 		pop[i].rank=i+1;
 	}
 
