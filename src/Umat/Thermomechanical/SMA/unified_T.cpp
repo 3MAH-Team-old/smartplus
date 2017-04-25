@@ -630,7 +630,7 @@ void umat_sma_unified_T_T(const vec &Etot, const vec &DEtot, vec &sigma, double 
     P_theta[1] = invBhat(0, 1)*(dPhiFdtheta - sum(dPhiFdsigma%(L*alpha))) + invBhat(1, 1)*(dPhiRdtheta - sum(dPhiRdsigma%(L*alpha)));
 
     dSdE = L - (kappa_j[0]*P_epsilon[0].t() + kappa_j[1]*P_epsilon[1].t());
-    dSdT = -1.*L*alpha - 1.*(kappa_j[0]*P_theta[0] + kappa_j[1]*P_theta[1]);
+    dSdT = -1.*L*alpha - (kappa_j[0]*P_theta[0] + kappa_j[1]*P_theta[1]);
 
     //Preliminaries for the computation of mechanical and thermal work
     double c_0A = rho*c_pA;
