@@ -16,7 +16,7 @@
  */
 
 ///@file read.cpp
-///@brief To read ODF from Npeak.dat
+///@brief To read parameters, variables and input values for functions
 ///@version 1.0
 
 #include <assert.h>
