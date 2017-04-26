@@ -61,6 +61,10 @@ void func_N(const vec &params, const vec &variables, const string& N_file, const
     cum_N.close();
   
     vec y;
+    
+    //In here you are asked to introduced the function you want to solve
+    UNUSED(params);
+    UNUSED(variables);
 //    vec y = p_cumulative(N, variables(0), variables(1), params); Insert here the fonction you want
     
     //write in the file
