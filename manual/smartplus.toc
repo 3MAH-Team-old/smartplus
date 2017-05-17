@@ -1,0 +1,12 @@
+\select@language {french}
+\contentsline {chapter}{Table des mati\`eres}{5}{section*.1}
+\contentsline {part}{I\hspace {1em}Practical documentation}{7}{part.1}
+\contentsline {chapter}{\numberline {1}Identification of material parameters}{9}{chapter.1}
+\contentsline {section}{\numberline {1.1}Description of the workflow}{11}{section.1.1}
+\contentsline {subsection}{\numberline {1.1.1}Definition of the objective function}{11}{subsection.1.1.1}
+\contentsline {subsubsection}{Information about the experimental points}{12}{section*.3}
+\contentsline {subsubsection}{Information about the weight factors}{13}{section*.4}
+\contentsline {subsection}{\numberline {1.1.2}Optimization algorithm}{14}{subsection.1.1.2}
+\contentsline {subsection}{\numberline {1.1.3}Identification of the material parameters based on the heterogeneous Meuwissen experiments}{15}{subsection.1.1.3}
+\contentsline {section}{\numberline {1.2}Description of the optimization algorithm utilized}{16}{section.1.2}
+\contentsline {xpart}{Practical documentation}{9}{part.1}

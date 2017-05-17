@@ -1,0 +1,142 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    GENERAL TEXT COMMANDS    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newsavebox\myboxA
+\newsavebox\myboxB
+\newlength\mylenA
+
+\newcommand*\overbar[2][0.75]{%
+    \sbox{\myboxA}{$\m@th#2$}%
+    \setbox\myboxB\null% Phantom box
+    \ht\myboxB=\ht\myboxA%
+    \dp\myboxB=\dp\myboxA%
+    \wd\myboxB=#1\wd\myboxA% Scale phantom
+    \sbox\myboxB{$\m@th\overline{\copy\myboxB}$}%  Overlined phantom
+    \setlength\mylenA{\the\wd\myboxA}%   calc width diff
+    \addtolength\mylenA{-\the\wd\myboxB}%
+    \ifdim\wd\myboxB<\wd\myboxA%
+       \rlap{\hskip 0.5\mylenA\usebox\myboxB}{\usebox\myboxA}%
+    \else
+        \hskip -0.5\mylenA\rlap{\usebox\myboxA}{\hskip 0.5\mylenA\usebox\myboxB}%
+    \fi}
+    
+
+
+\newcommand{\chem[1]}{\ensuremath{\mathrm{#1}}}
+
+\newcommand{\EqnCont}{\nonumber \\[0\baselineskip]}
+
+\newcommand{\prnt}[1]{\left(#1\right)}
+
+\renewcommand{\b}[1]{\boldsymbol{#1}}						%bold letters
+\renewcommand{\bm}[1]{\boldsymbol{\mathcal{#1}}}						%bold letters
+
+\newcommand\V[1]{\mathbb{#1}}							%mathbb capital letters
+\newcommand\Vs[1]{\mathbbm{#1}}							%mathbbm small letters
+\newcommand\M[1]{\overbar{#1}}							%capital letters with bar
+\newcommand\Ms[1]{\bar{#1}}							%small letters with bar
+\newcommand\Mb[1]{\overbar{\b{#1}}}						%bold capital letters with bar
+\newcommand\Mbs[1]{\bar{\b{#1}}}						%bold small letters with bar
+\newcommand\MV[1]{\overbar{\V{#1}}}						%mathbb capital letters with bar
+\newcommand\MVs[1]{\bar{\Vs{#1}}}						%mathbbm small letters with bar
+\newcommand\h[1]{\widehat{#1}}							%capital letters with hat
+\newcommand\hs[1]{\hat{#1}}							%small letters with hat
+\newcommand\hb[1]{\widehat{\b{#1}}}						%bold capital letters with hat
+\newcommand\hbs[1]{\hat{\b{#1}}}						%bold small letters with hat
+\newcommand\hV[1]{\widehat{\V{#1}}}						%mathbb capital letters with hat
+\newcommand\hVs[1]{\hat{\Vs{#1}}}						%mathbbm small letters with hat
+\newcommand\ti[1]{\widetilde{#1}}						%capital letters with tilde
+\newcommand\tis[1]{\tilde{#1}}							%small letters with tilde
+\newcommand\tib[1]{\widetilde{\b{#1}}}						%bold capital letters with tilde
+\newcommand\tibs[1]{\tilde{\b{#1}}}						%bold small letters with tilde
+\newcommand\tiV[1]{\widetilde{\V{#1}}}						%mathbb capital letters with tilde
+\newcommand\tiVs[1]{\tilde{\Vs{#1}}}						%mathbbm small letters with tilde
+
+\newcommand{\inter}{\mathrm{int}}
+\newcommand{\exter}{\mathrm{ext}}
+\newcommand{\sym}{\mathrm{sym}}
+\newcommand{\vol}{\mathrm{vol}}
+\newcommand{\dev}{\mathrm{dev}}
+\newcommand{\tr}{\mathrm{tr}}
+\newcommand{\eff}{\mathrm{eff}}
+\newcommand{\tot}{\mathrm{tot}}
+\newcommand{\rve}{\mathrm{rve}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    TENSOR NOTATION    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\dyad}{\otimes}
+\newcommand{\odyad}{\ \overline\otimes \ }
+\newcommand{\udyad}{\ \underline\otimes \ }
+\newcommand{\scon}{\ \! \textrm{\textperiodcentered} \! \ }
+\newcommand{\oscon}{\  \tilde{\cdot} \ }
+\newcommand{\uscon}{\ \underaccent{\tilde}{\textrm{\textperiodcentered}} \ }
+\newcommand{\dcon}{\ \!\! \colon \!\!\! \ }
+\newcommand{\odcon}{\ \tilde{:} \ }
+\newcommand{\udcon}{\ \!\!\underaccent{\tilde}{\colon}\!\! \ }
+\newcommand{\osc}{\  \overline{\cdot} \ }
+\newcommand{\usc}{\  \underline{\cdot} \ }
+\newcommand{\odc}{\ \overline{:} \ }
+\newcommand{\udc}{\ \underline{:} \ }
+\newcommand{\utimes}{\ \overline{{\times}} \ }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     OPERATORS     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\lrp}[1]{\left({#1}\right)}
+\newcommand{\lrb}[1]{\left[{#1}\right]}
+\newcommand{\lrc}[1]{\left\{{#1}\right\}}
+
+\newcommand{\sth}{\lrc{\bullet}}
+\newcommand{\stH}{\lrc{\circ}}
+
+\newcommand{\p}{\partial}
+\newcommand{\f}{\displaystyle\frac}
+\newcommand{\dfg}[2]{\f{\mathrm{d} {#1}}{\mathrm{d} {#2}}}
+\newcommand{\pfg}[2]{\f{\p {#1}}{\p {#2}}}
+\newcommand{\Dt}{\mathrm{D}_t}
+\newcommand{\dt}{\mathrm{d}_t}
+
+\newcommand{\grad}{\mathrm{grad}}
+\newcommand{\Grad}{\mathrm{Grad}}
+\renewcommand{\div}{\mathrm{div}}
+\newcommand{\Div}{\mathrm{Div}}
+\newcommand{\curl}{\mathrm{curl}}
+\newcommand{\Curl}{\mathrm{Curl}}
+\newcommand{\Det}{\mathrm{Det}}
+\renewcommand{\det}{\mathrm{det}}
+\newcommand{\Cof}{\mathrm{Cof}}
+\newcommand{\cof}{\mathrm{cof}}
+
+\renewcommand{\d}{\mathrm{d}}
+\renewcommand{\t}[1]{\mathrm{#1}}
+\newcommand{\D}{\mathrm{D}}
+
+\newcommand{\dV}{\, \d V}
+\newcommand{\dS}{\, \d S}
+\newcommand{\dL}{\, \d L}
+\newcommand{\dv}{\, \d v}
+\newcommand{\ds}{\, \d s}
+\newcommand{\dl}{\, \d l}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\average}[1]{\{\!\{{#1}\}\!\}}
+\newcommand{\jump}[1]{\text{\textlbrackdbl}{#1}\text{\textrbrackdbl}}
+\newcommand{\volaver}[1]{\displaystyle\left\langle{#1}\right\rangle}
+\newcommand{\suraver}[1]{\displaystyle\left\lceil{#1}\right\rfloor}
+\newcommand{\volintegro}[2]{\displaystyle\int_{#2}{#1}\dV}
+\newcommand{\volintegrt}[2]{\displaystyle\int_{#2}{#1}\dv}
+\newcommand{\bndintegro}[2]{\displaystyle\int_{\p {#2}}{#1}\dS}
+\newcommand{\bndintegrt}[2]{\displaystyle\int_{\p {#2}}{#1}\ds}
+\newcommand{\surintegro}[2]{\displaystyle\int_{#2}{#1}\dS}
+\newcommand{\surintegrt}[2]{\displaystyle\int_{#2}{#1}\ds}
+\newcommand{\linintegro}[2]{\displaystyle\int_{#2}{#1}\dL}
+\newcommand{\linintegrt}[2]{\displaystyle\int_{#2}{#1}\dl}
+
+\newcommand{\bfeps}{\b{\varepsilon}}
+\newcommand{\bfsig}{\b{\sigma}}

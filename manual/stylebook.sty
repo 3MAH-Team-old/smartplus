@@ -1,0 +1,485 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{stylebook}
+
+\newif\if@sommairechap \@sommairechapfalse
+\DeclareOption{sommairechap}{\@sommairechaptrue}
+\ProcessOptions
+
+%Additional packages 
+\RequirePackage{fancyhdr}
+\RequirePackage{enumerate}
+
+% Environment size calculation
+\RequirePackage{calc}
+
+%Additional math packages
+\RequirePackage{amsmath,amsfonts,amssymb,amsthm, array, gensymb,latexsym}
+\RequirePackage{bm}
+\RequirePackage{dsfont,mathrsfs}
+
+% Lettrine
+\RequirePackage{lettrine}
+
+%Table of contents
+\RequirePackage{tocbibind}
+
+% Style de la léegende
+\RequirePackage{caption}
+\DeclareCaptionLabelSeparator{mysep}{~--~}
+%\captionsetup{singlelinecheck=no,labelsep=mysep,font=small,textfont=it}
+\captionsetup{font=small,textfont=it}
+\setlength{\abovecaptionskip}{5pt}
+\setlength{\belowcaptionskip}{-5pt}
+\setlength{\parindent}{0cm}
+
+% Tableaux sur plusieurs pages - page de notations
+\RequirePackage{longtable}
+
+% Mise en forme des algorithmes
+
+%\RequirePackage[french,ruled,vlined]{algorithm2e}
+\RequirePackage{natbib}
+\RequirePackage{multirow}
+
+%\bibliographystyle{plainnatfrench}
+%\bibpunct{(}{)}{,}{a}{}{;}
+% Gestion des rÔøΩfÔøΩrence selon le format de sortie
+
+\RequirePackage{tabto}
+\RequirePackage{tabularx}
+\RequirePackage{ifpdf}
+
+\ifpdf
+  % configuration de graphicx et hyperref pour sortie PDF
+  \RequirePackage[pdftex]{graphicx}
+  \RequirePackage[pdftex,pdfauthor=Yves Chemisky, breaklinks = true]{hyperref} 
+  \DeclareGraphicsExtensions{.pdf,.png,.jpg}
+\else
+  % configuration de graphicx et hyperref pour sortie PS
+  \RequirePackage[dvips]{graphicx}
+  \DeclareGraphicsExtensions{.eps,.ps}
+ \RequirePackage[dvips, breaklinks = true]{hyperref}
+ \hypersetup{urlcolor=black,linkcolor=black,citecolor=black,colorlinks=true} 
+%  \RequirePackage[dvips,pdfauthor=Yves Chemisky,breaklinks = true]{hyperref}
+\fi
+
+%Package pour inclure du code et des examples:
+\RequirePackage{listings}
+
+%package de diagrammes (edité par Dia sur Linux)
+\RequirePackage{tikz}
+%Package pour forcer le positionnement des figures un peu plus ..
+\RequirePackage{float}
+
+%Package pour le positionnement des figures dans le texte
+\RequirePackage{wrapfig}
+
+%\RequirePackage{subfigmat}
+
+\RequirePackage{color}
+
+% Gestion ÔøΩventuel des sommaires en dÔøΩbut de chapitre
+\if@sommairechap
+  \RequirePackage[french]{minitoc}
+  \dominitoc
+  \setlength{\mtcindent}{0em}
+  \renewcommand{\mtifont}{\large\rm\scshape}
+  \renewcommand{\mtcSfont}{\small\rm\scshape}
+\fi
+
+\RequirePackage[subfigure]{tocloft}
+\RequirePackage{subfigmat}% matrices of similar subfigures, aka small mulitples
+
+\renewcommand{\cftsubsecfont}{\normalfont\small}
+\renewcommand{\cftsecfont}{\normalfont\normalsize}
+\renewcommand{\cftchapfont}{\normalfont\large\bfseries}
+\renewcommand{\cfttoctitlefont}{\Huge\scshape}
+\renewcommand{\cftloftitlefont}{\Huge\scshape}
+\renewcommand{\baselinestretch}{1.2}
+
+\RequirePackage{textcomp} %pour les degrés apparemment
+
+%\RequirePackage{tcolorbox}
+%\tcbuselibrary{breakable,skins}
+\RequirePackage{style/boiboites}
+
+\renewcommand{\textbf}[1]{\begingroup\bfseries\mathversion{bold}#1\endgroup}
+
+\newboxedtheorem[boxcolor=orange, background=blue!5, titlebackground=blue!20,
+titleboxcolor = black]{theo}{Théorème}{theos}
+
+\newboxedtheorem[boxcolor=orange, background=blue!5, titlebackground=blue!20,
+titleboxcolor = black]{ndc}{Note de cours}{ndcs}
+
+\newboxedtheorem[boxcolor=orange, background=blue!5, titlebackground=blue!20,
+titleboxcolor = black]{prop}{Proposition}{props}
+
+\input{packages_style_personal}
+
+% CONFIGURATION DE LA CÔøΩSURE (-> Axel Reichert)
+\tolerance = 1414
+\hbadness = 1414
+\emergencystretch 1.5em
+\hfuzz 0.3pt
+\widowpenalty=10000
+\vfuzz \hfuzz
+\raggedbottom
+
+% =============================================
+% PAGE DE GARDE
+\newif\ifdefinitif\definitiftrue
+
+\def\titleFR#1{\gdef\@titleFR{#1}}
+\def\titleEN#1{\gdef\@titleEN{#1}}
+\def\abstractFR#1{\gdef\@abstractFR{#1}}
+\def\abstractEN#1{\gdef\@abstractEN{#1}}
+\def\keywordsFR#1{\gdef\@keywordsFR{#1}}
+\def\keywordsEN#1{\gdef\@keywordsEN{#1}}
+\def\@author{}
+\def\address#1{\gdef\@address{#1}}
+\def\universite#1{\gdef\@universite{#1}}
+\def\laboratoire#1{\gdef\@laboratoire{#1}}
+%\def\specialite#1{\gdef\@specialite{#1}}
+%\def\datesoumission#1{\gdef\@datesoumission{#1}}
+%\def\datesoutenance#1{\gdef\@datesoutenance{#1}}
+%\def\jury#1{\gdef\@jury{#1}}
+%\def\dedicate#1{\gdef\dedication@text{#1}}
+
+\renewcommand{\titlepage}{%
+  \ifdefinitif
+  \begin{center}    
+
+
+    \huge~\textsc{\@titleFR} \\ \bigskip
+    
+    \vfill
+    
+    \Large~\textsc{\@author} \\
+
+    \vfill
+
+    \Large\textsc{\@universite} \\
+    %\textsc{\@laboratoire} \\ 
+    \bigskip
+    
+    \vfill
+    
+  \end{center}
+  \cleardoublepage
+
+  \else
+  
+  % --------------------------------------------------
+  % NON DEFINITIF : PAGE DE SOUMISSION AUX RAPPORTEURS
+  \thispagestyle{empty}
+  \vskip3cm
+  \vfill
+  \begin{center}
+    \large
+    Rapport soumis aux rapporteurs, dans le but de sanctionner
+    le dossier pour l'obtention du grade de \\
+    Docteur en \@specialite\\
+    de \\
+    l'\@universite
+  \end{center}
+  \vskip3cm
+  \begin{center}
+    \huge {\sc \@titleFR }\\ \vskip2cm
+    \large \@author, le \@submitdate \\
+  \end{center}
+  \vskip3cm
+  \vskip3cm
+  \vfill
+  \textsc{Mots-clés :} \@keywordsFR
+  \fi
+  \cleardoublepage
+}
+
+% ===========================================================
+% PAGE DE DEDICACE 
+
+\newcommand{\abstractpage}{%
+  \pagestyle{empty}
+  ~\newpage
+  \par
+  \vfill
+
+  \paragraph*{Titre}\@titleFR
+
+  \paragraph*{Résumé}\@abstractFR
+
+  \paragraph*{Mots-clés}\@keywordsFR
+
+  \paragraph*{Title}\@titleEN
+  
+  \paragraph*{Abstract}\@abstractEN
+  
+  \paragraph*{Keywords}\@keywordsEN
+}
+
+
+% ==========================================================================
+% MISE EN PAGE
+\RequirePackage{geometry}
+%\geometry{textheight=145ex,textwidth=37em,top=85pt,headheight=30pt,headsep=30pt,inner=120pt}
+\geometry{%
+a4paper,
+body={155mm,235mm},
+left=35mm,top=30mm,
+headheight=7mm,headsep=4mm,
+marginparsep=4mm,
+marginparwidth=27mm}
+%\addtolength{\marginparwidth}{-72pt}
+%\addtolength{\headwidth}{\marginparsep}
+%\addtolength{\headwidth}{\marginparwidth}
+
+% ==========================================================================
+% ENTèTES
+% Entètes standards
+
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyfoot[RO,LE]{\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0pt}
+}
+
+\fancypagestyle{main}{
+  \fancyhf{}
+  \fancyhead[LO]{\nouppercase{\rightmark}}
+  \fancyhead[RO,LE]{\thepage}
+  \fancyhead[RE]{\nouppercase{\leftmark}}
+  \renewcommand{\headrulewidth}{0.5pt}
+  \renewcommand{\footrulewidth}{0pt}
+}
+
+% ==============================================================
+% PRéFACE 
+\newcommand{\beforepreface}{
+ % \frontmatter
+  \pagestyle{empty}
+  \titlepage
+\newpage
+\strut
+\newpage
+
+\newpage
+\strut
+\newpage
+}
+
+% ==============================================================
+% CONTENU MAÔøΩTRE
+\newcommand{\afterpreface}{
+  %\mainmatter
+  \pagestyle{main}
+}
+
+% ---------------------------------------------------------------
+% PERSONNALISATION DE BABEL
+%\addto{\captionsfrench}{
+  \renewcommand*{\listfigurename}{Liste des figures}
+  \renewcommand*{\listtablename}{Liste des tableaux}
+  \renewcommand*{\appendixname}{}%
+%}
+% noindent en dÔøΩbut de section
+%\addto\extrasfrench{\bbl@nonfrenchindent}
+
+% ==========================================================================
+% PAGE DE GARDE DES CHAPITRES
+% Le rÔøΩsumÔøΩ + le minitoc ÔøΩventuel
+\newcommand{\resumechap}[1]{
+    \vskip2cm
+\begin{flushright}
+	\textit{#1}
+\end{flushright}
+  \clearpage
+}
+
+% chapitre numÔøΩrotÔøΩ
+%\DeclareFixedFont{\chapnumfont}{T1}{phv}{b}{n}{80pt}
+%Ancienne font un peu plus comic
+\newfont{\chapnumfont}{eurb10 scaled 7000}
+
+\renewcommand*{\@makechapterhead}[1]{%
+  \thispagestyle{plain}
+  \marginpar{\flushleft\hspace*{-4.5em}\vspace*{1.5em}\chapnumfont\thechapter}
+  \begin{flushleft}\vspace{6em}\nobreak\Huge\sc#1\end{flushleft}
+  \vspace{1cm}
+\minitoc
+}
+% chapitre non numÔøΩrotÔøΩ (*) 
+\renewcommand*{\@makeschapterhead}[1]{%  
+  \markboth{#1}{#1}
+  \thispagestyle{plain}
+  \begin{flushleft}\nobreak\Huge\sc #1\end{flushleft}
+  \vspace{3cm}
+  \if@sommairechap \mtcaddchapter \fi
+}
+
+% ==========================================================================
+% LES SECTIONS, SOUS-SECTIONS, SOUS-SOUS-SECTIONS
+\makeatletter
+
+%\newcommand{\sectionfont}{%
+%\fontencoding{\encodingdefault}%
+%\fontfamily{pag}%
+%\fontseries{bc}%
+%\fontshape{n}%
+%\selectfont}
+
+\renewcommand\section{\@startsection {section}{1}{\z@}%
+                                   {-3.5ex \@plus -1ex \@minus -.2ex}%
+                                   {2.3ex \@plus.2ex}%
+                                   {\normalfont\bfseries\large}}
+
+\renewcommand{\subsection}{\@startsection{subsection}{2}{\z@}%
+             {-3.25ex\@plus -1ex \@minus -.2ex}%
+             {1.5ex \@plus .2ex}%
+             {\normalfont\bfseries}}
+
+%Numéro des section et sous-sections dans la marge ou non.
+%\def\@seccntformat#1{%
+%  \protect\makebox[-3.5pt][r]{\csname the#1\endcsname\quad\hspace{-3.5pt}}
+%}
+\makeatother
+
+% ==========================================================================
+% ANNEXE, BIBLIOGRAPHIE
+
+% Annexe se comportez comme un chapitre
+\let\oldappendix=\appendix
+\renewcommand\appendix{%
+  \oldappendix
+  \chapter{Annexes}
+  \thispagestyle{plain}
+  \pagestyle{main}
+}
+
+%\RequirePackage[hyperpageref]{backref}
+%\backreffrench
+%\renewcommand*{\backref}[1]{}  % Disable standard
+%\renewcommand*{\backrefalt}[4]{% Detailed backref
+%  \ifcase #1 %
+%  \relax%(Not cited.)%
+%  \or
+%  (Cit\'e page~#2.)%
+%  \else
+%  (Cit\'e pages~#2.) 
+%  \fi}
+
+% Page blanche aprÔøΩs chapitre si nÔøΩcessaire
+\makeatletter
+\def\cleardoublepage{\clearpage\if@twoside \ifodd\c@page\else
+  \hbox{}
+  \vspace*{\fill}
+  \begin{center}
+    ~
+  \end{center}
+  \vspace{\fill}
+  \thispagestyle{empty}
+  \newpage
+  \if@twocolumn\hbox{}\newpage\fi\fi\fi}
+\makeatother
+
+% ---------------------------------------------------------------
+% LETTRINE
+\newcommand{\malettrine}[1]{
+  \lettrine[lines=2,loversize=0.33]{#1}
+}
+
+% ---------------------------------------------------------------
+% THEOREMES
+\newlength{\thmmargin}
+\newlength{\thmmargina}
+\newlength{\thmmarginb}
+\newlength{\thmmarginc}
+\newlength{\thmmargind}
+\newlength{\thmmargine}
+\newlength{\thmmarginf}
+\newlength{\thmmarging}
+\newlength{\thmmarginh}
+
+\addtolength{\thmmargin}{105pt}
+\addtolength{\thmmarginb}{\thmmargin-7.85ex} % exemple -- ok
+\addtolength{\thmmarginc}{\thmmargin-6.1ex} %  thÔøΩorÔøΩme,remarque -- ok
+\addtolength{\thmmargind}{\thmmargin-7.4ex} % propriÔøΩtÔøΩ -- ok
+\addtolength{\thmmargine}{\thmmargin-6ex} % dÔøΩfinition -- ok
+\addtolength{\thmmargina}{\thmmargin-5.625ex} % hypothÔøΩse -- ok
+\addtolength{\thmmarginf}{\thmmargin-4.8ex} % proposition -- ok
+\addtolength{\thmmarging}{\thmmargin-8.7ex} % Lemme -- ok
+\addtolength{\thmmarginh}{\thmmargin-6.5ex} % Corollaire -- ok
+
+% COMMAND \newtheoremstyle
+% espace avant, espace aprÔøΩs, font du corps, retrait titre, font titre, ponctuaiton aprÔøΩs titre, espace intermot, option supp
+
+% hypothÔøΩse
+\newtheoremstyle{thma}{9pt}{9pt}{\itshape}{-\thmmargina}{\small\bfseries}{\quad}{ }{}
+\theoremstyle{thma}
+\newtheorem{hypothese}{Hypoth\`{e}se}[chapter]
+% exemple
+\newtheoremstyle{thmb}{9pt}{9pt}{\itshape}{-\thmmarginb}{\small\bfseries}{\quad}{ }{}
+\theoremstyle{thmb}
+\newtheorem{exemple}{Exemple}[chapter]
+% thÔøΩorÔøΩme & remarque
+\newtheoremstyle{thmc}{9pt}{9pt}{\itshape}{-\thmmarginc}{\small\bfseries}{\quad}{ }{}
+\theoremstyle{thmc}
+\newtheorem{theoreme}{Th\'{e}or\`{e}me}[chapter]
+\newtheorem{remarque}{Remarque}[chapter]
+% propriÔøΩtÔøΩ
+\newtheoremstyle{thmd}{9pt}{9pt}{\itshape}{-\thmmargind}{\small\bfseries}{\quad}{ }{}
+\theoremstyle{thmd}
+\newtheorem{propriete}{Propri\'{e}t\'{e}}[chapter]
+% dÔøΩfinition
+\newtheoremstyle{thme}{9pt}{9pt}{\itshape}{-\thmmargine}{\small\bfseries}{\quad}{ }{}
+\theoremstyle{thme}
+\newtheorem{definitionf}{D\'{e}finition}[chapter]
+% proposition
+\newtheoremstyle{thmf}{9pt}{9pt}{\itshape}{-\thmmarginf}{\small\bfseries}{\quad}{ }{}
+\theoremstyle{thmf}
+\newtheorem{propositionf}{Proposition}[chapter]
+% lemme
+\newtheoremstyle{thmg}{9pt}{9pt}{\itshape}{-\thmmarging}{\small\bfseries}{\quad}{ }{}
+\theoremstyle{thmg}
+\newtheorem{lemme}{Lemme}[chapter]
+% corollaire
+\newtheoremstyle{thmh}{9pt}{9pt}{\itshape}{-\thmmarginh}{\small\bfseries}{\quad}{ }{}
+\theoremstyle{thmh}
+\newtheorem{corollaire}{Corollaire}[chapter]
+
+
+% ==========================================================================
+% FIGURES ET TABLES 
+
+% \figScale{monfichier}{LÔøΩgende de la figure}
+\newcommand{\figScaleX}[3]{
+  \begin{figure}[!htbp]
+	\begin{center}
+    Igraphics[width=#1\textwidth]{#2}
+    \caption{#3}
+    \label{fig:#2}
+	\end{center}
+  \end{figure}
+}
+\newcommand{\figScale}[2]{
+ \figScaleX{0.95}{#1}{#2}
+}
+\newcommand{\figScaleXRot}[4]{
+  \begin{figure}[!htbp]
+ \centering
+    \includegraphics[angle=#1,width=#2\textwidth]{#3}
+    \caption{#4}
+    \label{fig:#3}
+  \end{figure}
+}
+
+% ==========================================================================
+% COLOPHON
+\newcommand{\colophon}[1]{
+  ~\vfill
+  \begin{center}
+    \small #1
+  \end{center}
+  \cleardoublepage
+}
+
