@@ -59,7 +59,7 @@ protected:
     virtual void fillS_loc(const arma::mat&, const ellipsoid &); //need the L_global of the matrix
     virtual void fillP_loc(const arma::mat&, const ellipsoid &); //need the L_global of the matrix
     virtual void fillT(const arma::mat&, const arma::mat&, const ellipsoid &); //need the L_global of the matrix
-    virtual void fillT_m(const arma::mat&, const arma::mat&, const ellipsoid &); //need the L_global
+    virtual void fillT_iso(const arma::mat&, const arma::mat&, const ellipsoid &); //need the L_global
     
 //    virtual void l2g_T();
 //    virtual void g2l_T();
