@@ -96,4 +96,7 @@ arma::vec el_pred(const arma::vec &, const arma::mat &, const arma::vec &, const
 //Return the elastic prediction stress, providing the stiffness tensor and the trial elastic strain
 arma::vec el_pred(const arma::mat &, const arma::vec &, const int &ndi = 3);
 
+//Return the isotropized tangent modulus from the spectral decomposition of Bornert.etal (2001)
+arma::mat Isotropize(const arma::mat &);
+
 } //namespace smart
