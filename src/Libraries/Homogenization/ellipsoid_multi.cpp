@@ -24,6 +24,7 @@
 #include <string>
 #include <assert.h>
 #include <armadillo>
+#include <smartplus/Libraries/Continuum_Mechanics/constitutive.hpp>
 #include <smartplus/Libraries/Maths/rotation.hpp>
 #include <smartplus/Libraries/Geometry/ellipsoid.hpp>
 #include <smartplus/Libraries/Homogenization/ellipsoid_multi.hpp>
@@ -134,15 +135,17 @@ void ellipsoid_multi::fillT(const mat& Lt_m, const mat& Lt, const ellipsoid &ell
 }
 
 //-------------------------------------
-void ellipsoid_multi::fillT_m(const mat& Lt_m, const mat& Lt, const ellipsoid &ell)
+void ellipsoid_multi::fillT_iso(const mat& Lt_m, const mat& Lt, const ellipsoid &ell)
 //This method corresponf to the Ponte-astenada and Willis method
 //-------------------------------------
 {
-    mat Lt_m_local_geom = rotate_g2l_L(Lt_m, ell.psi_geom, ell.theta_geom, ell.phi_geom);    
-    P_loc = T_II(Lt_m_local_geom, ell.a1, ell.a2, ell.a3, x, wx, y, wy, mp, np);
-    mat P = rotate_l2g_M(P_loc, ell.psi_geom, ell.theta_geom, ell.phi_geom);
+    mat Lt_m_iso = Isotropize(Lt_m);
+    S_loc = Eshelby(Lt_m_iso, ell.a1, ell.a2, ell.a3, x, wx, y, wy, mp, np);
+    mat Lt_local_geom = rotate_g2l_L(Lt, ell.psi_geom, ell.theta_geom, ell.phi_geom);
     
-    T = inv(inv(Lt - Lt_m) + P);
+    T_loc = inv(eye(6,6) + S_loc*inv(Lt_m_iso)*(Lt_local_geom - Lt_m_iso));
+    
+    T = rotate_l2g_A(T_loc, ell.psi_geom, ell.theta_geom, ell.phi_geom);
 }
         
 //----------------------------------------------------------------------
