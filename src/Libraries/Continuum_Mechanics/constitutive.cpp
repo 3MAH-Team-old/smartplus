@@ -609,4 +609,10 @@ vec el_pred(const mat &L, const vec &E_el, const int &ndi) {
     return sigma;
 }
     
+mat Isotropize(const mat &Lt) {
+
+    return accu(Ivol()%Lt)*Ivol() + (4./11.)*accu(Idev()%Lt)*Idev();
+
+}
+    
 } //namespace smart
