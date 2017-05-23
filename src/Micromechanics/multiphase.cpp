@@ -122,6 +122,11 @@ void umat_multi(phase_characteristics &phase, const mat &DR, const double &Time,
             }
             case 102: {
                 int n_matrix = phase.sptr_matprops->props(4);
+                DE_Mori_Tanaka_iso(phase, n_matrix);
+                break;
+            }
+            case 103: {
+                int n_matrix = phase.sptr_matprops->props(4);
                 DE_Self_Consistent(phase, n_matrix, start, 0);
                 break;
             }
@@ -166,6 +171,11 @@ void umat_multi(phase_characteristics &phase, const mat &DR, const double &Time,
                 break;
             }
             case 102: {
+                int n_matrix = phase.sptr_matprops->props(4);
+                Lt_Mori_Tanaka_iso(phase, n_matrix);
+                break;
+            }
+            case 103: {
                 int n_matrix = phase.sptr_matprops->props(4);
                 Lt_Self_Consistent(phase, n_matrix, start, 0);
                 break;
