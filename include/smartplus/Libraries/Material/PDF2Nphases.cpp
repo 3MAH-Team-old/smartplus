@@ -24,21 +24,21 @@
 #include <iostream>
 #include <string.h>
 #include <armadillo>
-#include "ODF.hpp"
+#include "PDF.hpp"
 #include "../Phase/phase_characteristics.hpp"
 
 namespace smart{
 
-//Fill the ODF from a vector of angles, providing a file with the peak informations
-arma::vec get_densities_ODF(const arma::vec &, const std::string &, const std::string &, const bool &);
+//Fill the PDF from a vector of parameter, providing a file with the peak informations
+arma::vec get_densities_PDF(const arma::vec &, const std::string &, const std::string &);
     
-//Fill the angles of the geom and material (if indicated 1 in angles_mat)
-void fill_angles(const double &, phase_characteristics &, const ODF &, const int & = 1);
+//Fill the parameters of the geom and material
+void fill_parameters(const double &, phase_characteristics &, const PDF &);
     
-//This function computes the ODF of the selected angle, according to different methods (Lorentzian, Pearson...)
-phase_characteristics discretize_ODF(const phase_characteristics &, ODF &, const int &, const int &, const int & = 1);
+//This function computes the PDF of the selected angle, according to different methods (Lorentzian, Pearson...)
+phase_characteristics discretize_PDF(const phase_characteristics &, PDF &, const int &, const int &);
 
 //Writes the Nphases.dat file for multiphase modeling, according to specific ODFs
-//void ODF2Nphases(const arma::Col<int> &, const arma::Col<int> &, const arma::Col<int> &, const std::vector<std::string> &, const arma::mat &, const bool& = false, const double& = 0.);
+//void PDF2Nphases(const arma::Col<int> &, const arma::Col<int> &, const arma::Col<int> &, const std::vector<std::string> &, const arma::mat &, const bool& = false, const double& = 0.);
 
 } //namespace smart
