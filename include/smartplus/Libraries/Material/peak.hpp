@@ -53,7 +53,9 @@ class peak
 		peak(const peak&);	//Copy constructor
         virtual ~peak();
 
-        virtual double get_density(const double &);
+        virtual double get_density_ODF(const double &);
+
+        virtual double get_density_PDF(const double &);
     
 		virtual peak& operator = (const peak&);
     
