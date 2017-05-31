@@ -107,7 +107,7 @@ peak::~peak() {}
  */
     
 //-------------------------------------------------------------
-double peak::get_density(const double &theta)
+double peak::get_density_ODF(const double &theta)
 //-------------------------------------------------------------
 {
     
@@ -136,6 +136,50 @@ double peak::get_density(const double &theta)
             assert(width > 0.);
             double inv_width = 1./width;
             return Pearson7(theta, mean, inv_width, params) + Pearson7(theta - pi, mean, inv_width, params) + Pearson7(theta + pi, mean, inv_width, params);
+            break;
+        }
+        case 7: {
+            return 1.;
+            break;
+        }
+        default : {
+            cout << "Error: The peak type specified is not recognized" << endl;
+            return 0;
+            break;            
+        }
+    }
+}
+
+//-------------------------------------------------------------
+double peak::get_density_PDF(const double &theta)
+//-------------------------------------------------------------
+{
+    
+    switch (method) {
+        case 1: {
+            return ODF_sd(theta, mean, params);
+            break;
+        }
+        case 2: {
+            return ODF_hard(theta, mean, s_dev, ampl);
+            break;
+        }
+        case 3: {
+            return Gaussian(theta, mean, s_dev, ampl);
+            break;
+        }
+        case 4: {
+            return Lorentzian(theta, mean, width, ampl);
+            break;
+        }
+        case 5: {
+            return PseudoVoigt(theta, mean, s_dev, width, ampl, params);
+            break;
+        }
+        case 6: {
+            assert(width > 0.);
+            double inv_width = 1./width;
+            return Pearson7(theta, mean, inv_width, params);
             break;
         }
         case 7: {
