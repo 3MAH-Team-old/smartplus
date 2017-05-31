@@ -43,7 +43,7 @@ using namespace arma;
 
 namespace smart{
     
-vec get_densities(const vec &x, const string &path_data, const string &input_peaks, const bool &radian) {
+vec get_densities_ODF(const vec &x, const string &path_data, const string &input_peaks, const bool &radian) {
     
     vec y = zeros(x.n_elem);
     vec x_rad;
