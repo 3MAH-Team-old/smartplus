@@ -30,7 +30,7 @@
 namespace smart{
 
 //Fill the ODF from a vector of angles, providing a file with the peak informations
-arma::vec get_densities(const arma::vec &, const std::string &, const std::string &, const bool &);
+arma::vec get_densities_ODF(const arma::vec &, const std::string &, const std::string &, const bool &);
     
 //Fill the angles of the geom and material (if indicated 1 in angles_mat)
 void fill_angles(const double &, phase_characteristics &, const ODF &, const int & = 1);
