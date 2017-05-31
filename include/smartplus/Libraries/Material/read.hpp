@@ -23,10 +23,13 @@
 #include <armadillo>
 #include <string>
 #include "ODF.hpp"
+#include "PDF.hpp"
 
 namespace smart{
     
 /// Function that reads the output parameters
     void read_peak(ODF &, const std::string &, const std::string &);
+    
+    void read_peak(PDF &, const std::string &, const std::string &);
 
 } //namespace smart
