@@ -148,7 +148,7 @@ double ODF::density(const double &alpha)
     double density = 0.;
     
     for(auto p : peaks) {
-        density += p.get_density(alpha);
+        density += p.get_density_ODF(alpha);
     }
     return density;
 }
