@@ -85,7 +85,7 @@ then
 	Test_OK=$?
 
 	#Create the list of the file to copy after compilation
-	executableToCopy="solver identification L_eff Elastic_props ODF"
+	executableToCopy="solver identification L_eff Elastic_props ODF PDF"
 	objectToCopy="umat_single umat_singleT"
 
 	# Copy all important files (+ final message)
