@@ -42,8 +42,10 @@
 #include <smartplus/Libraries/Phase/read.hpp>
 #include <smartplus/Libraries/Phase/write.hpp>
 #include <smartplus/Libraries/Material/ODF.hpp>
+#include <smartplus/Libraries/Material/PDF.hpp>
 #include <smartplus/Libraries/Material/read.hpp>
 #include <smartplus/Libraries/Material/ODF2Nphases.hpp>
+#include <smartplus/Libraries/Material/PDF2Nphases.hpp>
 
 #include <smartplus/Libraries/Continuum_Mechanics/func_N.hpp>
 #include <smartplus/Libraries/Continuum_Mechanics/read.hpp>
@@ -307,6 +309,114 @@ void launch_odf(const individual &ind, vector<parameters> &params, const string 
     outputfile = path_data + "/" + outputfile;
     boost::filesystem::copy_file(outputfile,simulfile,boost::filesystem::copy_option::overwrite_if_exists);
 }
+
+
+void launch_pdf(const individual &ind, vector<parameters> &params, const string &path_results, const string &name, const string &path_data, const string &path_keys, const string &materialfile)
+{
+
+    string inputfile;
+    string outputfile;
+    string simulfile;
+    
+    string name_ext = name.substr(name.length()-4,name.length());
+    string name_root = name.substr(0,name.length()-4); //to remove the extension
+    
+    //Replace the parameters
+    for (unsigned int k=0; k<params.size(); k++) {
+        params[k].value = ind.p(k);
+    }
+    
+    copy_parameters(params, path_keys, path_data);
+    apply_parameters(params, path_data);
+    
+    string umat_name;
+    int nprops;
+    double psi_rve = 0.;
+    double theta_rve = 0.;
+    double phi_rve = 0.;
+    int nstatev = 0;
+    vec props;
+    
+    //Then read the material properties
+    read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, path_data, materialfile);
+    phase_characteristics rve_init;
+    rve_init.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, nprops, props);
+    
+    
+    // The vector of props should be = {nphases_out,nscale,geom_type,npeak};
+    //int nphases_in = int(props(0));
+    int nphases_out = int(props(1));		//called "nphases_rve" (props(6)) in main (software/PDF.cpp)
+    int nscale_in = int(props(2));		//called "num_file_in" (props(1)) in main (software/PDF.cpp)
+    int nscale_out = int(props(3));		//called "num_file_out" (props(5)) in main (software/PDF.cpp)
+    int geom_type = int(props(4));		//related to umat_name in main (software/PDF.cpp)
+    int npeak = int(props(5));		//called "num_file_peaks" (props(11)) in main (software/PDF.cpp)
+    double parameter_min = int(props(6));		//as (props(8)) in main (software/PDF.cpp)
+    double parameter_max = int(props(7));		//as (props(9)) in main (software/PDF.cpp)
+    double num_Parameter = int(props(8));		//as (props(10)) in main (software/PDF.cpp)
+    
+    
+    switch (geom_type) {
+            
+        case 0 : {
+            //Definition from Nphases.dat
+            rve_init.construct(0,1); //The rve is supposed to be mechanical only here
+            inputfile = "Nphases" + to_string(nscale_in) + ".dat";
+            read_phase(rve_init, path_data, inputfile);
+            break;
+        }
+        case 1: {
+            //Definition from Nlayers.dat
+            rve_init.construct(1,1); //The rve is supposed to be mechanical only here
+            inputfile = "Nlayers" + to_string(nscale_in) + ".dat";
+            read_layer(rve_init, path_data, inputfile);
+            break;
+        }
+        case 2: {
+            rve_init.construct(2,1); //The rve is supposed to be mechanical only here
+            //Definition from Nellipsoids.dat
+            inputfile = "Nellipsoids" + to_string(nscale_in) + ".dat";
+            read_ellipsoid(rve_init, path_data, inputfile);
+            break;
+        }
+        case 3: {
+            rve_init.construct(3,1); //The rve is supposed to be mechanical only here
+            //Definition from Ncylinders.dat
+            inputfile = "Ncylinders" + to_string(nscale_in) + ".dat";
+            read_cylinder(rve_init, path_data, inputfile);
+            break;
+        }
+    }
+    
+
+    string peakfile = "Npeaks" + to_string(npeak) + ".dat";
+    
+    PDF pdf_rve(num_Parameter, parameter_min, parameter_max);    ////HERE Parameter index is set to 0 as default
+    read_peak(pdf_rve, path_data, peakfile);
+    
+    phase_characteristics rve = discretize_PDF(rve_init, pdf_rve, 1, nphases_out);
+    
+    if(rve.shape_type == 0) {
+        outputfile = "Nphases" + to_string(nscale_out) + ".dat";
+        write_phase(rve, path_data, outputfile);
+    }
+    if(rve.shape_type == 1) {
+        outputfile = "Nlayers" + to_string(nscale_out) + ".dat";
+        write_layer(rve, path_data, outputfile);
+    }
+    else if(rve.shape_type == 2) {
+        outputfile = "Nellipsoids" + to_string(nscale_out) + ".dat";
+        write_ellipsoid(rve, path_data, outputfile);
+    }
+    else if(rve.shape_type == 3) {
+        outputfile = "Ncylinders" + to_string(nscale_out) + ".dat";
+        write_cylinder(rve, path_data, outputfile);
+    }
+    
+    //Get the simulation files according to the proper name
+    simulfile = path_results + "/" + name_root + "_" + to_string(ind.id)  +"_" + to_string(1) + name_ext;
+    outputfile = path_data + "/" + outputfile;
+    boost::filesystem::copy_file(outputfile,simulfile,boost::filesystem::copy_option::overwrite_if_exists);
+}
     
 void launch_func_N(const individual &ind, const int &nfiles, vector<parameters> &params, vector<constants> &consts, const string &path_results, const string &name, const string &path_data, const string &path_keys, const string &materialfile)
 {
@@ -360,7 +470,7 @@ void run_simulation(const string &simul_type, const individual &ind, const int &
     }
     
     std::map<std::string, int> list_simul;
-    list_simul = {{"SOLVE",1},{"ODF",2},{"FUNCN",3}};
+    list_simul = {{"SOLVE",1},{"ODF",2},{"PDF",3},{"FUNCN",4}};
     
     switch (list_simul[simul_type]) {
             
@@ -373,6 +483,10 @@ void run_simulation(const string &simul_type, const individual &ind, const int &
             break;
         }
         case 3: {
+            launch_pdf(ind, params, folder, name, path_data, path_keys, inputdatafile);
+            break;
+        }
+        case 4: {
             launch_func_N(ind, nfiles, params, consts, folder, name, path_data, path_keys, inputdatafile);
             break;
         }
