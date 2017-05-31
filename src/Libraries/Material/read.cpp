@@ -25,6 +25,7 @@
 #include <fstream>
 #include <smartplus/parameter.hpp>
 #include <smartplus/Libraries/Material/ODF.hpp>
+#include <smartplus/Libraries/Material/PDF.hpp>
 
 using namespace std;
 using namespace arma;
@@ -93,6 +94,68 @@ void read_peak(ODF &odf_rve, const string &path_data, const string &inputfile) {
     }
     
     paramodf.close();
+}
+
+
+
+//Overload of the read_peak function for PDF
+void read_peak(PDF &pdf_rve, const string &path_data, const string &inputfile) {
+    
+    unsigned int npeaks = 0;
+    std::string buffer;
+    std::string path_inputfile = path_data + "/" + inputfile;
+    std::ifstream parampdf;
+    
+    parampdf.open(path_inputfile, ios::in);
+    if(parampdf) {
+        while (!parampdf.eof())
+        {
+            getline (parampdf,buffer);
+            if (buffer != "") {
+                npeaks++;
+            }
+        }
+    }
+    else {
+        cout << "Error: cannot open the file " << inputfile << " that details the peak characteristics in the folder: " << path_data << endl;
+        return;
+    }
+    parampdf.close();
+    npeaks--;
+    
+    //Generate the sub_phase vector and har-create the objects pointed buy the shared_ptrs
+    pdf_rve.construct(npeaks);
+    
+    int nparams = 0;
+    
+    parampdf.open(path_inputfile, ios::in);
+    parampdf >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer;
+    
+    for(unsigned int i=0; i<npeaks; i++) {
+        
+        parampdf >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> nparams;
+        
+        pdf_rve.peaks[i].params = zeros(nparams);
+        for(unsigned int j=0; j<pdf_rve.peaks[i].params.n_elem; j++) {
+            parampdf >> buffer;
+        }
+    }
+    parampdf.close();
+    
+    parampdf.open(path_inputfile, ios::in);
+    parampdf >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer >> buffer;
+    
+    for(unsigned int i=0; i<npeaks; i++) {
+        
+        parampdf >> pdf_rve.peaks[i].number >> pdf_rve.peaks[i].method >> pdf_rve.peaks[i].mean >> pdf_rve.peaks[i].s_dev >> pdf_rve.peaks[i].width >> pdf_rve.peaks[i].ampl >> buffer;
+        
+        for(unsigned int j=0; j<pdf_rve.peaks[i].params.n_elem; j++) {
+            parampdf >> pdf_rve.peaks[i].params(j);
+        }
+        
+    }
+    
+    parampdf.close();
 }
 
 } //namespace smart
