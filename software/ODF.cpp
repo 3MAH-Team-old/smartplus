@@ -43,20 +43,26 @@ using namespace smart;
 
 int main() {
 
-    int nphases_rve = 36;
+    string path_data = "data";
+    // string path_results = "results";
+    // string outputfile = "results_job.txt";
+    // string pathfile = "path.txt";
+	string materialfile = "material.dat";
+	string umat_name;
+	int nprops = 0;
+	int nstatev = 0;
+	vec props;
+    
+	double psi_rve = 0.;
+	double theta_rve = 0.;
+	double phi_rve = 0.;
+    
+    read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, path_data, materialfile);
     
     phase_characteristics rve_init;
     
-    string umat_name = "MIPLN";
-    vec props = {2,0};
-    
-    double psi_rve = 0.;
-    double theta_rve = 0.;
-    double phi_rve = 0.;
-    
     rve_init.sptr_matprops->update(0, umat_name, 1, psi_rve, theta_rve, phi_rve, props.n_elem, props);
     
-    string path_data = "data";
     string inputfile;
     string outputfile;
     
@@ -82,34 +88,47 @@ int main() {
         }
     }
     
-    double angle_min = 0.;
-    double angle_max = 180.;
     
-    ODF odf_rve(0, false, angle_min, angle_max);
-    read_peak(odf_rve, path_data, "Npeaks0.dat");
+    //Added parameters for the ODF
+    double num_file_output = props(5);
+    double nphases_rve = props(6);
+    double num_phase_disc = props(7);
+    double angle_min = props(8);
+    double angle_max = props(9);
+    double num_angle = props(10);
+    double num_file_npeaks = props(11);
     
-    vec x = linspace<vec>(0,  178,  90);
+    
+    angle_min = 0.;
+    angle_max = 180.;
+    
+    
+    ODF odf_rve(num_angle, false, angle_min, angle_max);
+    string npeaksfile = "Npeaks" + to_string(int(num_file_npeaks)) + ".dat";
+    read_peak(odf_rve, path_data, npeaksfile);
+    
+    vec x = linspace<vec>(angle_min, angle_max-iota,  90);
     cout << "x = " << x.t() << endl;
     
-    vec y = get_densities(x, path_data, "Npeaks0.dat", false);
+    vec y = get_densities_ODF(x, path_data, "Npeaks0.dat", false);
     cout << "y = " << y.t() << endl;
     
-    phase_characteristics rve = discretize_ODF(rve_init, odf_rve, 1, nphases_rve,0);
+    phase_characteristics rve = discretize_ODF(rve_init, odf_rve, num_phase_disc, nphases_rve,0);
 
     if(rve.shape_type == 0) {
-        outputfile = "Nphases1.dat";
+        outputfile = "Nphases" + to_string(int(num_file_output)) + ".dat";
         write_phase(rve, path_data, outputfile);
     }
     if(rve.shape_type == 1) {
-        outputfile = "Nlayers1.dat";
+        outputfile = "Nlayers" + to_string(int(num_file_output)) + ".dat";
         write_layer(rve, path_data, outputfile);
     }
     else if(rve.shape_type == 2) {
-        outputfile = "Nellipsopids1.dat";
+        outputfile = "Nellipsoids" + to_string(int(num_file_output)) + ".dat";
         write_ellipsoid(rve, path_data, outputfile);
     }
     else if(rve.shape_type == 3) {
-        outputfile = "Ncylinders1.dat";
+        outputfile = "Ncylinders" + to_string(int(num_file_output)) + ".dat";
         write_cylinder(rve, path_data, outputfile);
     }
 
