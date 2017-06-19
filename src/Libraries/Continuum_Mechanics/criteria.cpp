@@ -23,6 +23,8 @@
 #include <assert.h>
 #include <math.h>
 #include <armadillo>
+#include <smartplus/parameter.hpp>
+#include <smartplus/Libraries/Continuum_Mechanics/criteria.hpp>
 #include <smartplus/Libraries/Continuum_Mechanics/contimech.hpp>
 #include <smartplus/Libraries/Continuum_Mechanics/constitutive.hpp>
 
@@ -110,8 +112,91 @@ vec dTresca_stress(const vec &v)
 {
     return eta_stress(v);
 }
+
+mat P_Ani(const vec &params) {
+    assert(params.n_elem == 9); //P_11,P_22,P_33,P_12,P_13,P_23,P_44,P_55,P_66
+    mat P = zeros(6,6);
+    P(0,0) = params(0); //P_11
+    P(1,1) = params(1); //P_22
+    P(2,2) = params(2); //P_33
+    P(0,1) = params(3); //P_12
+    P(1,0) = params(3); //P_12
+    P(0,2) = params(4); //P_13
+    P(2,0) = params(4); //P_13
+    P(1,2) = params(5); //P_23
+    P(2,1) = params(5); //P_23
+    P(3,3) = 2.*params(6); //P_44 = P_1212
+    P(4,4) = 2.*params(7); //P_55 = P_1313
+    P(5,5) = 2.*params(8); //P_66 = P_2323
     
+    return P;
+}
     
+mat P_Hill(const vec &params) {
+    assert(params.n_elem == 6); //F,G,H,L,M,N
+    mat P = zeros(6,6);
+    //param(0) = F
+    //param(1) = G
+    //param(2) = H
+    //param(3) = L
+    //param(4) = M
+    //param(5) = N
+    P(0,0) = (1./3.)*(params(1) + params(2)); //P_11 = G+H
+    P(1,1) = (1./3.)*(params(0) + params(2)); //P_22 = F+H
+    P(2,2) = (1./3.)*(params(0) + params(1)); //P_33 = F+G
+    P(0,1) = -(1./3.)*params(2); //P_12 = -H
+    P(1,0) = -(1./3.)*params(2); //P_12 = -H
+    P(0,2) = -(1./3.)*params(1); //P_13 = -G
+    P(2,0) = -(1./3.)*params(1); //P_13 = -G
+    P(1,2) = -(1./3.)*params(0); //P_23 = -F
+    P(2,1) = -(1./3.)*params(0); //P_23 = -F
+    P(3,3) = 2.*params(5); //P_44 = N
+    P(4,4) = 2.*params(4); //P_55 = M
+    P(5,5) = 2.*params(3); //P_66 = L
+    
+    return P;
+}
+
+double Ani_stress(const vec &v, const mat &H) {
+    
+    if (norm(v,2) > iota) {
+        return pow((3./2.)*sum(v%(H*v)),0.5);
+    }
+    else {
+        return 0.;
+    }
+}
+                   
+vec dAni_stress(const vec &v, const mat &H) {
+   
+   if (norm(v,2) > iota) {
+       return (3./2.)*(H*v)/Ani_stress(v,H);
+   }
+   else {
+       return zeros(6);
+   }
+}
+    
+double Hill_stress(const vec &v, const vec &params) {
+    mat P = P_Hill(params);
+    return Ani_stress(v,P);
+}
+
+vec dHill_stress(const vec &v, const vec &params) {
+   mat P = P_Hill(params);
+   return dAni_stress(v,P);
+}
+                   
+double Ani_stress(const vec &v, const vec &params) {
+    mat P = P_Ani(params);
+    return Ani_stress(v,P);
+}
+
+vec dAni_stress(const vec &v, const vec &params) {
+    mat P = P_Ani(params);
+    return dAni_stress(v,P);
+}
+                   
 double Eq_stress(const vec &v, const string &eq_type, const vec &param)
 {
     if(eq_type == "Mises") {
@@ -122,6 +207,12 @@ double Eq_stress(const vec &v, const string &eq_type, const vec &param)
     }
     else if(eq_type == "Prager") {
         return Prager_stress(v, param(0), param(1));
+    }
+    else if(eq_type == "Hill") {
+        return Hill_stress(v, param);
+    }
+    else if(eq_type == "Ani") {
+        return Ani_stress(v, param);
     }
     else {
         cout << "Error in Eq_stress : No valid arguement is given\n";
@@ -139,6 +230,12 @@ vec dEq_stress(const vec &v, const string &eq_type, const vec &param)
     }
     else if(eq_type == "Prager") {
         return dPrager_stress(v, param(0), param(1));
+    }
+    else if(eq_type == "Hill") {
+        return dHill_stress(v, param);
+    }
+    else if(eq_type == "Prager") {
+        return dAni_stress(v, param);
     }
     else {
         cout << "Error in dEq_stress : No valid arguement is given\n";
