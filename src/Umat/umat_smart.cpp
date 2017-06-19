@@ -597,10 +597,12 @@ void smart2abaqus_T(double *stress, double *ddsdde, double *ddsddt, double *drpl
             ddsddt[0] = dSdT(0,0);
             ddsddt[1] = dSdT(0,1);
             ddsddt[2] = dSdT(0,2);
+            ddsddt[3] = dSdT(0,3);
             
             drplde[0] = drpldE(0,0);
             drplde[1] = drpldE(1,0);
             drplde[2] = drpldE(2,0);
+            drplde[3] = drpldE(3,0);
             
             ddsdde[0] = dSdE(0,0);
             ddsdde[4] = dSdE(0,1);
@@ -631,11 +633,15 @@ void smart2abaqus_T(double *stress, double *ddsdde, double *ddsddt, double *drpl
             ddsddt[1] = dSdT(0,1);
             ddsddt[2] = dSdT(0,2);
             ddsddt[3] = dSdT(0,3);
+            ddsddt[4] = dSdT(0,4);
+            ddsddt[5] = dSdT(0,5);
             
             drplde[0] = drpldE(0,0);
             drplde[1] = drpldE(1,0);
             drplde[2] = drpldE(2,0);
             drplde[3] = drpldE(3,0);
+            drplde[4] = drpldE(4,0);
+            drplde[5] = drpldE(5,0);
             
             ddsdde[0] = dSdE(0,0);
             ddsdde[6] = dSdE(0,1);
