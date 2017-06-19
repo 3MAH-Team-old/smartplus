@@ -37,6 +37,30 @@ double Tresca_stress(const arma::vec &);
 //This function returns the the derivative of the Tresca equivalent stress.
 arma::vec dTresca_stress(const arma::vec &);
     
+//This function returns the Full anisotropic tensor from components
+arma::mat P_ani(const arma::vec &);
+
+//This function returns the Hill anisotropic tensor, providing F,G,H,L,M,N
+arma::mat P_hill(const arma::vec &);
+
+//This function returns the anisotropic equivalent stress, given a matrix H
+double Ani_stress(const arma::vec &, const arma::mat &);
+
+//This function returns the derivative of the anisotropic equivalent stress, given a matrix H
+arma::vec dAni_stress(const arma::vec &, const arma::mat &H);
+    
+//This function returns the anisotropic equivalent stress, providing the anisotropic tensor H components
+double Ani_stress(const arma::vec &, const arma::vec &);
+
+//This function returns the derivative of the anisotropic equivalent stress, providing the anisotropic tensor H components
+arma::vec dAni_stress(const arma::vec &, const arma::vec &);
+    
+//This function returns the anisotropic equivalent stress, providing F,G,H,L,M,N
+double Hill_stress(const arma::vec &v, const arma::vec &);
+
+//This function returns the derivative of the anisotropic equivalent stress, providing F,G,H,L,M,N
+arma::vec dHill_stress(const arma::vec &, const arma::vec &);
+    
 //This function computes the selected equivalent stress function
 double Eq_stress(const arma::vec &, const std::string &, const arma::vec &);
 
