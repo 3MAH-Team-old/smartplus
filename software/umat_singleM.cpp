@@ -15,7 +15,7 @@
  
  */
 
-///@file umat_singleT.cpp
+///@file umat_singleM.cpp
 ///@brief umat template to run smart subroutines using Abaqus
 ///@brief Implemented in 1D-2D-3D
 ///@author Chemisky & Despringre
@@ -30,7 +30,7 @@
 
 #include <smartplus/parameter.hpp>
 #include <smartplus/Libraries/Phase/phase_characteristics.hpp>
-#include <smartplus/Libraries/Phase/state_variables_T.hpp>
+#include <smartplus/Libraries/Phase/state_variables_M.hpp>
 #include <smartplus/Umat/umat_smart.hpp>
 
 ///@param stress array containing the components of the stress tensor (dimension ntens)
@@ -79,56 +79,52 @@ extern "C" void umat_(double *stress, double *statev, double *ddsdde, double &ss
 {
     UNUSED(sse);
     UNUSED(spd);
-    UNUSED(scd);
-    UNUSED(predef);
-    UNUSED(dpred);
-    UNUSED(ntens);
-    UNUSED(coords);
-    UNUSED(celent);
-    UNUSED(dfgrd0);
-    UNUSED(dfgrd1);
-    UNUSED(noel);
-    UNUSED(npt);
-    UNUSED(layer);
-    UNUSED(kspt);
-    UNUSED(kstep);
-    UNUSED(kinc);
+	UNUSED(scd);
+	UNUSED(rpl);
+	UNUSED(ddsddt);
+	UNUSED(drplde);
+	UNUSED(drpldt);
+	UNUSED(predef);
+	UNUSED(dpred);
+	UNUSED(ntens);
+	UNUSED(coords);
+	UNUSED(celent);
+	UNUSED(dfgrd0);
+	UNUSED(dfgrd1);
+	UNUSED(noel);
+	UNUSED(npt);
+	UNUSED(layer);
+	UNUSED(kspt);
+	UNUSED(kstep);
+	UNUSED(kinc);
+	
+	bool start = false;
+	double Time = 0.;
+	double DTime = 0.;
     
-    bool start = false;
-    double Time = 0.;
-    double DTime = 0.;
-    
-    int nstatev_smart = nstatev-7;
+	int nstatev_smart = nstatev-4;
     vec props_smart = zeros(nprops);
     vec statev_smart = zeros(nstatev_smart);
     
-    vec sigma = zeros(6);
-    vec Etot = zeros(6);
-    vec DEtot = zeros(6);
-    mat dSdE = zeros(6,6);
-    mat dSdT = zeros(1,6);
-    mat drpldE = zeros(6,1);
-    mat drpldT = zeros(1,1);
-    mat DR = zeros(3,3);
+	vec sigma = zeros(6);
+	vec Etot = zeros(6);
+	vec DEtot = zeros(6);
+	mat Lt = zeros(6,6);
+	mat DR = zeros(3,3);
     vec Wm = zeros(4);
-    vec Wt = zeros(3);
     
-    string umat_name(cmname);
-    umat_name = umat_name.substr(0, 5);
+	string umat_name(cmname);
+	umat_name = umat_name.substr(0, 5);
 	   
     phase_characteristics rve;
-    rve.construct(0,2);
-    auto rve_sv_T = std::dynamic_pointer_cast<state_variables_T>(rve.sptr_sv_global);
-    rve_sv_T->resize(nstatev_smart);
+    rve.construct(0,1);
+    auto rve_sv_M = std::dynamic_pointer_cast<state_variables_M>(rve.sptr_sv_global);
+    rve_sv_M->resize(nstatev_smart);
     rve.sptr_matprops->resize(nprops);
-
     
-    abaqus2smart_T(stress, ddsdde, ddsddt, drplde, drpldt, stran, dstran, time, dtime, temperature, Dtemperature, nprops, props, nstatev, statev, ndi, nshr, drot, rve_sv_T->sigma, rve_sv_T->dSdE, rve_sv_T->dSdT, rve_sv_T->drdE, rve_sv_T->drdT, rve_sv_T->Etot, rve_sv_T->DEtot, rve_sv_T->T, rve_sv_T->DT, Time, DTime, props_smart, rve_sv_T->Wm, rve_sv_T->Wt, rve_sv_T->statev, DR, start);
-    
+	abaqus2smart_M(stress, ddsdde, stran, dstran, time, dtime, temperature, Dtemperature, nprops, props, nstatev, statev, ndi, nshr, drot, rve_sv_M->sigma, rve_sv_M->Lt, rve_sv_M->Etot, rve_sv_M->DEtot, rve_sv_M->T, rve_sv_M->DT, Time, DTime, props_smart, rve_sv_M->Wm, rve_sv_M->statev, DR, start);
     rve.sptr_matprops->update(0, umat_name, 1., 0., 0., 0., nprops, props_smart);
-    select_umat_T(rve, DR, Time, DTime, ndi, nshr, start, pnewdt);
-
-    smart2abaqus_T(stress, ddsdde, ddsddt, drplde, drpldt, rpl, statev, ndi, nshr, rve_sv_T->sigma, rve_sv_T->statev, rve_sv_T->r, rve_sv_T->Wm, rve_sv_T->Wt, rve_sv_T->dSdE, rve_sv_T->dSdT, rve_sv_T->drdE, rve_sv_T->drdT);
+    select_umat_M(rve, DR, Time, DTime, ndi, nshr, start, pnewdt);
     
-    
+	smart2abaqus_M(stress, ddsdde, statev, ndi, nshr, rve_sv_M->sigma, rve_sv_M->statev, rve_sv_M->Wm, rve_sv_M->Lt);
 }
