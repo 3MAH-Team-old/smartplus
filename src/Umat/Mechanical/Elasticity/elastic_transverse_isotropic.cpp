@@ -83,8 +83,8 @@ void umat_elasticity_trans_iso(const vec &Etot, const vec &DEtot, vec &sigma, ma
 	///Elastic prediction - Accounting for the thermal prediction
 
 	//Compute the elastic strain and the related stress	
-	vec DEel = DEtot - alpha*DT;
-    sigma = el_pred(sigma_start, Lt, DEel, ndi);
+    vec Eel = Etot + DEtot - alpha*(T+DT-T_init);
+    sigma = el_pred(Lt, Eel, ndi);
     
     //Computation of the mechanical and thermal work quantities
     Wm += 0.5*sum((sigma_start+sigma)%DEtot);
