@@ -50,11 +50,24 @@ void umat_elasticity_trans_iso(const vec &Etot, const vec &DEtot, vec &sigma, ma
     UNUSED(nprops);
     UNUSED(nstatev);
     UNUSED(statev);
-    UNUSED(T);
     UNUSED(Time);
     UNUSED(DTime);
     UNUSED(nshr);
-    UNUSED(tnew_dt);    
+    UNUSED(tnew_dt);
+    
+    double T_init = statev(0);
+    
+    ///@brief Initialization
+    if(start)
+    {
+        T_init = T;
+        sigma = zeros(6);
+        
+        Wm = 0.;
+        Wm_r = 0.;
+        Wm_ir = 0.;
+        Wm_d = 0.;
+    }
     
 	//From the props to the material properties
 	double axis = props(0);
@@ -91,6 +104,8 @@ void umat_elasticity_trans_iso(const vec &Etot, const vec &DEtot, vec &sigma, ma
     Wm_r += 0.5*sum((sigma_start+sigma)%DEtot);
     Wm_ir += 0.;
     Wm_d += 0.;
+    
+    statev(0) = T_init;    
 }
     
 } //namespace smart
