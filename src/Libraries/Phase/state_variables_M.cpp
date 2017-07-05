@@ -42,9 +42,12 @@ namespace smart{
 */
 
 //-------------------------------------------------------------
-state_variables_M::state_variables_M() : state_variables(), Wm(4), Wm_start(4), L(6,6), Lt(6,6)
+state_variables_M::state_variables_M() : state_variables(), sigma_in(6), sigma_in_start(6), Wm(4), Wm_start(4), L(6,6), Lt(6,6)
 //-------------------------------------------------------------
 {
+    sigma_in = zeros(6);
+    sigma_in_start = zeros(6);
+    
     Wm = zeros(4);
     Wm_start = zeros(4);
     
@@ -59,10 +62,13 @@ state_variables_M::state_variables_M() : state_variables(), Wm(4), Wm_start(4), 
 */
 
 //-------------------------------------------------------------
-state_variables_M::state_variables_M(const vec &mEtot, const vec &mDEtot, const vec &msigma, const vec &msigma_start, const double &mT, const double &mDT, const int &mnstatev, const vec &mstatev, const vec &mstatev_start, const vec &mWm, const vec& mWm_start, const mat &mL, const mat &mLt) : state_variables(mEtot, mDEtot, msigma, msigma_start, mT, mDT, mnstatev, mstatev, mstatev_start), L(6,6), Lt(6,6)
+state_variables_M::state_variables_M(const vec &mEtot, const vec &mDEtot, const vec &msigma, const vec &msigma_start, const vec &msigma_in, const vec &msigma_in_start, const double &mT, const double &mDT, const int &mnstatev, const vec &mstatev, const vec &mstatev_start, const vec &mWm, const vec& mWm_start, const mat &mL, const mat &mLt) : state_variables(mEtot, mDEtot, msigma, msigma_start, mT, mDT, mnstatev, mstatev, mstatev_start), sigma_in(6), sigma_in_start(6), Wm(4), Wm_start(4), L(6,6), Lt(6,6)
 //-------------------------------------------------------------
 {
 
+    assert (msigma_in.size() == 6);
+    assert (msigma_in_start.size() == 6);
+    
     assert (mWm.size() == 4);
     assert (mWm_start.size() == 4);
     
@@ -70,7 +76,10 @@ state_variables_M::state_variables_M(const vec &mEtot, const vec &mDEtot, const 
 	assert (mL.n_cols == 6);
 	assert (mLt.n_rows == 6);
 	assert (mLt.n_cols == 6);	
-	
+
+    sigma_in = msigma_in;
+    sigma_in_start = msigma_in_start;
+    
     Wm = mWm;
     Wm_start = mWm_start;
     
@@ -84,9 +93,12 @@ state_variables_M::state_variables_M(const vec &mEtot, const vec &mDEtot, const 
 */
 
 //------------------------------------------------------
-state_variables_M::state_variables_M(const state_variables_M& sv) : state_variables(sv), Wm(4), Wm_start(4), L(6,6), Lt(6,6)
+state_variables_M::state_variables_M(const state_variables_M& sv) : state_variables(sv), sigma_in(6), sigma_in_start(6), Wm(4), Wm_start(4), L(6,6), Lt(6,6)
 //------------------------------------------------------
 {
+    sigma_in = sv.sigma_in;
+    sigma_in_start = sv.sigma_in_start;
+    
     Wm = sv.Wm;
     Wm_start = sv.Wm_start;
     
@@ -119,6 +131,8 @@ state_variables_M& state_variables_M::operator = (const state_variables_M& sv)
 	DEtot = sv.DEtot;
 	sigma = sv.sigma;
 	sigma_start = sv.sigma_start;
+    sigma_in = sv.sigma_in;
+    sigma_in_start = sv.sigma_in_start;
 	L = sv.L;
 	Lt = sv.Lt;
     T = sv.T;
@@ -142,6 +156,8 @@ state_variables_M& state_variables_M::copy_fields_M(const state_variables_M& sv)
 	DEtot = sv.DEtot;
 	sigma = sv.sigma;
 	sigma_start = sv.sigma_start;
+	sigma_in = sv.sigma_in;
+    sigma_in_start = sv.sigma_in_start;
 	L = sv.L;
 	Lt = sv.Lt;
     T = sv.T;
@@ -154,11 +170,14 @@ state_variables_M& state_variables_M::copy_fields_M(const state_variables_M& sv)
 }
 
 //-------------------------------------------------------------
-void state_variables_M::update(const vec &mEtot, const vec &mDEtot, const vec &msigma, const vec &msigma_start, const double &mT, const double &mDT, const int &mnstatev, const vec &mstatev, const vec &mstatev_start,  const vec &mWm, const vec &mWm_start, const mat &mL, const mat &mLt)
+void state_variables_M::update(const vec &mEtot, const vec &mDEtot, const vec &msigma, const vec &msigma_start, const vec &msigma_in, const vec &msigma_in_start, const double &mT, const double &mDT, const int &mnstatev, const vec &mstatev, const vec &mstatev_start,  const vec &mWm, const vec &mWm_start, const mat &mL, const mat &mLt)
 //-------------------------------------------------------------
 {
     state_variables::update(mEtot, mDEtot, msigma, msigma_start, mT, mDT, mnstatev, mstatev, mstatev_start);
 
+    assert (msigma_in.size() == 6);
+    assert (msigma_in_start.size() == 6);
+    
     assert (mWm.size() == 4);
     assert (mWm_start.size() == 4);
     
@@ -166,6 +185,9 @@ void state_variables_M::update(const vec &mEtot, const vec &mDEtot, const vec &m
     assert (mL.n_cols == 6);
     assert (mLt.n_rows == 6);
     assert (mLt.n_cols == 6);
+    
+    sigma_in = msigma_in;
+    sigma_in_start = msigma_in_start;
     
     Wm = mWm;
     Wm_start = mWm_start;
@@ -179,6 +201,7 @@ void state_variables_M::to_start()
 //-------------------------------------------------------------
 {
     state_variables::to_start();
+    sigma_in = sigma_in_start;
     Wm = Wm_start;
 }
 
@@ -187,6 +210,7 @@ void state_variables_M::set_start()
 //-------------------------------------------------------------
 {
     state_variables::set_start();
+    sigma_in_start = sigma_in;
     Wm_start = Wm;
 }
         
@@ -197,6 +221,9 @@ state_variables_M& state_variables_M::rotate_l2g(const state_variables_M& sv, co
     
     state_variables::rotate_l2g(sv, psi, theta, phi);
     
+    sigma_in = sv.sigma_in;
+    sigma_in_start = sv.sigma_in_start;
+    
     Wm = sv.Wm;
     Wm_start = sv.Wm_start;
     
@@ -204,14 +231,20 @@ state_variables_M& state_variables_M::rotate_l2g(const state_variables_M& sv, co
 	Lt = sv.Lt;
     
   	if(fabs(phi) > iota) {
+        sigma_in = rotate_stress(sigma_in, -phi, axis_phi);
+        sigma_in_start = rotate_stress(sigma_in_start, -phi, axis_phi);
 		L = rotateL(L, -phi, axis_phi);
 		Lt = rotateL(Lt, -phi, axis_phi);
 	}
   	if(fabs(theta) > iota) {
+        sigma_in = rotate_stress(sigma_in, -theta, axis_theta);
+        sigma_in_start = rotate_stress(sigma_in_start, -theta, axis_theta);
 		Lt = rotateL(Lt, -theta, axis_theta);
 		L = rotateL(L, -theta, axis_theta);
 	}
 	if(fabs(psi) > iota) {
+        sigma_in = rotate_stress(sigma_in, -psi, axis_psi);
+        sigma_in_start = rotate_stress(sigma_in_start, -psi, axis_psi);
 		Lt = rotateL(Lt, -psi, axis_psi);
 		L = rotateL(L, -psi, axis_psi);        
 	}
@@ -226,6 +259,9 @@ state_variables_M& state_variables_M::rotate_g2l(const state_variables_M& sv, co
 
     state_variables::rotate_g2l(sv, psi, theta, phi);
     
+    sigma_in = sv.sigma_in;
+    sigma_in_start = sv.sigma_in_start;
+    
     Wm = sv.Wm;
     Wm_start = sv.Wm_start;
 
@@ -233,14 +269,20 @@ state_variables_M& state_variables_M::rotate_g2l(const state_variables_M& sv, co
     Lt = sv.Lt;
     
   	if(fabs(psi) > iota) {
+        sigma_in = rotate_stress(sigma_in, psi, axis_psi);
+        sigma_in_start = rotate_stress(sigma_in_start, psi, axis_psi);
 		L = rotateL(L, psi, axis_psi);
 		Lt = rotateL(Lt, psi, axis_psi);
 	}			
 	if(fabs(theta) > iota) {
+        sigma_in = rotate_stress(sigma_in, theta, axis_theta);
+        sigma_in_start = rotate_stress(sigma_in_start, theta, axis_theta);
 		L = rotateL(L, theta, axis_theta);
 		Lt = rotateL(Lt, theta, axis_theta);
 	}
 	if(fabs(phi) > iota) {
+        sigma_in = rotate_stress(sigma_in, phi, axis_phi);
+        sigma_in_start = rotate_stress(sigma_in_start, phi, axis_phi);
 		L = rotateL(L, phi, axis_phi);
 		Lt = rotateL(Lt, phi, axis_phi);
     }
@@ -256,6 +298,8 @@ ostream& operator << (ostream& s, const state_variables_M& sv)
 	s << "DEtot: \n" << sv.DEtot << "\n";
 	s << "sigma: \n" << sv.sigma << "\n";
 	s << "sigma_start: \n" << sv.sigma_start << "\n";
+    s << "sigma_in: \n" << sv.sigma_in << "\n";
+    s << "sigma_in_start: \n" << sv.sigma_in_start << "\n";    
     s << "T: \n" << sv.T << "\n";
     s << "DT: \n" << sv.DT << "\n";
     s << "Wm: \n" << sv.Wm << "\n";
