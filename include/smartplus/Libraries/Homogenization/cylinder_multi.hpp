@@ -47,7 +47,7 @@ protected:
     arma::mat B_loc;
     
     cylinder_multi(); //default constructor
-    cylinder_multi(const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&); //Constructor with parameters
+    cylinder_multi(const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::vec&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&); //Constructor with parameters
     cylinder_multi(const cylinder_multi&);	//Copy constructor
     ~cylinder_multi();
     
