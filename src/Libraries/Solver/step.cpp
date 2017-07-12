@@ -135,7 +135,7 @@ void step::generate()
 }
 
 //----------------------------------------------------------------------
-void step::compute_inc(double &tnew_dt, const int &inc, double &tinc, double &Dtinc, double &Dtinc_cur) {
+void step::compute_inc(double &tnew_dt, const int &inc, double &tinc, double &Dtinc, double &Dtinc_cur, const int &inforce_solver) {
 //----------------------------------------------------------------------
     
     if((inc == 0)&&(Dtinc == 0.)){
