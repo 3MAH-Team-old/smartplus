@@ -58,7 +58,7 @@ cylinder_multi::cylinder_multi() : phase_multi(), T_loc(6,6), T(6,6), A_loc(6,6)
 */
 
 //-------------------------------------------------------------
-cylinder_multi::cylinder_multi(const mat &mA, const mat &mA_start, const mat &mB, const mat &mB_start, const mat &mA_loc, const mat &mB_loc, const mat &mT_loc, const mat &mT) : phase_multi(mA, mA_start, mB, mB_start), T_loc(6,6), T(6,6), A_loc(6,6), B_loc(6,6)
+cylinder_multi::cylinder_multi(const mat &mA, const mat &mA_start, const mat &mB, const mat &mB_start, const vec &mA_in, const mat &mA_loc, const mat &mB_loc, const mat &mT_loc, const mat &mT) : phase_multi(mA, mA_start, mB, mB_start, mA_in), T_loc(6,6), T(6,6), A_loc(6,6), B_loc(6,6)
 //-------------------------------------------------------------
 {
     T_loc = mT_loc;
