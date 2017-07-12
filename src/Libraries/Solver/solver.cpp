@@ -45,7 +45,7 @@ using namespace arma;
 
 namespace smart{
 
-void solver(const string &umat_name, const vec &props, const double &nstatev, const double &psi_rve, const double &theta_rve, const double &phi_rve, const std::string &path_data, const std::string &path_results, const std::string &pathfile, const std::string &outputfile) {
+void solver(const string &umat_name, const vec &props, const double &nstatev, const double &psi_rve, const double &theta_rve, const double &phi_rve, const int &solver_type, const double &div_tnew_dt_solver, const double &mul_tnew_dt_solver, const int &miniter_solver, const int &maxiter_solver, const int &inforce_solver, const double &precision_solver, const double &lambda_solver, const std::string &path_data, const std::string &path_results, const std::string &pathfile, const std::string &outputfile) {
 
     //Check if the required directories exist:
     if(!boost::filesystem::is_directory(path_data)) {
@@ -159,6 +159,19 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                 //Run the umat for the first time in the block. So that we get the proper tangent properties
                 run_umat_M(rve, DR, Time, DTime, ndi, nshr, start, tnew_dt);
                 
+                shared_ptr<step_meca> sptr_meca;
+                if(solver_type == 1) {
+                    //RNL
+                    
+                    sptr_meca = std::dynamic_pointer_cast<step_meca>(blocks[0].steps[0]);
+                    sptr_meca->generate(Time, sv_M->Etot, sv_M->sigma, sv_M->T);
+                    
+                    Lt_2_K(sv_M->Lt, K, sptr_meca->cBC_meca, lambda_solver);
+                    
+                    //jacobian inversion
+                    invK = inv(K);
+                }
+                
                 if(start) {
                     //Use the number of phases saved to define the files
                     rve.define_output(path_results, outputfile_global, "global");
@@ -176,8 +189,8 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                     
                     /// Step loop
                     for(int j = 0; j < blocks[i].nstep; j++){
-                        
-                        shared_ptr<step_meca> sptr_meca = std::dynamic_pointer_cast<step_meca>(blocks[i].steps[j]);
+                    
+                        sptr_meca = std::dynamic_pointer_cast<step_meca>(blocks[i].steps[j]);
                         sptr_meca->generate(Time, sv_M->Etot, sv_M->sigma, sv_M->T);
                         
                         nK = sum(sptr_meca->cBC_meca);
@@ -196,7 +209,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                             
                             while (tinc<1.) {
                                 
-                                sptr_meca->compute_inc(tnew_dt, inc, tinc, Dtinc, Dtinc_cur);
+                                sptr_meca->compute_inc(tnew_dt, inc, tinc, Dtinc, Dtinc_cur, inforce_solver);
                                 
                                 if(nK == 0){
                                     
@@ -204,7 +217,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                     sv_M->DT = Dtinc*sptr_meca->Ts(inc);
                                     DTime = Dtinc*sptr_meca->times(inc);
                                     
-                                    run_umat_M(rve, DR, Time, DTime, ndi, nshr, start, tnew_dt);
+                                    run_umat_M_RNL(rve, DR, Time, DTime, ndi, nshr, start, tnew_dt);
                                 }
                                 else{
                                     /// ********************** SOLVING THE MIXED PROBLEM NRSTRUCT ***********************************
@@ -226,22 +239,47 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                     
                                     while((error > precision_solver)&&(compteur < maxiter_solver)) {
                                         
-                                        ///Prediction of the strain increment using the tangent modulus given from the umat_ function
-                                        //we use the ddsdde (Lt) from the previous increment
-                                        Lt_2_K(sv_M->Lt, K, sptr_meca->cBC_meca, lambda_solver);
-                                        
-                                        ///jacobian inversion
-                                        invK = inv(K);
-                                        
-                                        /// Prediction of the component of the strain tensor
-                                        Delta = -invK * residual;
+                                        if(solver_type == 0){
+                                            // classic
+                                            ///Prediction of the strain increment using the tangent modulus given from the umat_ function
+                                            //we use the ddsdde (Lt) from the previous increment
+                                            Lt_2_K(sv_M->Lt, K, sptr_meca->cBC_meca, lambda_solver);
+                                            
+                                            ///jacobian inversion
+                                            invK = inv(K);
+                                            
+                                            /// Prediction of the component of the strain tensor
+                                            Delta = -invK * residual;
+                                        }
+                                        else if(solver_type == 1) {
+                                            //RNL
+                                            vec sigma_in_red = zeros(6);
+                                            for(int k = 0 ; k < 6 ; k++)
+                                            {
+                                                if (sptr_meca->cBC_meca(k)) {
+                                                    sigma_in_red(k) = sv_M->sigma_in(k) - sv_M->sigma_in_start(k);
+                                                }
+                                                else {
+                                                    sigma_in_red(k) = 0.;
+                                                }
+                                            }
+                                            Delta = -1.*invK * (residual - sigma_in_red);
+                                        }
                                         
                                         sv_M->DEtot += Delta;
                                         sv_M->DT = Dtinc*sptr_meca->Ts(inc);
                                         DTime = Dtinc*sptr_meca->times(inc);
                                         
                                         rve.to_start();
-                                        run_umat_M(rve, DR, Time, DTime, ndi, nshr, start, tnew_dt);
+                                        
+                                        if(solver_type == 0){
+                                            // classic
+                                            run_umat_M(rve, DR, Time, DTime, ndi, nshr, start, tnew_dt);
+                                        }
+                                        else if(solver_type == 1) {
+                                            //RNL
+                                            run_umat_M_RNL(rve, DR, Time, DTime, ndi, nshr, start, tnew_dt);
+                                        }
                                         
                                         for(int k = 0 ; k < 6 ; k++)
                                         {
@@ -430,7 +468,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                             
                             while (tinc<1.) {
                                 
-                                sptr_thermomeca->compute_inc(tnew_dt, inc, tinc, Dtinc, Dtinc_cur);
+                                sptr_thermomeca->compute_inc(tnew_dt, inc, tinc, Dtinc, Dtinc_cur, inforce_solver);
                                 
                                 if(nK + sptr_thermomeca->cBC_T == 0){
                                     
@@ -645,9 +683,9 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                 break;
             }
         }
-    //end of blocks loops
+        //end of blocks loops
     }
     
 }
-
+    
 } //namespace smart
