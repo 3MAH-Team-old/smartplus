@@ -40,7 +40,7 @@ namespace smart{
 */
 
 //-------------------------------------------------------------
-phase_multi::phase_multi() : A(6,6), A_start(6,6), B(6,6), B_start(6,6)
+phase_multi::phase_multi() : A(6,6), A_start(6,6), B(6,6), B_start(6,6), A_in(6)
 //-------------------------------------------------------------
 {
     
@@ -51,7 +51,7 @@ phase_multi::phase_multi() : A(6,6), A_start(6,6), B(6,6), B_start(6,6)
 */
 
 //-------------------------------------------------------------
-phase_multi::phase_multi(const mat &mA, const mat &mA_start, const mat &mB, const mat &mB_start) : A(6,6), A_start(6,6), B(6,6), B_start(6,6)
+phase_multi::phase_multi(const mat &mA, const mat &mA_start, const mat &mB, const mat &mB_start, const vec &mA_in) : A(6,6), A_start(6,6), B(6,6), B_start(6,6), A_in(6)
 //-------------------------------------------------------------
 {
     A = mA;
@@ -59,6 +59,8 @@ phase_multi::phase_multi(const mat &mA, const mat &mA_start, const mat &mB, cons
     
     A_start = mA_start;
     B_start = mB_start;
+    
+    A_in = mA_in;
 }
 
 /*!
@@ -67,7 +69,7 @@ phase_multi::phase_multi(const mat &mA, const mat &mA_start, const mat &mB, cons
 */
     
 //------------------------------------------------------
-phase_multi::phase_multi(const phase_multi& pc) : A(6,6), A_start(6,6), B(6,6), B_start(6,6)
+phase_multi::phase_multi(const phase_multi& pc) : A(6,6), A_start(6,6), B(6,6), B_start(6,6), A_in(6)
 //------------------------------------------------------
 {
     A = pc.A;
@@ -76,6 +78,7 @@ phase_multi::phase_multi(const phase_multi& pc) : A(6,6), A_start(6,6), B(6,6), 
     A_start = pc.A_start;
     B_start = pc.B_start;
     
+    A_in = pc.A_in;
 }
 
 /*!
@@ -118,6 +121,8 @@ phase_multi& phase_multi::operator = (const phase_multi& pc)
     A_start = pc.A_start;
     B_start = pc.B_start;
     
+    A_in = pc.A_in;
+    
 	return *this;
 }
     
@@ -130,6 +135,9 @@ ostream& operator << (ostream& s, const phase_multi& pc)
     s << pc.A;
     s << "Display stress concentration tensor:\n";
     s << pc.B;
+    s << "Display inelastic strain concentration vector:\n";
+    s << pc.A_in;
+    
     
     s << "\n\n";
 
