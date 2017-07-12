@@ -28,6 +28,12 @@ namespace smart{
 ///Approximation of a normal distribution
 double normal_distrib(const double &, const double &, const double &);
 
+//Compute the probabilistic value for a given x, providing the shape parameter alpha and the scale parameter beta
+double proba_distrib_weibull(const double &, const double &, const double &);
+
+//Compute the probabilistic value for a given x, providing the shape parameter alpha and the scale parameter beta
+double cumul_distrib_weibull(const double &, const double &, const double &);
+    
 //tri_sum of a and b
 int tri_sum(const int &, const int &);
 
