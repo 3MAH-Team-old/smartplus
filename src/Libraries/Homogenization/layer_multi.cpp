@@ -51,7 +51,7 @@ layer_multi::layer_multi() : phase_multi(), Dnn(3,3), Dnt(3,3), dXn(3,3), dXt(3,
 */
 
 //-------------------------------------------------------------
-layer_multi::layer_multi(const mat &mA, const mat &mA_start, const mat &mB, const mat &mB_start, const mat &mDnn, const mat &mDnt, const mat &mdXn, const mat &mdXt, const vec &msigma_hat, const vec &mdzdx1) : phase_multi(mA, mA_start, mB, mB_start), Dnn(3,3), Dnt(3,3), dXn(3,3), dXt(3,3), sigma_hat(3), dzdx1(3)
+layer_multi::layer_multi(const mat &mA, const mat &mA_start, const mat &mB, const mat &mB_start, const vec &mA_in, const mat &mDnn, const mat &mDnt, const mat &mdXn, const mat &mdXt, const vec &msigma_hat, const vec &mdzdx1) : phase_multi(mA, mA_start, mB, mB_start, mA_in), Dnn(3,3), Dnt(3,3), dXn(3,3), dXt(3,3), sigma_hat(3), dzdx1(3)
 //-------------------------------------------------------------
 {
     Dnn = mDnn;
