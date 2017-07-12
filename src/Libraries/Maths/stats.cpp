@@ -23,6 +23,7 @@
 #include <assert.h>
 #include <armadillo>
 #include <smartplus/parameter.hpp>
+#include <smartplus/Libraries/Continuum_Mechanics/contimech.hpp>
 
 using namespace std;
 using namespace arma;
@@ -42,6 +43,28 @@ double normal_distrib(const double &x, const double &mean, const double &dev){
 		double k_sum = k*(0.319381530 + k*(-0.356563782 + k*(1.781477937 + k*(-1.821255978 + 1.330274429*k))));
 		return (1.0 - (1.0/(sqrt(2*pi)))*exp(-0.5*x_norm*x_norm) * k_sum);
 	}	
+}
+
+double proba_distrib_weibull(const double &x, const double &alpha, const double &beta) {
+    //This is the implementation of a Wibull cumulative distribution function, where
+    // alpha > 0 is the shape parameter and λ > 0 is the scale parameter of the distribution.
+    // Its complementary cumulative distribution function is a stretched exponential function. The Weibull distribution is related to a number of other probability distributions; in particular, it interpolates between the exponential distribution (alpha = 1) and the Rayleigh distribution (alpha = 2 and \beta = \sqrt{2}\sigma)
+    
+    assert(alpha > 0.);
+    assert(beta > 0.);
+    
+    return Macaulay_p((alpha/beta)*pow((x/beta),alpha-1.)*exp(-1.* pow(x/beta, alpha)));
+}
+    
+double cumul_distrib_weibull(const double &x, const double &alpha, const double &beta) {
+    //This is the implementation of a Wibull cumulative distribution function, where
+    // alpha > 0 is the shape parameter and λ > 0 is the scale parameter of the distribution.
+    // Its complementary cumulative distribution function is a stretched exponential function. The Weibull distribution is related to a number of other probability distributions; in particular, it interpolates between the exponential distribution (alpha = 1) and the Rayleigh distribution (alpha = 2 and \beta = \sqrt{2}\sigma)
+    
+    assert(alpha > 0.);
+    assert(beta > 0.);
+    
+    return Macaulay_p(1. - exp(-1.* pow(x/beta, alpha)));
 }
 
 //tri_sum of a and b
