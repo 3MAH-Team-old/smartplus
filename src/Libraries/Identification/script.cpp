@@ -194,11 +194,23 @@ void launch_solver(const individual &ind, const int &nfiles, vector<parameters> 
         apply_constants(consts, path_data);
         apply_parameters(params, path_data);
         
+        int solver_type = 0;
+        
+        double div_tnew_dt_solver = 0.;
+        double mul_tnew_dt_solver = 0.;
+        int miniter_solver = 0;
+        int maxiter_solver = 0;
+        int inforce_solver = 0;
+        double precision_solver = 0.;
+        double lambda_solver = 0.;
+        
+        solver_essentials(solver_type, path_data);
+        solver_control(div_tnew_dt_solver, mul_tnew_dt_solver, miniter_solver, maxiter_solver, inforce_solver, precision_solver, lambda_solver, path_data);
+        
         //Then read the material properties
         read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, path_data, materialfile);
-        
         ///Launching the solver with relevant parameters
-        solver(umat_name, props, nstatev, psi_rve, theta_rve, phi_rve, path_data, path_results, pathfile, outputfile);
+        solver(umat_name, props, nstatev, psi_rve, theta_rve, phi_rve, solver_type, div_tnew_dt_solver, mul_tnew_dt_solver, miniter_solver, maxiter_solver, inforce_solver, precision_solver, lambda_solver, path_data, path_results, pathfile, outputfile);
         
         //Get the simulation files according to the proper name
         outputfile = path_results + "/" + name_root + "_" + to_string(ind.id) + "_" + to_string(i+1) + "_global-0" + name_ext;
