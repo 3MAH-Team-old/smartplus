@@ -55,7 +55,7 @@ class layer_multi : public phase_multi
         arma::vec dzdx1;
     
         layer_multi(); 	//default constructor
-        layer_multi(const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::vec&, const arma::vec&); //Constructor with parameters
+        layer_multi(const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::vec&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::vec&, const arma::vec&); //Constructor with parameters
         layer_multi(const layer_multi&);	//Copy constructor
             ~layer_multi();
     

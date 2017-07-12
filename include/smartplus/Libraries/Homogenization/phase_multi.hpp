@@ -43,9 +43,11 @@ class phase_multi
 		arma::mat A_start;	//Concentration tensor (strain)
 		arma::mat B;	//Concentration tensor (stress)
 		arma::mat B_start;	//Concentration tensor (stress)
+
+        arma::vec A_in;	//Inelastic concentration tensor (strain vector)
         
 		phase_multi(); 	//default constructor
-        phase_multi(const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&); //Constructor with parameters
+        phase_multi(const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&, const arma::vec&); //Constructor with parameters
 		phase_multi(const phase_multi&);	//Copy constructor
         ~phase_multi();
 		
