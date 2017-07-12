@@ -82,6 +82,47 @@ void Lth_2_K(const mat &dSdE, mat &dSdT, mat &dQdE, mat &dQdT, mat &K, const Col
     }
 }
 
+void solver_essentials(int &solver_type, const string &path, const string &filename) {
+        
+    string pathfile = path + "/" + filename;
+    ifstream solver_essentials;
+    string buffer;
+    
+    solver_essentials.open(pathfile, ios::in);
+    if(!solver_essentials) {
+        cout << "Error: cannot open : " << filename << " in :" << path << endl;
+        return;
+    }
+    
+    ///Get the control values for the solver
+    solver_essentials >> buffer >> solver_type;
+    solver_essentials.close();
+}
+
+void solver_control(double &div_tnew_dt_solver, double &mul_tnew_dt_solver, int &miniter_solver, int &maxiter_solver, int &inforce_solver, double &precision_solver, double &lambda_solver, const string &path, const string &filename) {
+    
+    string pathfile = path + "/" + filename;
+    ifstream solver_control;
+    string buffer;
+    
+    solver_control.open(pathfile, ios::in);
+    if(!solver_control) {
+        cout << "Error: cannot open : " << filename << " in :" << path << endl;
+        return;
+    }
+    
+    ///Get the control values for the solver
+    solver_control >> buffer >> div_tnew_dt_solver;
+    solver_control >> buffer >> mul_tnew_dt_solver;
+    solver_control >> buffer >> miniter_solver;
+    solver_control >> buffer >> maxiter_solver;
+    solver_control >> buffer >> inforce_solver;
+    solver_control >> buffer >> precision_solver;
+    solver_control >> buffer >> lambda_solver;
+    solver_control.close();
+
+}
+    
 void read_matprops(string &umat_name, int &nprops, vec &props, int &nstatev, double &psi_rve, double &theta_rve, double &phi_rve, const string &path_data, const string &materialfile) {
 
     ///Material properties reading, use "material.dat" to specify parameters values
