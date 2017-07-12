@@ -56,7 +56,7 @@ protected:
     virtual ~step();
    
     virtual void generate();
-    virtual void compute_inc(double &, const int &, double &, double &, double &);
+    virtual void compute_inc(double &, const int &, double &, double &, double &, const int &);
     virtual void assess_inc(const double &, double &, const double &, phase_characteristics &, double &, const double &);
     
     virtual step& operator = (const step&);
