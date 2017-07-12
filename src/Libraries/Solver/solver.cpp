@@ -147,7 +147,6 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                     //sv_M is reassigned properly
                     sv_M = std::dynamic_pointer_cast<state_variables_M>(rve.sptr_sv_global);
                 }
-                
                 sv_M->L = zeros(6,6);
                 sv_M->Lt = zeros(6,6);
                 
@@ -162,7 +161,6 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                 shared_ptr<step_meca> sptr_meca;
                 if(solver_type == 1) {
                     //RNL
-                    
                     sptr_meca = std::dynamic_pointer_cast<step_meca>(blocks[0].steps[0]);
                     sptr_meca->generate(Time, sv_M->Etot, sv_M->sigma, sv_M->T);
                     
@@ -170,6 +168,10 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                     
                     //jacobian inversion
                     invK = inv(K);
+                }
+                else if(solver_type < 0)||(solver_type > 1) {
+                    cout << "Error, the solver type is not properly defined";
+                    return;
                 }
                 
                 if(start) {
