@@ -112,6 +112,12 @@ then
 			then
 				cp ${current_dir}/build/bin/Debug/${file} ${current_dir}/build/bin
 			fi
+
+			#if Release exists, copy of the file from build/bin/Debug to build/bin
+			if [ -f ${current_dir}/build/bin/Release/${file} ]
+			then
+				cp ${current_dir}/build/bin/Release/${file} ${current_dir}/build/bin
+			fi
 			
 			#Copy the file from build/bin to exec
 			cp ${current_dir}/build/bin/${file} ${current_dir}/exec
