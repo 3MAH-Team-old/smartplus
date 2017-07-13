@@ -169,7 +169,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                     //jacobian inversion
                     invK = inv(K);
                 }
-                else if(solver_type < 0)||(solver_type > 1) {
+                else if ((solver_type < 0)||(solver_type > 1)) {
                     cout << "Error, the solver type is not properly defined";
                     return;
                 }
