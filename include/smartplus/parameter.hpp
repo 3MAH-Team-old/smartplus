@@ -57,35 +57,6 @@ namespace smart {
 #define mul_tnew_dt_umat 2
 #endif
 
-#ifndef lambda_solver
-#define lambda_solver 10000
-#endif
-    
-#ifndef miniter_solver
-#define miniter_solver 10
-#endif
-
-#ifndef maxiter_solver
-#define maxiter_solver 100
-#endif
-
-#ifndef precision_solver
-#define precision_solver 1E-6
-#endif
-
-#ifndef inforce_solver
-#define inforce_solver 1
-#endif
-
-#ifndef div_tnew_dt_solver
-#define div_tnew_dt_solver 0.5
-#endif
-
-#ifndef mul_tnew_dt_solver
-#define mul_tnew_dt_solver 2
-#endif
-
-
 #ifndef maxiter_micro
 #define maxiter_micro 100
 #endif
