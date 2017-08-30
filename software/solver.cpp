@@ -46,7 +46,11 @@ int main() {
     string outputfile = "results_job.txt";
     string pathfile = "path.txt";
 	string materialfile = "material.dat";
-	string umat_name;
+    string sol_essentials = "solver_essentials.inp";
+    string sol_control = "solver_control.inp";
+
+
+    string umat_name;
 	int nprops = 0;
 	int nstatev = 0;
 	vec props;
@@ -54,9 +58,21 @@ int main() {
 	double psi_rve = 0.;
 	double theta_rve = 0.;
 	double phi_rve = 0.;
+
+    int solver_type = 0;
+    double div_tnew_dt_solver = 0.;
+    double mul_tnew_dt_solver = 0.;
+    int miniter_solver = 0;
+    int maxiter_solver = 0;
+    int inforce_solver = 0;
+    double precision_solver = 0.;
+    double lambda_solver = 0.;
+    
+    solver_essentials(solver_type, path_data, sol_essentials);
+    solver_control(div_tnew_dt_solver, mul_tnew_dt_solver, miniter_solver, maxiter_solver, inforce_solver, precision_solver, lambda_solver, path_data, sol_control);
     
     read_matprops(umat_name, nprops, props, nstatev, psi_rve, theta_rve, phi_rve, path_data, materialfile);
-    solver(umat_name, props, nstatev, psi_rve, theta_rve, phi_rve, path_data, path_results, pathfile, outputfile);
+    solver(umat_name, props, nstatev, psi_rve, theta_rve, phi_rve, solver_type, div_tnew_dt_solver, mul_tnew_dt_solver, miniter_solver, maxiter_solver, inforce_solver, precision_solver, lambda_solver, path_data, path_results, pathfile, outputfile);
     
 	return 0;
 }
