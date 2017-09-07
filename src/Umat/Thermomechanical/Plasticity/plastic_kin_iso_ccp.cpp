@@ -308,7 +308,7 @@ void umat_plasticity_kin_iso_CCP_T(const vec &Etot, const vec &DEtot, vec &sigma
     }
     else {
         Gamma_epsilon = (dSdE*DEP)*(1./DTime) + (dA_pdp)*P_epsilon[0]*(Dp/DTime) + sum((dA_ada*Lambdaa)%P_epsilon[0])*(Da/DTime) + A_p/DTime*P_epsilon[0] + sum(A_a%Lambdaa)*P_epsilon[0]*(1./DTime) + sum(sigma%Lambdap)*P_epsilon[0]/DTime;
-        Gamma_theta = dA_pdp*P_theta[0]*(Dp/DTime) + sum((dA_ada*Lambdaa)%Da)*P_theta[0]/DTime + sum(A_a%Lambdaa)*P_theta[0]*(1./DTime) + A_p/DTime*P_theta[0] + sum(dSdT%DEP)*(1./DTime) + sum(sigma%Lambdap)*P_theta[0]/DTime;
+        Gamma_theta = dA_pdp*P_theta[0]*(Dp/DTime) + sum((dA_ada*Lambdaa)%Da)*P_theta[0]/DTime + A_p/DTime*P_theta[0] + sum(A_a%Lambdaa)*P_theta[0]*(1./DTime) + sum(dSdT%DEP)*(1./DTime) + sum(sigma%Lambdap)*P_theta[0]/DTime;
         
         N_epsilon = -1./DTime*(T + DT)*(dSdE*alpha);
         N_theta = -1./DTime*(T + DT)*sum(dSdT%alpha) -1.*Deta/DTime - rho*c_p*(1./DTime);
