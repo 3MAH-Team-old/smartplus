@@ -156,7 +156,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                 sv_M->DT = 0.;
                 
                 //Run the umat for the first time in the block. So that we get the proper tangent properties
-                run_umat_M(rve, DR, Time, DTime, ndi, nshr, start, tnew_dt);
+                run_umat_M(rve, DR, Time, DTime, ndi, nshr, start, solver_type, tnew_dt);
                 
                 shared_ptr<step_meca> sptr_meca;
                 if(solver_type == 1) {
@@ -164,7 +164,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                     sptr_meca = std::dynamic_pointer_cast<step_meca>(blocks[0].steps[0]);
                     sptr_meca->generate(Time, sv_M->Etot, sv_M->sigma, sv_M->T);
                     
-                    Lt_2_K(sv_M->Lt, K, sptr_meca->cBC_meca, lambda_solver);
+                    Lt_2_K(sv_M->L, K, sptr_meca->cBC_meca, lambda_solver);
                     
                     //jacobian inversion
                     invK = inv(K);
@@ -219,7 +219,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                     sv_M->DT = Dtinc*sptr_meca->Ts(inc);
                                     DTime = Dtinc*sptr_meca->times(inc);
                                     
-                                    run_umat_M_RNL(rve, DR, Time, DTime, ndi, nshr, start, tnew_dt);
+                                    run_umat_M(rve, DR, Time, DTime, ndi, nshr, start, solver_type, tnew_dt);
                                 }
                                 else{
                                     /// ********************** SOLVING THE MIXED PROBLEM NRSTRUCT ***********************************
@@ -265,7 +265,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                                     sigma_in_red(k) = 0.;
                                                 }
                                             }
-                                            Delta = -1.*invK * (residual - sigma_in_red);
+                                            Delta = -invK * residual;
                                         }
                                         
                                         sv_M->DEtot += Delta;
@@ -274,14 +274,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                         
                                         rve.to_start();
                                         
-                                        if(solver_type == 0){
-                                            // classic
-                                            run_umat_M(rve, DR, Time, DTime, ndi, nshr, start, tnew_dt);
-                                        }
-                                        else if(solver_type == 1) {
-                                            //RNL
-                                            run_umat_M_RNL(rve, DR, Time, DTime, ndi, nshr, start, tnew_dt);
-                                        }
+                                        run_umat_M(rve, DR, Time, DTime, ndi, nshr, start, solver_type, tnew_dt);
                                         
                                         for(int k = 0 ; k < 6 ; k++)
                                         {
