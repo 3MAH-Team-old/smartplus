@@ -136,7 +136,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                 
                 if(start) {
                     rve.construct(0,blocks[i].type);
-                    rve.sptr_sv_global->update(zeros(6), zeros(6), zeros(6), zeros(6), T_init, 0., nstatev, zeros(nstatev), zeros(nstatev));
+                    rve.sptr_sv_global->update(zeros(6), zeros(6), zeros(6), zeros(6), zeros(3,3), zeros(3,3), T_init, 0., nstatev, zeros(nstatev), zeros(nstatev));
                     sv_M = std::dynamic_pointer_cast<state_variables_M>(rve.sptr_sv_global);
                 }
                 else {
@@ -164,7 +164,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                     sptr_meca = std::dynamic_pointer_cast<step_meca>(blocks[0].steps[0]);
                     sptr_meca->generate(Time, sv_M->Etot, sv_M->sigma, sv_M->T);
                     
-                    Lt_2_K(sv_M->L, K, sptr_meca->cBC_meca, lambda_solver);
+                    Lt_2_K(sv_M->Lt, K, sptr_meca->cBC_meca, lambda_solver);
                     
                     //jacobian inversion
                     invK = inv(K);
@@ -390,7 +390,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                 
                 if(start) {
                     rve.construct(0,blocks[i].type);
-                    rve.sptr_sv_global->update(zeros(6), zeros(6), zeros(6), zeros(6), T_init, 0., nstatev, zeros(nstatev), zeros(nstatev));
+                    rve.sptr_sv_global->update(zeros(6), zeros(6), zeros(6), zeros(6), zeros(3,3), zeros(3,3), T_init, 0., nstatev, zeros(nstatev), zeros(nstatev));
                     sv_T = std::dynamic_pointer_cast<state_variables_T>(rve.sptr_sv_global);
                 }
                 else {
@@ -413,10 +413,26 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                 sv_T->DT = 0.;
                 
                 //Run the umat for the first time in the block. So that we get the proper tangent properties
-                run_umat_T(rve, DR, Time, DTime, ndi, nshr, start, tnew_dt);
+                run_umat_T(rve, DR, Time, DTime, ndi, nshr, start, solver_type, tnew_dt);
                 
                 sv_T->Q = -1.*sv_T->r;    //Since DTime=0;
                 dQdT = lambda_solver;  //To avoid any singularity in the system                
+                
+                shared_ptr<step_thermomeca> sptr_thermomeca;
+                if(solver_type == 1) {
+                    //RNL
+                    sptr_thermomeca = std::dynamic_pointer_cast<step_thermomeca>(blocks[0].steps[0]);
+                    sptr_thermomeca->generate(Time, sv_T->Etot, sv_T->sigma, sv_T->T);
+                    
+                    Lth_2_K(sv_T->dSdE, sv_T->dSdT, dQdE, dQdT, K, sptr_thermomeca->cBC_meca, sptr_thermomeca->cBC_T, lambda_solver);
+                    
+                    //jacobian inversion
+                    invK = inv(K);
+                }
+                else if ((solver_type < 0)||(solver_type > 1)) {
+                    cout << "Error, the solver type is not properly defined";
+                    return;
+                }
                 
                 if(start) {
                     //Use the number of phases saved to define the files
@@ -471,7 +487,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                     sv_T->DT = Dtinc*sptr_thermomeca->Ts(inc);
                                     DTime = Dtinc*sptr_thermomeca->times(inc);
                                     
-                                    run_umat_T(rve, DR, Time, DTime, ndi, nshr, start, tnew_dt);
+                                    run_umat_T(rve, DR, Time, DTime, ndi, nshr, start, solver_type, tnew_dt);
                                     
                                     sv_T->Q = -1.*sv_T->r;
                                     
@@ -511,15 +527,33 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                     
                                     while((error > precision_solver)&&(compteur < maxiter_solver)) {
                                         
-                                        ///Prediction of the strain increment using the tangent modulus given from the umat_ function
-                                        //we use the ddsdde (Lt) from the previous increment
-                                        Lth_2_K(sv_T->dSdE, sv_T->dSdT, dQdE, dQdT, K, sptr_thermomeca->cBC_meca, sptr_thermomeca->cBC_T, lambda_solver);
-                                        
-                                        ///jacobian inversion
-                                        invK = inv(K);
-                                        
-                                        /// Prediction of the component of the strain tensor
-                                        Delta = -invK * residual;
+                                        if(solver_type == 0){
+                                            // classic
+                                            ///Prediction of the strain increment using the tangent modulus given from the umat_ function
+                                            //we use the ddsdde (Lt) from the previous increment
+                                            Lth_2_K(sv_T->dSdE, sv_T->dSdT, dQdE, dQdT, K, sptr_thermomeca->cBC_meca, sptr_thermomeca->cBC_T, lambda_solver);
+                                            
+                                            ///jacobian inversion
+                                            invK = inv(K);
+                                            
+                                            /// Prediction of the component of the strain tensor
+                                            Delta = -invK * residual;
+                                        }
+                                        else if(solver_type == 1) {
+                                            //RNL
+                                            vec sigma_in_red = zeros(7);
+                                            for(int k = 0 ; k < 6 ; k++)
+                                            {
+                                                if (sptr_thermomeca->cBC_meca(k)) {
+                                                    sigma_in_red(k) = sv_T->sigma_in(k) - sv_T->sigma_in_start(k);
+                                                }
+                                                else {
+                                                    sigma_in_red(k) = 0.;
+                                                }
+                                            }
+                                            sigma_in_red(6) = -1.*sv_T->r_in;
+                                            Delta = -invK * residual;
+                                        }
                                         
                                         for(int k = 0 ; k < 6 ; k++)
                                         {
@@ -529,7 +563,7 @@ void solver(const string &umat_name, const vec &props, const double &nstatev, co
                                         DTime = Dtinc*sptr_thermomeca->times(inc);
                                         
                                         rve.to_start();
-                                        run_umat_T(rve, DR, Time, DTime, ndi, nshr, start, tnew_dt);
+                                        run_umat_T(rve, DR, Time, DTime, ndi, nshr, start, solver_type, tnew_dt);
                                         
                                         if (DTime < 1.E-12) {
                                             sv_T->Q = -1.*sv_T->r;    //Since DTime=0;
