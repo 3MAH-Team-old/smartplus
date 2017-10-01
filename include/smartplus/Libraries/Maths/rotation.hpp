@@ -25,40 +25,49 @@
 
 namespace smart{
 
-//To generate a 3x3 rotation matrix
-arma::mat fillR(const double &, const int &);
+//To rotate a vector, given a rotation matrix
+arma::vec rotate_vec(const arma::vec &, const arma::mat &);
+arma::vec rotate_vec(const arma::vec &, const double &, const int &);
+//To rotate a matrix, given a rotation matrix
+arma::mat rotate_mat(const arma::mat &, const arma::mat &);
+arma::mat rotate_mat(const arma::mat &, const double &, const int &);
 
+//To generate a 3x3 rotation matrix (with 1 angle)
+arma::mat fillR(const double &, const int &);
+//To generate a 3x3 rotation matrix (with 3 angles and a convention, by default null string means the generic convention indicated in the parameters.hpp). By default active , alibi rotation is considered
+arma::mat fillR(const double &, const double &, const double &, const bool & = true, const std::string & = "");
+    
 //To generate a 6x6 rotation matrix for stress tensors
-arma::mat fillQS(const double &, const int &);
-arma::mat fillQS(const arma::mat &);
+arma::mat fillQS(const double &, const int &, const bool & = true);
+arma::mat fillQS(const arma::mat &, const bool & = true);
     
 //To generate a 6x6 rotation matrix for strain tensors
-arma::mat fillQE(const double &, const int &);
-arma::mat fillQE(const arma::mat &);
+arma::mat fillQE(const double &, const int &, const bool & = true);
+arma::mat fillQE(const arma::mat &, const bool & = true);
 
 //To rotate a stiffness matrix (6,6)
-arma::mat rotateL(const arma::mat &, const double &, const int &);
-arma::mat rotateL(const arma::mat &, const arma::mat &);
+arma::mat rotateL(const arma::mat &, const double &, const int &, const bool & = true);
+arma::mat rotateL(const arma::mat &, const arma::mat &, const bool & = true);
 
 //To rotate a compliance matrix (6,6)
-arma::mat rotateM(const arma::mat &, const double &, const int &);
-arma::mat rotateM(const arma::mat &, const arma::mat &);
+arma::mat rotateM(const arma::mat &, const double &, const int &, const bool & = true);
+arma::mat rotateM(const arma::mat &, const arma::mat &, const bool & = true);
     
 //To rotate an interaction matrix A (6,6)
-arma::mat rotateA(const arma::mat &, const double &, const int &);
-arma::mat rotateA(const arma::mat &, const arma::mat &);
+arma::mat rotateA(const arma::mat &, const double &, const int &, const bool & = true);
+arma::mat rotateA(const arma::mat &, const arma::mat &, const bool & = true);
 
 //To rotate a interaction matrix B (6,6)
-arma::mat rotateB(const arma::mat &, const double &, const int &);
-arma::mat rotateB(const arma::mat &, const arma::mat &);
+arma::mat rotateB(const arma::mat &, const double &, const int &, const bool & = true);
+arma::mat rotateB(const arma::mat &, const arma::mat &, const bool & = true);
     
 //To rotate a stress vector (6)
-arma::vec rotate_stress(const arma::vec &, const double &, const int &);
-arma::vec rotate_stress(const arma::vec &, const arma::mat &);
+arma::vec rotate_stress(const arma::vec &, const double &, const int &, const bool & = true);
+arma::vec rotate_stress(const arma::vec &, const arma::mat &, const bool & = true);
     
 //To rotate a strain vector (6)
-arma::vec rotate_strain(const arma::vec &, const double &, const int &);
-arma::vec rotate_strain(const arma::vec &, const arma::mat &);
+arma::vec rotate_strain(const arma::vec &, const double &, const int &, const bool & = true);
+arma::vec rotate_strain(const arma::vec &, const arma::mat &, const bool & = true);
 
 //To rotate from local to global a strain tensor (6)
 arma::mat rotate_l2g_strain(const arma::vec &, const double &, const double &, const double &);
