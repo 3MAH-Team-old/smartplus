@@ -12,12 +12,11 @@
  
  You should have received a copy of the GNU General Public License
  along with SMART+.  If not, see <http://www.gnu.org/licenses/>.
- 
  */
 
 ///@file umat_L_elastic.cpp
 ///@brief elastic properties of composite materials
-///@version 0.9
+///@version 1.0
 
 #include <iostream>
 #include <map>
@@ -35,7 +34,6 @@
 #include <smartplus/Libraries/Homogenization/eshelby.hpp>
 #include <smartplus/Micromechanics/schemes.hpp>
 
-
 using namespace std;
 using namespace arma;
 
@@ -43,18 +41,19 @@ namespace smart{
     
 void get_L_elastic(phase_characteristics &rve)
 {
+    
     string path_data = "data";
     string inputfile; //file # that stores the microstructure properties
     
     std::map<string, int> list_umat;
-    list_umat = {{"ELISO",1},{"ELIST",2},{"ELORT",3},{"MIHEN",100},{"MIMTN",101},{"MISCN",102},{"MISCM",103},{"MIPLN",104}};
+    list_umat = {{"ELISO",1},{"ELIST",2},{"ELORT",3},{"MIHEN",100},{"MIMTN",101},{"MISCN",103},{"MIPLN",104}};
     
     int method = list_umat[rve.sptr_matprops->umat_name];
     
     //first we read the behavior of the phases & we construct the tensors if necessary
     switch (method) {
             
-        case 100: case 101: case 102: case 103: {
+        case 100: case 101: case 103: {
             //Definition of the static vectors x,wx,y,wy
             ellipsoid_multi::mp = rve.sptr_matprops->props(2);
             ellipsoid_multi::np = rve.sptr_matprops->props(3);
@@ -114,7 +113,7 @@ void get_L_elastic(phase_characteristics &rve)
             break;
         }
         case 100: {
-             for (auto r : rve.sub_phases) {
+            for (auto r : rve.sub_phases) {
                 get_L_elastic(r);
             }
             Lt_Homogeneous_E(rve);
@@ -126,16 +125,8 @@ void get_L_elastic(phase_characteristics &rve)
             }
             int n_matrix = rve.sptr_matprops->props(4);
             Lt_Mori_Tanaka(rve, n_matrix);
-            break;
+            break;	
         }
-        case 102: {
-            for (auto r : rve.sub_phases) {
-                get_L_elastic(r);
-            }
-            int n_matrix = rve.sptr_matprops->props(4);
-            Lt_Mori_Tanaka_iso(rve, n_matrix);
-            break;
-        }		    
         case 103: {
             for (auto r : rve.sub_phases) {
                 get_L_elastic(r);
@@ -160,7 +151,7 @@ void get_L_elastic(phase_characteristics &rve)
                 }
                 error = norm(umat_M->Lt - Lt_n,2.);
                 nbiter++;
-            }
+             }
             break;
         }
         case 104: {
@@ -175,11 +166,11 @@ void get_L_elastic(phase_characteristics &rve)
             return;
         }
     }
-
+    
     switch (method) {
             
-        case 100: case 101: case 102: case 103: case 104: {
-    
+	    case 100: case 101: case 103: case 104: {
+
             // Compute the effective tangent modulus, and the effective stress
             umat_M->Lt = zeros(6,6);
             for (auto r : rve.sub_phases) {
