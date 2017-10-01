@@ -101,6 +101,7 @@ extern "C" void umat_(double *stress, double *statev, double *ddsdde, double &ss
 	bool start = false;
 	double Time = 0.;
 	double DTime = 0.;
+    int solver_type = 0;
     
 	int nstatev_smart = nstatev-4;
     vec props_smart = zeros(nprops);
@@ -124,7 +125,7 @@ extern "C" void umat_(double *stress, double *statev, double *ddsdde, double &ss
     
 	abaqus2smart_M(stress, ddsdde, stran, dstran, time, dtime, temperature, Dtemperature, nprops, props, nstatev, statev, ndi, nshr, drot, rve_sv_M->sigma, rve_sv_M->Lt, rve_sv_M->Etot, rve_sv_M->DEtot, rve_sv_M->T, rve_sv_M->DT, Time, DTime, props_smart, rve_sv_M->Wm, rve_sv_M->statev, DR, start);
     rve.sptr_matprops->update(0, umat_name, 1., 0., 0., 0., nprops, props_smart);
-    select_umat_M(rve, DR, Time, DTime, ndi, nshr, start, pnewdt);
+    select_umat_M(rve, DR, Time, DTime, ndi, nshr, start, solver_type, pnewdt);
     
 	smart2abaqus_M(stress, ddsdde, statev, ndi, nshr, rve_sv_M->sigma, rve_sv_M->statev, rve_sv_M->Wm, rve_sv_M->Lt);
 }
