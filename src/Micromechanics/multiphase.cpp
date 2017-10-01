@@ -91,7 +91,7 @@ void umat_multi(phase_characteristics &phase, const mat &DR, const double &Time,
         for (int i=0; i<nphases; i++) {
             //Run the appropriate constitutive model
             
-            select_umat_M(phase.sub_phases[i], DR, Time, DTime, ndi, nshr, start, tnew_dt);
+            select_umat_M(phase.sub_phases[i], DR, Time, DTime, ndi, nshr, start, 0, tnew_dt);
         }
     }
 
@@ -142,7 +142,7 @@ void umat_multi(phase_characteristics &phase, const mat &DR, const double &Time,
             
             //Theta method for the tangent modulus
             //mat Lt_start = umat_sub_phases_M->Lt
-            select_umat_M(r, DR, Time, DTime, ndi, nshr, start, tnew_dt);
+            select_umat_M(r, DR, Time, DTime, ndi, nshr, start, 0, tnew_dt);
 
             //Theta method for the tangent modulus
             //umat_sub_phases_M = std::dynamic_pointer_cast<state_variables_M>(r.sptr_sv_global);
