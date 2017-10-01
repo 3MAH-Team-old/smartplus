@@ -18,12 +18,16 @@
 
 namespace smart{
     
-    void Newton_Raphon(const arma::vec &, const arma::vec &, const arma::mat &, arma::vec &, arma::vec &, double &);
-    
-    void Fischer_Burmeister(const arma::vec &, const arma::vec &, const arma::mat &, arma::vec &, arma::vec &, double &);
+void Newton_Raphon(const arma::vec &, const arma::vec &, const arma::mat &, arma::vec &, arma::vec &, double &);
 
-    void Fischer_Burmeister_m(const arma::vec &, const arma::vec &, const arma::mat &, arma::vec &, arma::vec &, double &);
+void Fischer_Burmeister(const arma::vec &, const arma::vec &, const arma::mat &, arma::vec &, arma::vec &, double &);
+
+void Fischer_Burmeister_limits(const arma::vec &, const arma::vec &, const arma::vec &, const arma::mat &, const arma::mat &, arma::vec &, arma::vec &, double &);
+
+void Fischer_Burmeister_m(const arma::vec &, const arma::vec &, const arma::mat &, arma::vec &, arma::vec &, double &);
+
+void Fischer_Burmeister_m_limits(const arma::vec &, const arma::vec &, const arma::vec &, const arma::mat &, const arma::mat &, arma::vec &, arma::vec &, double &);
     
-    arma::mat denom_FB_m(const arma::vec &, const arma::mat &, const arma::vec &);
+arma::mat denom_FB_m(const arma::vec &, const arma::mat &, const arma::vec &);
     
 } //namespace smart
