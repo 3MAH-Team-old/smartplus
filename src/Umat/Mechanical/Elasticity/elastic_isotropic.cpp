@@ -52,6 +52,11 @@ void umat_elasticity_iso(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt,
     
     double T_init = statev(0);
     
+    //From the props to the material properties
+    double E = props(0);
+    double nu = props(1);
+    double alpha = props(2);
+    
     ///@brief Initialization
     if(start)
     {
@@ -66,15 +71,6 @@ void umat_elasticity_iso(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt,
         Wm_d = 0.;
     }
     
-	//From the props to the material properties
-	double E = props(0);
-	double nu = props(1);
-	double alpha = props(2);
-	
-    
-	if(start) { //Initialization
-		sigma = zeros(6);
-	}
 	vec sigma_start = sigma;
 	
 	//Compute the elastic strain and the related stress	
@@ -82,7 +78,7 @@ void umat_elasticity_iso(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt,
     sigma = el_pred(L, Eel, ndi);
     
     if (solver_type == 0) {
-		Lt = L
+        Lt = L;
 	}
     else if(solver_type == 1) {
         sigma_in = zeros(6);
