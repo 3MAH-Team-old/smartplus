@@ -52,11 +52,25 @@ void umat_elasticity_ortho(const vec &Etot, const vec &DEtot, vec &sigma, mat &L
     
     double T_init = statev(0);
     
+    //From the props to the material properties
+    double Ex = props(0);
+    double Ey = props(1);
+    double Ez = props(2);
+    double nuxy = props(3);
+    double nuxz = props(4);
+    double nuyz = props(5);
+    double Gxy = props(6);
+    double Gxz = props(7);
+    double Gyz = props(8);
+    double alphax = props(9);
+    double alphay = props(10);
+    double alphaz = props(11);
+    
     ///@brief Initialization
     if(start)
     {
 	    //Elastic stiffness tensor
-		L = L_ortho(E, nu, "Enu");
+		L = L_ortho(Ex,Ey,Ez,nuxy,nuxz,nuyz,Gxy,Gxz,Gyz, "EnuG");
         T_init = T;
         sigma = zeros(6);
         
@@ -66,24 +80,6 @@ void umat_elasticity_ortho(const vec &Etot, const vec &DEtot, vec &sigma, mat &L
         Wm_d = 0.;
     }
     
-	//From the props to the material properties
-	double Ex = props(0);
-	double Ey = props(1);
-	double Ez = props(2);
-	double nuxy = props(3);
-	double nuxz = props(4);
-    double nuyz = props(5);
-	double Gxy = props(6);
-	double Gxz = props(7);
-    double Gyz = props(8);
-	double alphax = props(9);
-	double alphay = props(10);
-    double alphaz = props(11);
-	
-		
-	if(start) { //Initialization
-		sigma = zeros(6);
-	}	
 	vec sigma_start = sigma;
 	
 	//definition of the CTE tensor
@@ -97,7 +93,7 @@ void umat_elasticity_ortho(const vec &Etot, const vec &DEtot, vec &sigma, mat &L
     sigma = el_pred(Lt, Eel, ndi);
     
     if (solver_type == 0) {
-		Lt = L
+        Lt = L;
 	}
     else if(solver_type == 1) {
         sigma_in = zeros(6);
