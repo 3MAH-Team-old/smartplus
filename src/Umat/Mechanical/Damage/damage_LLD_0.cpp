@@ -68,22 +68,6 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, m
     //Rotation of internal variables (tensors)
     EP = rotate_strain(EP, DR);
     
-    ///@brief Initialization
-    if (start) {
-		//Elastic stiffness tensor
-		mat L = L_isotrans(EL, ET, nuTL, nuTT, GLT, 1);
-        Tinit = T;
-        d_22 = 0.;
-        d_12 = 0.;
-        
-        p_ts = 10.*limit;
-        EP = zeros(6);
-        sigma = zeros(6);
-    }
-    
-    vec sigma_start = sigma;
-    vec EP_start = EP;
-    
     double axis = props(0);
     double EL = props(1);
     double ET = props(2);
@@ -116,6 +100,22 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, m
     double n_lambda = 1.0;
     double alpha_lambda = 0.;
     
+    ///@brief Initialization
+    if (start) {
+		//Elastic stiffness tensor
+		mat L = L_isotrans(EL, ET, nuTL, nuTT, GLT, 1);
+        Tinit = T;
+        d_22 = 0.;
+        d_12 = 0.;
+        
+        p_ts = 10.*limit;
+        EP = zeros(6);
+        sigma = zeros(6);
+    }
+    
+    vec sigma_start = sigma;
+    vec EP_start = EP;
+    
     double E1 = EL;
     double E2_0 = ET;
     double E3_0 = ET;
@@ -132,7 +132,7 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, m
     
     // ######################  Elastic stiffness #################################
     //defines L
-    mat L = L_isotrans(EL, ET, nuTL, nuTT, GLT, 1);
+    L = L_isotrans(EL, ET, nuTL, nuTT, GLT, 1);
     
     // cout << "EL = " << EL << "/ ET = " << ET << "/ nuTL = " << nuTL << "/ nuTT = " << nuTT << "/ GLT = " << GLT << endl;
     // 
@@ -661,7 +661,7 @@ void umat_damage_LLD_0(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, m
 		P_epsilon[2] = invBhat(0, 2)*dPhi_d_22d_sigma + invBhat(1, 2)*dPhi_d_12d_sigma + invBhat(2, 2)*dPhi_p_tsd_sigma;
 		
 		Lt = L_tilde - (kappa_j[0]*P_epsilon[0].t() + kappa_j[1]*P_epsilon[1].t() + kappa_j[2]*P_epsilon[2].t());
-    
+    }
     else if(solver_type == 1) {
         sigma_in = -L*(Etot - Eel);
     }
