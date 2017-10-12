@@ -57,6 +57,16 @@ void umat_elasticity_trans_iso(const vec &Etot, const vec &DEtot, vec &sigma, ma
     
     double T_init = statev(0);
     
+    //From the props to the material properties
+    double axis = props(0);
+    double EL = props(1);
+    double ET = props(2);
+    double nuTL = props(3);
+    double nuTT = props(4);
+    double GLT = props(5);
+    double alphaL = props(6);
+    double alphaT = props(7);
+    
     ///@brief Initialization
     if(start)
     {
@@ -71,20 +81,6 @@ void umat_elasticity_trans_iso(const vec &Etot, const vec &DEtot, vec &sigma, ma
         Wm_d = 0.;
     }
     
-	//From the props to the material properties
-	double axis = props(0);
-	double EL = props(1);
-	double ET = props(2);
-	double nuTL = props(3);
-	double nuTT = props(4);
-	double GLT = props(5);
-	double alphaL = props(6);
-	double alphaT = props(7);
-	
-	
-	if(start) { //Initialization
-		sigma = zeros(6);
-	}	
 	vec sigma_start = sigma;
 
 	//definition of the CTE tensor
@@ -99,7 +95,7 @@ void umat_elasticity_trans_iso(const vec &Etot, const vec &DEtot, vec &sigma, ma
     sigma = el_pred(Lt, Eel, ndi);
     
     if (solver_type == 0) {
-		Lt = L
+        Lt = L;
 	}
     else if(solver_type == 1) {
         sigma_in = zeros(6);
