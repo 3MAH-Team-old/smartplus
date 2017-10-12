@@ -42,7 +42,7 @@ namespace smart {
 
 ///@brief No statev is required for thermoelastic constitutive law
 
-void umat_elasticity_trans_iso(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT, const double &Time, const double &DTime, double &Wm, double &Wm_r, double &Wm_ir, double &Wm_d, const int &ndi, const int &nshr, const bool &start, double &tnew_dt)
+void umat_elasticity_trans_iso(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, mat &L, vec &sigma_in, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT, const double &Time, const double &DTime, double &Wm, double &Wm_r, double &Wm_ir, double &Wm_d, const int &ndi, const int &nshr, const bool &start, const int &solver_type, double &tnew_dt)
 {  	
 
     UNUSED(Etot);
@@ -60,6 +60,8 @@ void umat_elasticity_trans_iso(const vec &Etot, const vec &DEtot, vec &sigma, ma
     ///@brief Initialization
     if(start)
     {
+        //Elastic stiffness tensor
+		L = L_isotrans(E, nu, "Enu");
         T_init = T;
         sigma = zeros(6);
         
@@ -79,9 +81,6 @@ void umat_elasticity_trans_iso(const vec &Etot, const vec &DEtot, vec &sigma, ma
 	double alphaL = props(6);
 	double alphaT = props(7);
 	
-	// ######################  Elastic stiffness #################################			
-	//defines L
-	Lt = L_isotrans(EL, ET, nuTL, nuTT, GLT, axis);
 	
 	if(start) { //Initialization
 		sigma = zeros(6);
@@ -98,6 +97,13 @@ void umat_elasticity_trans_iso(const vec &Etot, const vec &DEtot, vec &sigma, ma
 	//Compute the elastic strain and the related stress	
     vec Eel = Etot + DEtot - alpha*(T+DT-T_init);
     sigma = el_pred(Lt, Eel, ndi);
+    
+    if (solver_type == 0) {
+		Lt = L
+	}
+    else if(solver_type == 1) {
+        sigma_in = zeros(6);
+    }
     
     //Computation of the mechanical and thermal work quantities
     Wm += 0.5*sum((sigma_start+sigma)%DEtot);

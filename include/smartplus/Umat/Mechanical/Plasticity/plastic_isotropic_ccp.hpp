@@ -45,6 +45,6 @@ namespace smart {
 ///@brief statev[6] : Plastic strain 13: EP(0,2)
 ///@brief statev[7] : Plastic strain 23: EP(1,2)
 
-void umat_plasticity_iso_CCP(const arma::vec &, const arma::vec &, arma::vec &, arma::mat &, arma::mat &, arma::vec &, const arma::mat &, const int &, const arma::vec &, const int &, arma::vec &, const double &, const double &,const double &,const double &, double &, double &, double &, double &, const int &, const int &, const bool &, const int &, double &);
+void umat_plasticity_iso_CCP_limits(const arma::vec &, const arma::vec &, arma::vec &, arma::mat &, arma::mat &, arma::vec &, const arma::mat &, const int &, const arma::vec &, const int &, arma::vec &, const double &, const double &,const double &,const double &, double &, double &, double &, double &, const int &, const int &, const bool &, const int &, double &);
     
 } //namespace smart

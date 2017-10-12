@@ -62,7 +62,7 @@ namespace smart {
 ///@brief statev[13] : Backstress 11: X(1,2)
 
 
-void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT, const double &Time, const double &DTime, double &Wm, double &Wm_r, double &Wm_ir, double &Wm_d, const int &ndi, const int &nshr, const bool &start, double &tnew_dt)
+void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, mat &L, vec &sigma_in, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT, const double &Time, const double &DTime, double &Wm, double &Wm_r, double &Wm_ir, double &Wm_d, const int &ndi, const int &nshr, const bool &start, const int &solver_type, double &tnew_dt)                               
 {
     
     UNUSED(nprops);
@@ -83,12 +83,7 @@ void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, 
     
     //definition of the CTE tensor
     vec alpha = alpha_iso*Ith();
-    
-    // ######################  Elastic compliance and stiffness #################################
-    //defines L
-    mat L = L_iso(E, nu, "Enu");
-    mat M = M_iso(E, nu, "Enu");
-    
+       
     ///@brief Temperature initialization
     double T_init = statev(0);
     //From the statev to the internal variables
@@ -117,6 +112,8 @@ void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, 
     ///@brief Initialization
     if(start)
     {
+        //Elstic stiffness tensor
+        L = L_iso(E, nu, "Enu");
         T_init = T;
         vec vide = zeros(6);
         sigma = vide;
@@ -230,40 +227,46 @@ void umat_plasticity_kin_iso_CCP(const vec &Etot, const vec &DEtot, vec &sigma, 
     double Dp = Ds_j[0];
     vec Da = a - a_start;
     
-    //Computation of the tangent modulus
-    mat Bhat = zeros(1, 1);
-    Bhat(0, 0) = sum(dPhidsigma%kappa_j[0]) - K(0,0);
+    if (solver_type == 0) {
     
-    vec op = zeros(1);
-    mat delta = eye(1,1);
+		//Computation of the tangent modulus
+		mat Bhat = zeros(1, 1);
+		Bhat(0, 0) = sum(dPhidsigma%kappa_j[0]) - K(0,0);
     
-    for (int i=0; i<1; i++) {
-        if(Ds_j[i] > iota)
-            op(i) = 1.;
+		vec op = zeros(1);
+		mat delta = eye(1,1);
+    
+		for (int i=0; i<1; i++) {
+			if(Ds_j[i] > iota)
+				op(i) = 1.;
+		}
+    
+		mat Bbar = zeros(1,1);
+		for (int i = 0; i < 1; i++) {
+			for (int j = 0; j < 1; j++) {
+				Bbar(i, j) = op(i)*op(j)*Bhat(i, j) + delta(i,j)*(1-op(i)*op(j));
+			}
+		}
+    
+		mat invBbar = zeros(1, 1);
+		mat invBhat = zeros(1, 1);
+		invBbar = inv(Bbar);
+		for (int i = 0; i < 1; i++) {
+			for (int j = 0; j < 1; j++) {
+				invBhat(i, j) = op(i)*op(j)*invBbar(i, j);
+			}
+		}
+    
+		std::vector<vec> P_epsilon(1);
+		P_epsilon[0] = invBhat(0, 0)*(L*dPhidsigma);
+		std::vector<double> P_theta(1);
+		P_theta[0] = dPhidtheta - sum(dPhidsigma%(L*alpha));
+		
+		Lt = L - (kappa_j[0]*P_epsilon[0].t());
+	}
+    else if(solver_type == 1) {
+        sigma_in = -L*EP;
     }
-    
-    mat Bbar = zeros(1,1);
-    for (int i = 0; i < 1; i++) {
-        for (int j = 0; j < 1; j++) {
-            Bbar(i, j) = op(i)*op(j)*Bhat(i, j) + delta(i,j)*(1-op(i)*op(j));
-        }
-    }
-    
-    mat invBbar = zeros(1, 1);
-    mat invBhat = zeros(1, 1);
-    invBbar = inv(Bbar);
-    for (int i = 0; i < 1; i++) {
-        for (int j = 0; j < 1; j++) {
-            invBhat(i, j) = op(i)*op(j)*invBbar(i, j);
-        }
-    }
-    
-    std::vector<vec> P_epsilon(1);
-    P_epsilon[0] = invBhat(0, 0)*(L*dPhidsigma);
-    std::vector<double> P_theta(1);
-    P_theta[0] = dPhidtheta - sum(dPhidsigma%(L*alpha));
-    
-    Lt = L - (kappa_j[0]*P_epsilon[0].t());
     
     double A_p = -Hp;
     vec A_a = -X;

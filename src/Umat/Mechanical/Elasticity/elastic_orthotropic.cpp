@@ -37,7 +37,7 @@ namespace smart{
 
 ///@brief No statev is required for thermoelastic constitutive law
 
-void umat_elasticity_ortho(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT, const double &Time, const double &DTime, double &Wm, double &Wm_r, double &Wm_ir, double &Wm_d, const int &ndi, const int &nshr, const bool &start, double &tnew_dt)
+void umat_elasticity_ortho(const vec &Etot, const vec &DEtot, vec &sigma, mat &Lt, mat &L, vec &sigma_in, const mat &DR, const int &nprops, const vec &props, const int &nstatev, vec &statev, const double &T, const double &DT, const double &Time, const double &DTime, double &Wm, double &Wm_r, double &Wm_ir, double &Wm_d, const int &ndi, const int &nshr, const bool &start, const int &solver_type, double &tnew_dt)
 {  	
 
     UNUSED(Etot);
@@ -55,6 +55,8 @@ void umat_elasticity_ortho(const vec &Etot, const vec &DEtot, vec &sigma, mat &L
     ///@brief Initialization
     if(start)
     {
+	    //Elastic stiffness tensor
+		L = L_ortho(E, nu, "Enu");
         T_init = T;
         sigma = zeros(6);
         
@@ -78,10 +80,7 @@ void umat_elasticity_ortho(const vec &Etot, const vec &DEtot, vec &sigma, mat &L
 	double alphay = props(10);
     double alphaz = props(11);
 	
-	// ######################  Elastic compliance and stiffness #################################			
-	//defines L
-	Lt = L_ortho(Ex,Ey,Ez,nuxy,nuxz,nuyz,Gxy,Gxz,Gyz, "EnuG");
-	
+		
 	if(start) { //Initialization
 		sigma = zeros(6);
 	}	
@@ -96,6 +95,13 @@ void umat_elasticity_ortho(const vec &Etot, const vec &DEtot, vec &sigma, mat &L
 	//Compute the elastic strain and the related stress	
     vec Eel = Etot + DEtot - alpha*(T+DT-T_init);
     sigma = el_pred(Lt, Eel, ndi);
+    
+    if (solver_type == 0) {
+		Lt = L
+	}
+    else if(solver_type == 1) {
+        sigma_in = zeros(6);
+    }
         
     //Computation of the mechanical and thermal work quantities
     Wm += 0.5*sum((sigma_start+sigma)%DEtot);
