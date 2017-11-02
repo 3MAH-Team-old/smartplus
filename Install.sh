@@ -97,11 +97,19 @@ then
 		for object in ${objectToCopy}
 		do
 			#Copy of the "object".o from build/CMakeFiles/umat.dir/software to build/bin
-			if [ -f ${current_dir}/build/CMakeFiles/umat.dir/software/${object}.cpp.o ]
+			if [ -f ${current_dir}/build/CMakeFiles/umatM.dir/software/${object}.cpp.o ]
 			then 
-				cp ${current_dir}/build/CMakeFiles/umat.dir/software/${object}.cpp.o ${current_dir}/build/bin/${object}.o
-				echo "${blue}${object}.o${reset} copied in ${blue}${current_dir}/build/bin${reset}"
+				cp ${current_dir}/build/CMakeFiles/umatM.dir/software/${object}.cpp.o ${current_dir}/build/bin/${object}.o
 			fi
+			
+			#Copy of the "object".o from build/CMakeFiles/umat.dir/software to build/bin
+			if [ -f ${current_dir}/build/CMakeFiles/umatT.dir/software/${object}.cpp.o ]
+			then 
+				cp ${current_dir}/build/CMakeFiles/umatT.dir/software/${object}.cpp.o ${current_dir}/build/bin/${object}.o
+			fi
+			
+			cp ${current_dir}/build/bin/${object}.o ${current_dir}/exec/${object}.o
+			echo "${blue}${object}.o${reset} copied in ${blue}${current_dir}/exec${reset}"
 		done
 		
 		#Treatement of executable files
