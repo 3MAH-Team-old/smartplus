@@ -146,11 +146,11 @@ foreach(testSrc ${TEST_SRCS})
 endforeach(testSrc)
 
 
-#add_library(umat OBJECT software/umat_single.cpp)
-#set_property(TARGET umat PROPERTY COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -c -openm -larmadillo -std=c++11 -DARMA_DONT_USE_WRAPPER")
+add_library(umatM OBJECT software/umat_singleM.cpp)
+set_property(TARGET umatM PROPERTY COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -c -openm -larmadillo -std=c++11 -DARMA_DONT_USE_WRAPPER")
 
-#add_library(umatT OBJECT software/umat_singleT.cpp)
-#set_property(TARGET umatT PROPERTY COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -c -openm -larmadillo -std=c++11 -DARMA_DONT_USE_WRAPPER")
+add_library(umatT OBJECT software/umat_singleT.cpp)
+set_property(TARGET umatT PROPERTY COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -c -openm -larmadillo -std=c++11 -DARMA_DONT_USE_WRAPPER")
 
 
 ################################################################################
