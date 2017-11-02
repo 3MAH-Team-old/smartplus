@@ -86,7 +86,7 @@ then
 
 	#Create the list of the file to copy after compilation
 	executableToCopy="solver identification L_eff Elastic_props ODF PDF"
-	objectToCopy="umat_single umat_singleT"
+	objectToCopy="umat_singleM umat_singleT"
 
 	# Copy all important files (+ final message)
 	if [ $Test_OK -eq 0 ]
