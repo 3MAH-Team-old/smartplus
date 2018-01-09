@@ -32,6 +32,6 @@ namespace smart{
 ///@brief props[2] : Number of integration points in the 1 direction
 ///@brief props[3] : Number of integration points in the 2 direction
 
-void umat_multi(phase_characteristics &, const arma::mat &, const double &,const double &, const int &, const int &, const bool &, double &, const int &, const int &);
+void umat_multi(phase_characteristics &, const arma::mat &, const double &,const double &, const int &, const int &, const bool &, double &, const int &);
 
 } //namespace smart
