@@ -67,6 +67,7 @@ int main() {
     //Second we call a recursive method that find all the elastic moduli iof the phases
     get_L_elastic(rve);
     output << sv_M->Lt << "\n";
+    output.close();
     
 	return 0;
 }
